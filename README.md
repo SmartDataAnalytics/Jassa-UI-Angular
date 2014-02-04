@@ -1,6 +1,11 @@
 Jassa-Angular-UI
 ================
 
+Build setup taken from the angular-ui-bootstrap project (https://github.com/angular-ui/bootstrap/blob/master/.jshintrc) ~ Kudos!
+
+
+The `pom.xml` just exits for making the project import into maven based environments potentially easier.
+
 Angular-JS based user interface components for Jassa
 
 
