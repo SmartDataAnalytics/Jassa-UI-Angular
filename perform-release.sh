@@ -1,10 +1,12 @@
 #!/bin/bash
 set -e
 
+npm install
+
 # Retrieve the package version via grunt (no idea how to make grunt output to stdout; that's why i just use a file)
 grunt getversion
 version=`cat target/version.txt`
-tag="$version"
+tag="v$version"
 #echo "$version"
 
 sourceFolder='dist'
