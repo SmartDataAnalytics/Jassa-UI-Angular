@@ -19,7 +19,7 @@ grunt
 
 
 git clone git@github.com:GeoKnow/Jassa-UI-Angular-Bower.git "$targetFolder" || true
-git pull
+( cd "$targetFolder" && git pull )
 
 #rm -rf "$targetFolder"
 #mkdir -p "$targetFolder"
@@ -40,4 +40,5 @@ git push
 git tag -d "$tag" || true
 git push origin ":refs/tags/$tag" || true
 git tag "$tag"
-git push --tags 
+git push --tags
+
