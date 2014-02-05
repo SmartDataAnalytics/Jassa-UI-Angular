@@ -341,7 +341,7 @@ module.exports = function(grunt) {
         grunt.util._.extend(karmaOptions, coverageOpts);
         grunt.config.set('karma.options', karmaOptions);
       }
-      if(false) {
+      if(false) { // DISABLED ~ Claus 2014-02-04
           grunt.task.run(this.args.length ? 'karma:jenkins' : 'karma:continuous');
       }
     }
@@ -370,6 +370,12 @@ module.exports = function(grunt) {
 
   grunt.registerTask('version', 'Set version. If no arguments, it just takes off suffix', function() {
     setVersion(this.args[0], this.args[1]);
+  });
+
+  grunt.registerTask('getversion', 'Retrieve the version', function() {
+    var pkg = require('./package.json');
+    //console.log(pkg.version);
+    grunt.file.write('target/version.txt', pkg.version);
   });
 
   grunt.registerMultiTask('shell', 'run shell commands', function() {
