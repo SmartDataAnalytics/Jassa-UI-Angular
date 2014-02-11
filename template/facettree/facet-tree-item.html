@@ -15,10 +15,10 @@
 
 		<tabset class="tabset-small">
 			<tab heading="Incoming Facets" active="{{facet.isIncomingActive === true}}" select="selectIncoming(facet.item.getPath())">
-				<div ng-repeat="dirset in [facet.incoming]" ng-include="'resources/partials/facet-dir-content.html'"></div>
+				<div ng-repeat="dirset in [facet.incoming]" ng-include="'template/facettree/facet-dir-content.html'"></div>
 			</tab>
 			<tab heading="Outgoing Facets" active="{{facet.isOutgoingActive === true}}" select="selectOutgoing(facet.item.getPath())">					
-				<div ng-repeat="dirset in [facet.outgoing]" ng-include="'resources/partials/facet-dir-content.html'"></div>
+				<div ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facettree/facet-dir-content.html'"></div>
 			</tab>
 		</tabset>
 	</div>

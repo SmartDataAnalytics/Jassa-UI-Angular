@@ -7,7 +7,7 @@
   "description": "UI for JAvascript Suite for Sparql Access",
   "main": "jassa-ui-angular-tpls.js",
   "dependencies": {
-    "jassa": "=0.0.1-SNAPSHOT",
+    "jassa": ">=0.0.1-SNAPSHOT",
     "angular": ">=1"
   },
   "keywords": [
