@@ -1,4 +1,4 @@
-angular.module('ui.jassa', [])
+angular.module('ui.jassa.facettree', [])
 
 /**
  * Controller for the SPARQL based FacetTree
@@ -13,7 +13,7 @@ angular.module('ui.jassa', [])
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig;
         //debugger;
-        $scope.facetTreeService = isConfigured ? ns.FaceteUtils.createFacetTreeService($scope.sparqlService, $scope.facetTreeConfig, labelMap) : null;
+        $scope.facetTreeService = isConfigured ? Jassa.facete.FaceteUtils.createFacetTreeService($scope.sparqlService, $scope.facetTreeConfig, labelMap) : null;
     };
     
     var update = function() {
@@ -44,7 +44,7 @@ angular.module('ui.jassa', [])
     
         if($scope.facetTreeService) {
           
-            var facetTreeTagger = ns.FaceteUtils.createFacetTreeTagger($scope.facetTreeConfig.getPathToFilterString());
+            var facetTreeTagger = Jassa.facete.FaceteUtils.createFacetTreeTagger($scope.facetTreeConfig.getPathToFilterString());
     
             //console.log('scopefacets', $scope.facet);             
             var promise = $scope.facetTreeService.fetchFacetTree(startPath);
