@@ -145,7 +145,7 @@ angular.module('ui.jassa', [])
     return {
         restrict: 'EA',
         replace: true,
-        templateUrl: 'resources/partials/facet-tree-item.html',
+        templateUrl: 'template/facettree/facet-tree-item.html',
         transclude: false,
         require: 'facetTree',
         scope: {
