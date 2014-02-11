@@ -39,6 +39,6 @@ angular.module("template/facettree/facet-dir-content.html", []).run(["$templateC
     "\n" +
     "<div style=\"padding-left: {{16* (dirset.path.getLength()+ 1)\"\n" +
     "	ng-repeat=\"facet in dirset.children\"\n" +
-    "	ng-include=\"'resources/partials/facet-tree-item.html'\" ></div>\n" +
+    "	ng-include=\"'template/facettree/facet-tree-item.html'\" ></div>\n" +
     "");
 }]);
