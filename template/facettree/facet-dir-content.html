@@ -2,7 +2,7 @@
 <!-- ng-show="dirset.pageCount > 1 || dirset.children.length > 5" -->
 
 <div style="width: 100%; background-color: #eeeeff;">
-{{Path Length: dirset.path.getLength()}}
+Path Length: {{dirset.path.getLength()}}
 	<div style="padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}">
 
 		<form class="form-inline" role="form" ng-submit="doFilter(dirset.path, dirset.filter.filterString)">
