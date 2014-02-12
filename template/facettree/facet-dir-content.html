@@ -2,7 +2,8 @@
 <!-- ng-show="dirset.pageCount > 1 || dirset.children.length > 5" -->
 
 <div style="width: 100%; background-color: #eeeeff;">
-	<div style="padding-right: 16px; padding-left: {{16* (dirset.path.getLength()+ 1)">
+{{Path Length: dirset.path.getLength()}}
+	<div style="padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}">
 
 		<form class="form-inline" role="form" ng-submit="doFilter(dirset.path, dirset.filter.filterString)">
 
@@ -32,9 +33,9 @@
 <!--                 		</div> -->
 
 <span ng-show="dirset.children.length == 0"
-	style="color: #aaaaaa; padding-left: {{16* (dirset.path.getLength()+ 1)">(no
+	style="color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}">(no
 	entries)</span>
 
-<div style="padding-left: {{16* (dirset.path.getLength()+ 1)"
+<div style="padding-left: {{16*(dirset.path.getLength()+1)}}"
 	ng-repeat="facet in dirset.children"
 	ng-include="'template/facettree/facet-tree-item.html'" ></div>
