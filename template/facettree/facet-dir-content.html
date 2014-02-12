@@ -2,7 +2,7 @@
 <!-- ng-show="dirset.pageCount > 1 || dirset.children.length > 5" -->
 
 <div style="width: 100%; background-color: #eeeeff;">
-	<div style="padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}">
+	<div style="padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}px">
 
 		<form class="form-inline" role="form" ng-submit="doFilter(dirset.path, dirset.filter.filterString)">
 
@@ -14,7 +14,7 @@
 			</div>
 			<div class="form-group" ng-if="dirset.pageCount > 1" style="background-color: #eeeeff">
 				<pagination
-					style="padding-left: {{16 * (dirset.path.getLength() + 1)}}px"
+					style="padding-left: {{16*(dirset.path.getLength()+1)}}px"
 					class="pagination-tiny" max-size="7"
 					total-items="dirset.childFacetCount" page="dirset.pageIndex"
 					boundary-links="true" rotate="false"
@@ -32,9 +32,11 @@
 <!--                 		</div> -->
 
 <span ng-show="dirset.children.length == 0"
-	style="color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}">(no
+	style="color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}px">(no
 	entries)</span>
 
-<div style="padding-left: {{16*(dirset.path.getLength()+1)}}"
+<div style="padding-left: {{16*(dirset.path.getLength()+1)}}px"
 	ng-repeat="facet in dirset.children"
 	ng-include="'template/facettree/facet-tree-item.html'" ></div>
+
+

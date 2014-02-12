@@ -2,18 +2,18 @@
 <html ng-app="FacetTreeDemo">
 
 <head>
-	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-	<title>Jassa UI Angular: Facet Tree Demo</title>
+    <title>Jassa UI Angular: Facet Tree Demo</title>
 	
     <!-- bower:css -->
-	    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-	    <!-- endbower -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
 
-	<link rel="stylesheet" href="css/facete-style.css" />
+    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
 	
-	<script src="bower_components/jscache/cache.js"></script>
+    <script src="bower_components/jscache/cache.js"></script>
 
     <!-- bower:js -->
     <script src="bower_components/jquery/jquery.js"></script>
@@ -23,40 +23,35 @@
     <script src="bower_components/jassa/jassa.js"></script>
     <!-- endbower -->
 
-	    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
-
-	    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
-
-	    <script src="../../../target/release/repo/jassa-ui-angular-tpls.js"></script>
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+    <script src="../../../target/release/repo/jassa-ui-angular-tpls.js"></script>
 	
 	<script type="text/javascript">
-	_.mixin(_.str.exports());
+    _.mixin(_.str.exports());
 
-	var service = Jassa.service;
-	var facete = Jassa.facete;
+    var service = Jassa.service;
+    var facete = Jassa.facete;
 
-	
-	var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
-		var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
+        var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
-//		$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/']);
-		$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://linkedgeodata.org/sparql', ['http://linkedgeodata.org/']);
-		$scope.facetTreeConfig = new facete.FacetTreeConfig();
+        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
+        $scope.facetTreeConfig = new facete.FacetTreeConfig();
 
         $scope.selectFacet = function(path) {
-			alert('Selected Path: [' + path + ']');
+            alert('Selected Path: [' + path + ']');
         };
     }]);
-
 	</script>
 
 </head>
 
-<body>
-  	<facet-tree ng-controller="MyCtrl" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)" />  
+<body ng-controller="MyCtrl"> 
+   <facet-tree sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)" />  
 </body>
 
 </html>
