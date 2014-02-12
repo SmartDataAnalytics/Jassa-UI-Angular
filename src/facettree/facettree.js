@@ -13,7 +13,7 @@ angular.module('ui.jassa.facettree', [])
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig;
         //debugger;
-        $scope.facetTreeService = isConfigured ? Jassa.facete.FaceteUtils.createFacetTreeService($scope.sparqlService, $scope.facetTreeConfig, labelMap) : null;
+        $scope.facetTreeService = isConfigured ? Jassa.facete.FaceteUtils.createFacetTreeService($scope.sparqlService, $scope.facetTreeConfig, null) : null;
     };
     
     var update = function() {
@@ -49,7 +49,7 @@ angular.module('ui.jassa.facettree', [])
             //console.log('scopefacets', $scope.facet);             
             var promise = $scope.facetTreeService.fetchFacetTree(startPath);
               
-            sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(data) {
+            Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(data) {
                 facetTreeTagger.applyTags(data);
                 $scope.facet = data;
             });
@@ -60,7 +60,7 @@ angular.module('ui.jassa.facettree', [])
     };
               
     $scope.toggleCollapsed = function(path) {
-        util.CollectionUtils.toggleItem($scope.facetTreeConfig.getExpansionSet(), path);
+        Jassa.util.CollectionUtils.toggleItem($scope.facetTreeConfig.getExpansionSet(), path);
           
         var val = $scope.facetTreeConfig.getExpansionMap().get(path);
         if(val == null) {

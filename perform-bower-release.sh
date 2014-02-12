@@ -25,16 +25,13 @@ git clone git@github.com:GeoKnow/Jassa-UI-Angular-Bower.git "$targetFolder" || t
 #mkdir -p "$targetFolder"
 
 cp bower.json "$targetFolder"
-( cd "$targetFolder" && git add bower.json )
+cp css/jassa-ui-angular.css "$targetFolder"
 
 for source in `cd "$sourceFolder" && ls -1`; do
     target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?||g'`
  
     cp -v "$sourceFolder/$source" "$targetFolder/$target"
-    ( cd "$targetFolder" && git add "$target" ) || true
-#    git add "$targetFolder/$target" || true
 done
-
 
 cd "$targetFolder"
 git add -A

@@ -5,7 +5,7 @@
     "Claus Stadler <cstadler@informatik.uni-leipzig.de>"
   ],
   "description": "UI for JAvascript Suite for Sparql Access",
-  "main": "jassa-ui-angular-tpls.js",
+  "main": ["jassa-ui-angular-tpls.js, jassa-ui-angular.css"],
   "dependencies": {
     "jassa": ">=0.0.1-SNAPSHOT",
     "angular": ">=1"

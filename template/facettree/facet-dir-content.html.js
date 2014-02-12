@@ -4,7 +4,7 @@ angular.module("template/facettree/facet-dir-content.html", []).run(["$templateC
     "<!-- ng-show=\"dirset.pageCount > 1 || dirset.children.length > 5\" -->\n" +
     "\n" +
     "<div style=\"width: 100%; background-color: #eeeeff;\">\n" +
-    "	<div style=\"padding-right: 16px; padding-left: {{16* (dirset.item.path.getLength()+ 1)\">\n" +
+    "	<div style=\"padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}\">\n" +
     "\n" +
     "		<form class=\"form-inline\" role=\"form\" ng-submit=\"doFilter(dirset.path, dirset.filter.filterString)\">\n" +
     "\n" +
@@ -16,7 +16,7 @@ angular.module("template/facettree/facet-dir-content.html", []).run(["$templateC
     "			</div>\n" +
     "			<div class=\"form-group\" ng-if=\"dirset.pageCount > 1\" style=\"background-color: #eeeeff\">\n" +
     "				<pagination\n" +
-    "					style=\"padding-left: {{16 * (dirset.item.getPath().getLength() + 1)}}px\"\n" +
+    "					style=\"padding-left: {{16 * (dirset.path.getLength() + 1)}}px\"\n" +
     "					class=\"pagination-tiny\" max-size=\"7\"\n" +
     "					total-items=\"dirset.childFacetCount\" page=\"dirset.pageIndex\"\n" +
     "					boundary-links=\"true\" rotate=\"false\"\n" +
@@ -30,14 +30,14 @@ angular.module("template/facettree/facet-dir-content.html", []).run(["$templateC
     "\n" +
     "\n" +
     "<!--                 		<div ng-show=\"dirset.pageCount != 1\" style=\"width:100%; background-color: #eeeeff\"> -->\n" +
-    "<!--     		         		<pagination style=\"padding-left: {{16 * (dirset.item.getPath().getLength() + 1)}}px\" class=\"pagination-tiny\" max-size=\"7\" total-items=\"dirset.childFacetCount\" page=\"dirset.pageIndex\" boundary-links=\"true\" rotate=\"false\" on-select-page=\"selectFacetPage(page, facet)\" first-text=\"<<\" previous-text=\"<\" next-text=\">\" last-text=\">>\"></pagination> -->\n" +
+    "<!--     		         		<pagination style=\"padding-left: {{16 * (dirset.path.getLength() + 1)}}px\" class=\"pagination-tiny\" max-size=\"7\" total-items=\"dirset.childFacetCount\" page=\"dirset.pageIndex\" boundary-links=\"true\" rotate=\"false\" on-select-page=\"selectFacetPage(page, facet)\" first-text=\"<<\" previous-text=\"<\" next-text=\">\" last-text=\">>\"></pagination> -->\n" +
     "<!--                 		</div> -->\n" +
     "\n" +
     "<span ng-show=\"dirset.children.length == 0\"\n" +
-    "	style=\"color: #aaaaaa; padding-left: {{16* (dirset.path.getLength()+ 1)\">(no\n" +
+    "	style=\"color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}\">(no\n" +
     "	entries)</span>\n" +
     "\n" +
-    "<div style=\"padding-left: {{16* (dirset.path.getLength()+ 1)\"\n" +
+    "<div style=\"padding-left: {{16*(dirset.path.getLength()+1)}}\"\n" +
     "	ng-repeat=\"facet in dirset.children\"\n" +
     "	ng-include=\"'template/facettree/facet-tree-item.html'\" ></div>\n" +
     "");
