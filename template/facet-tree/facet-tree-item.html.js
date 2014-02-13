@@ -1,5 +1,5 @@
-angular.module("template/facettree/facet-tree-item.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/facettree/facet-tree-item.html",
+angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/facet-tree/facet-tree-item.html",
     "<div ng-class=\"{'frame': facet.isExpanded}\">\n" +
     "	<div class=\"facet-row\" ng-class=\"{'highlite': facet.isExpanded}\" ng-mouseover=\"facet.isHovered=true\" ng-mouseleave=\"facet.isHovered=false\">\n" +
     "		<a ng-show=\"facet.isExpanded\" href=\"\" ng-click=\"toggleCollapsed(facet.item.getPath())\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a>\n" +
@@ -17,10 +17,10 @@ angular.module("template/facettree/facet-tree-item.html", []).run(["$templateCac
     "\n" +
     "		<tabset class=\"tabset-small\">\n" +
     "			<tab heading=\"Incoming Facets\" active=\"{{facet.isIncomingActive === true}}\" select=\"selectIncoming(facet.item.getPath())\">\n" +
-    "				<div ng-repeat=\"dirset in [facet.incoming]\" ng-include=\"'template/facettree/facet-dir-content.html'\"></div>\n" +
+    "				<div ng-repeat=\"dirset in [facet.incoming]\" ng-include=\"'template/facet-tree/facet-dir-content.html'\"></div>\n" +
     "			</tab>\n" +
     "			<tab heading=\"Outgoing Facets\" active=\"{{facet.isOutgoingActive === true}}\" select=\"selectOutgoing(facet.item.getPath())\">					\n" +
-    "				<div ng-repeat=\"dirset in [facet.outgoing]\" ng-include=\"'template/facettree/facet-dir-content.html'\"></div>\n" +
+    "				<div ng-repeat=\"dirset in [facet.outgoing]\" ng-include=\"'template/facet-tree/facet-dir-content.html'\"></div>\n" +
     "			</tab>\n" +
     "		</tabset>\n" +
     "	</div>\n" +

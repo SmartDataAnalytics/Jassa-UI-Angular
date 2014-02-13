@@ -1,5 +1,5 @@
-angular.module("template/facettree/facet-dir-content.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/facettree/facet-dir-content.html",
+angular.module("template/facet-tree/facet-dir-content.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/facet-tree/facet-dir-content.html",
     "\n" +
     "<!-- ng-show=\"dirset.pageCount > 1 || dirset.children.length > 5\" -->\n" +
     "\n" +
@@ -39,7 +39,7 @@ angular.module("template/facettree/facet-dir-content.html", []).run(["$templateC
     "\n" +
     "<div style=\"padding-left: {{16*(dirset.path.getLength()+1)}}px\"\n" +
     "	ng-repeat=\"facet in dirset.children\"\n" +
-    "	ng-include=\"'template/facettree/facet-tree-item.html'\" ></div>\n" +
+    "	ng-include=\"'template/facet-tree/facet-tree-item.html'\" ></div>\n" +
     "\n" +
     "\n" +
     "");

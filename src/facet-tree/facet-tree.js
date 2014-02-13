@@ -1,4 +1,4 @@
-angular.module('ui.jassa.facettree', [])
+angular.module('ui.jassa.facet-tree', [])
 
 /**
  * Controller for the SPARQL based FacetTree
@@ -145,7 +145,7 @@ angular.module('ui.jassa.facettree', [])
     return {
         restrict: 'EA',
         replace: true,
-        templateUrl: 'template/facettree/facet-tree-item.html',
+        templateUrl: 'template/facet-tree/facet-tree-item.html',
         transclude: false,
         require: 'facetTree',
         scope: {
