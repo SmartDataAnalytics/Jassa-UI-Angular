@@ -37,12 +37,18 @@
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
+        $scope.$watch('facetTreeConfig.hashCode()', function(newState) {
+            console.log('Config change detected', newState);
+        });
+
+
         var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
         $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
 
         $scope.facetTreeConfig = new facete.FacetTreeConfig();
+
 
         $scope.path = null;
 
