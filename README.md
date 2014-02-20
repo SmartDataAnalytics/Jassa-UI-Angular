@@ -1,43 +1,85 @@
-Jassa-Angular-UI
-================
+# Jassa-Angular-UI
 
-Build setup taken from the angular-ui-bootstrap project (https://github.com/angular-ui/bootstrap/blob/master/.jshintrc) ~ Kudos!
+This repository contains a set of reusable angularjs directives (widgets) for user interface components based on the [JAvaScript Suite for Sparql Access (Jassa)](https://github.com/GeoKnow/Jassa).
+The widgets are designed to work directly on a SPARQL endpoint and cope with large result sets by means of pagination support.
 
+_Disclaimer: The repository layout and the build configuration are based on [angular-ui-bootstrap](https://github.com/angular-ui/bootstrap)._
 
-Run
+## Components
 
-    grunt
-
-to build the artefacts; will be put in the `dist` folder.
-
-The `pom.xml` just exits for making the project import into maven based environments potentially easier.
-
-Angular-JS based user interface components for Jassa
+### Facet Search
+* FacetTree: A SPARQL-based data-driven widget for showing a (possibly) nested facet tree for a selected set of resources. Nodes in the tree feature support for regex search and pagination.
+* FacetValueList: A SPARQL-based data-driven widget for showing the list of values for a given facet selection. Supports regex search and pagination.
+* ConstraintList: A widget which summarizes 
 
 
-    sudo npm install -g generator-angularjs-library
-    # glob module is a missing dep
-    sudo npm install -i glob
-    sudo npm install -i lodash
-    sudo npm install -i debug
-    sudo npm install -i async
-    sudo npm install -i diff
-    sudo npm install -i inquirer
-    sudo npm install -i isbinaryfile
-    sudo npm install -i mkdirp
-    sudo npm install -i rimraf
-    sudo npm install -i iconv-lite
-    sudo npm install -i tar
-    sudo npm install -i request
-	sudo npm install -i dargs
-	sudo npm install -i underscore.string
-	sudo npm install -i cheerio
-	sudo npm install -g shelljs
+### Map display
+The interaction of the faceted search components with the map frameworks (OpenLayers)[http://openlayers.org/] and (Leaflet)[http://leafletjs.com/] is work in progress.
 
-sudo vim /usr/lib/node_modules/generator-angularjs-library/node_modules/yeoman-generator/lib/util/common.js
-Change content to module.exports.yeoman = 'yeoman' (https://github.com/jvandemo/generator-angularjs-library/issues/10) 
 
-    yo install angularjs-library
+## Demo
 
-	Clean up the project if you configured the generator wrong:
-	rm -rf bower_components bower.json Gruntfile.js karma-unit.conf.js node_modules package.json src test
+See the widgets in action [here](http://cstadler.aksw.org/jassa-ui/).
+_The stylistic aspect is work in progress :)_
+
+
+## Usage
+
+You can install jassa-ui-angular with the bower package managager using
+
+    bower install jassa-ui-angular
+
+This will checkout the latest version (by git tag) from our [bower release repository](https://github.com/GeoKnow/Jassa-UI-Angular-Bower).
+
+HTML tags for the dependencies can be injected into a file using the `bower-install` grunt task.
+
+    grunt bower-install
+
+For some dependencies bower-install task does not know what to add to your HTML file due to lack of metadata. Manually add the following elements to your `index.html` or main file.
+
+    <link rel="stylesheet" href="css/jassa-ui-angular.css" />
+    <script src="bower_components/jscache/cache.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+
+Note: [This issue](https://github.com/angular-ui/bootstrap/issues/1791) causes Angular-UI-Bootstrap v0.10.0 to throw an exception when using expressions for the active state of tabs. The issue seems to be fixed in master, but there is no bower release yet. Hence, you need to fall back to this [slightly modified version](https://github.com/GeoKnow/Jassa-UI-Angular/blob/master/jassa-ui-angular-core/demo/facet-tree/app/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js).
+
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+
+## Build
+
+Make sure that a current version `npm` is available on your system.
+You can install `npm` using:
+
+```bash
+# Remove or purge old versions
+sudo apt-get remove nodejs npm
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get update
+sudo apt-get install nodejs
+# The nodejs package includes the npm command
+```
+
+Install development tools (-g indicates to install them globally on your system rather than the current working directory)
+
+```bash
+sudo npm install -g grunt-cli
+sudo npm install -g bower
+```
+
+Run the build script
+
+```bash
+cd jassa-ui-angular-core
+./build.sh
+```
+
+## Project layout
+
+* `jassa-ui-angular-core`: Module for core widgets which do not depend on other user interface libraries except for angular-ui-bootstrap.
+* `jassa-ui-angular-geo-openlayers`: Module for openlayer widgets. WIP.
+
+## License
+To be clarified (some liberal one, such as MIT or Apache v2)
+
