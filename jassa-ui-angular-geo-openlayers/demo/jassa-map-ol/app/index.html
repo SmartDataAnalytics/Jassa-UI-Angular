@@ -32,14 +32,83 @@
 	<script type="text/javascript">
     _.mixin(_.str.exports());
 
+	var rdf = Jassa.rdf;
+	var sparql = Jassa.sparql;
     var service = Jassa.service;
+	var sponate = Jassa.sponate;
     var facete = Jassa.facete;
+
+	var geo = Jassa.geo;
 
     var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
 		$scope.map = null;
+
+	var conceptWgs84 = new facete.Concept(sparql.ElementString.create('?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ;  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y'), rdf.NodeFactory.createVar('s'));
+	var conceptGeoVocab = new facete.Concept(sparql.ElementString.create('?s <http://www.opengis.net/ont/geosparql#asWKT> ?w'), rdf.NodeFactory.createVar('s'));
+
+
+	var vs = rdf.NodeFactory.createVar('s');
+	var vx = rdf.NodeFactory.createVar('x');
+	var vy = rdf.NodeFactory.createVar('y');
+	var vw = rdf.NodeFactory.createVar('w');
+	
+	var geoConcepts = [conceptWgs84, conceptGeoVocab];
+
+		var mapParser = new sponate.MapParser();
+
+		var wgs84GeoView = mapParser.parseMap({
+			name: 'lonlat',
+			template: [{
+				id: conceptWgs84.getVar(), //'?s',
+				lon: vx, // '?x',
+				lat: vy, // '?y'
+				wkt: function(b) { return 'POINT(' + b.get(vx).getLiteralValue() + ' ' + b.get(vy).getLiteralValue() + ')';}
+			}],
+			from: conceptWgs84.getElement()
+		});	
+	
+		var ogcGeoView = mapParser.parseMap({
+			name: 'lonlat',
+			template: [{
+				id: conceptGeoVocab.getVar(),
+				wkt: vw
+			}],
+			from: conceptGeoVocab.getElement()
+		});
+    
+    
+		var intersectsFnName = 'bif:st_intersects';
+		var geomFromTextFnName = 'bif:st_geomFromText';
+	
+	
+	    var wgs84MapFactory = new sponate.GeoMapFactory(wgs84GeoView, new geo.BBoxExprFactoryWgs84(vx, vy));
+		//var ogcMapFactory = new ns.GeoMapFactory(ogcGeoView, new geo.BBoxExprFactoryWkt(vw));
+		var ogcMapFactory = new sponate.GeoMapFactory(ogcGeoView, new geo.BBoxExprFactoryWkt(vw, intersectsFnName, geomFromTextFnName));
+
+    	//var mapLinkFactories = [wgs84MapFactory]; //, ogcMapFactory];
+
+/*
+        sparqlService = sparqlServiceFactory.createSparqlService(wsConf.sparqlServiceIri, wsConf.defaultGraphIris);
+		facetConfig = conceptSpace.getFacetTreeConfig().getFacetConfig();
+		facetConceptGenerator = facete.FaceteUtils.createFacetConceptGenerator(facetConfig);
+
+       	var concept = facetConceptGenerator.createConceptResources(path); 
+*/
+
+		var sparqlService = new service.SparqlServiceHttp('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/']);
+		sparqlService = new service.SparqlServiceCache(sparqlService);
+		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
+
+
+        $scope.dataSources = [{
+			sparqlService: sparqlService,
+			mapLinkFactory: wgs84MapFactory,
+			concept: facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s'))
+		}];
+
 /*
         var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
@@ -61,7 +130,7 @@
 </head>
 
 <body ng-controller="MyCtrl">
-   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%"></div>
+   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="dataSources"></div>
 </body>
 
 </html>
