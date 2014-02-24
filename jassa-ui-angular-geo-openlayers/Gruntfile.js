@@ -25,9 +25,9 @@ module.exports = function(grunt) {
     filenamecustom: '<%= filename %>-custom',
 
     meta: {
-      modules: 'angular.module("ui.jassa", [<%= srcModules %>]);',
-      tplmodules: 'angular.module("ui.jassa.tpls", [<%= tplModules %>]);',
-      all: 'angular.module("ui.jassa", ["ui.jassa.tpls", <%= srcModules %>]);',
+      modules: 'angular.module("ui.jassa.openlayers", [<%= srcModules %>]);',
+      tplmodules: 'angular.module("ui.jassa.openlayers.tpls", [<%= tplModules %>]);',
+      all: 'angular.module("ui.jassa.openlayers", ["ui.jassa.openlayers.tpls", <%= srcModules %>]);',
       banner: ['/*',
                ' * <%= pkg.name %>',
                ' * <%= pkg.homepage %>\n',
@@ -237,7 +237,7 @@ module.exports = function(grunt) {
 
     var module = {
       name: name,
-      moduleName: enquote('ui.jassa.' + name),
+      moduleName: enquote('ui.jassa.openlayers.' + name),
       displayName: ucwords(breakup(name, ' ')),
       srcFiles: grunt.file.expand('src/'+name+'/*.js'),
       tplFiles: grunt.file.expand('template/'+name+'/*.html'),

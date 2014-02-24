@@ -8,6 +8,7 @@
     <title>Jassa UI Angular: Facet Tree Demo</title>
 	
     <!-- bower:css -->
+	    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 	    <!-- endbower -->
 
     <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
@@ -20,6 +21,7 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <!-- endbower -->
 
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
@@ -43,21 +45,18 @@
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
-		//var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
-		//var sparqlService = new service.SparqlServiceHttp('http://localhost/fts-sparql', ['http://localhost/geostats.virt.fixed.nt']);
-		var sparqlService = new service.SparqlServiceHttp('http://localhost/fts-sparql', ['http://localhost/geostats.nt']);
+		var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
 
 		sparqlService = new service.SparqlServiceCache(sparqlService);
 		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
         $scope.dataSources = [{
 			sparqlService: sparqlService,
-//			mapLinkFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-			mapLinkFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+			mapLinkFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
 			concept: facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s')),
 		    quadTreeConfig: {
-				maxItemsPerTileCount: 100,
-				maxGlobalItemCount: 100000
+				maxItemsPerTileCount: 1000,
+				maxGlobalItemCount: 5000
 			}
 		}];
     }]);
