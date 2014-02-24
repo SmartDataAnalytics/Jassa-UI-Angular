@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html ng-app="FacetTreeDemo">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Jassa UI Angular: Facet Tree Demo</title>
+	
+    <!-- bower:css -->
+	    <!-- endbower -->
+
+    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+	
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <!-- endbower -->
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <script src="../../../target/release/repo/jassa-ui-angular-geo-openlayers-tpls.js"></script>
+	
+	<script type="text/javascript">
+    _.mixin(_.str.exports());
+
+	var rdf = Jassa.rdf;
+	var sparql = Jassa.sparql;
+    var service = Jassa.service;
+	var sponate = Jassa.sponate;
+    var facete = Jassa.facete;
+	var geo = Jassa.geo;
+
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
+
+    myModule.controller('MyCtrl', ['$scope', function($scope) {
+
+//		var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+		//var sparqlService = new service.SparqlServiceHttp('http://localhost:8800/sparql', ['http://localhost/geostats.virt.fixed.nt']);
+		var sparqlService = new service.SparqlServiceHttp('http://localhost/fts-sparql', ['http://localhost/geostats.nt']);
+
+		sparqlService = new service.SparqlServiceCache(sparqlService);
+		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
+
+
+        $scope.dataSources = [{
+			sparqlService: sparqlService,
+			//mapLinkFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+			mapLinkFactory: geo.GeoMapFactoryUtils.ogc84MapFactory,
+			concept: facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s')),
+		    quadTreeConfig: {
+				maxItemsPerTileCount: 1000,
+				maxGlobalItemCount: 10000
+			}
+		}];
+    }]);
+	</script>
+
+</head>
+
+<body ng-controller="MyCtrl">
+   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="dataSources"></div>
+</body>
+
+</html>
+

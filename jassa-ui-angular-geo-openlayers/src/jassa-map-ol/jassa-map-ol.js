@@ -4,6 +4,10 @@ angular.module('ui.jassa.jassa-map-ol', [])
         
         var refresh;
 
+//        $scope.center = null;
+//        $scope.zoom = null;
+//        $scope.config = [];
+        
         var defaultViewStateFetcher = new Jassa.geo.ViewStateFetcher();
 
         console.log('scope', $scope);
@@ -12,8 +16,11 @@ angular.module('ui.jassa.jassa-map-ol', [])
         // Make Jassa's ObjectUtils known to the scope - features the hashCode utility function
         $scope.ObjectUtils = Jassa.util.ObjectUtils;
         
-        var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(config), viewStateFetcher]';
+        //var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(config), viewStateFetcher]';
+        var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(config)]'; //viewStateFetcher
+        
         $scope.$watch(watchList, function() {
+            console.log('Map refresh: ' + Jassa.util.ObjectUtils.hashCode($scope.config));
             refresh();
         }, true);
         
@@ -27,7 +34,7 @@ angular.module('ui.jassa.jassa-map-ol', [])
             var configs = $scope.config;
             
             
-            var bounds = mapWrapper.getExtent();//            var bounds = ns.MapUtils.getExtent($scope.map)
+            var bounds = Jassa.geo.openlayers.MapUtils.getExtent($scope.map);
             
             _(configs).each(function(config) {
 
@@ -37,8 +44,9 @@ angular.module('ui.jassa.jassa-map-ol', [])
                 var mapLinkFactory = config.mapLinkFactory;
                 //var conceptFactory = config.conceptFactory
                 var concept = config.concept;
+                var quadTreeConfig = config.quadTreeConfig;
                 
-                var promise = viewStateFetcher.fetchViewState(sparqlService, mapLinkFactory, concept, bounds);
+                var promise = viewStateFetcher.fetchViewState(sparqlService, mapLinkFactory, concept, bounds, quadTreeConfig);
                 
                 // TODO How to obtain the marker style?
                 promise.done(function(viewState) {
@@ -67,17 +75,14 @@ angular.module('ui.jassa.jassa-map-ol', [])
         
 }])
 
-
+//http://jsfiddle.net/A2G3D/1/
 .directive('jassaMapOl', function($parse) {
     return {
         restrict: 'EA', // says that this directive is only for html elements
         replace: true,
         template: '<div></div>',
-        priority: -10,
         controller: 'JassaMapOlCtrl',
         scope: {
-//            center: '=',
-//            zoom: '=',
             config: '='
         },
         link: function (scope, element, attrs) {
@@ -87,21 +92,61 @@ angular.module('ui.jassa.jassa-map-ol', [])
 
             var map = widget.map;
             map.widget = widget;
-            var model = $parse(attrs.jassaMapOl);
+            
+            scope.map = map;
+            //scope.$parent.map = map;
+                        
+            /*
+            var getCenter = $parse('map.center');
+            var setCenter = getCenter.assign;
+            
+            var getCenter = $parse('map.center');
+            var setCenter = getCenter.assign;
+            */
+            
+            //var model = $parse(attrs.jassaMapOl);
 
-            if(model) {
-                model.assign(scope, map);
-            }
 
-            //console.log('Dir dataSources', attrs, scope);
+//            if(model) {
+//                //model.assign(scope, map);
+//            }
 
 
             var syncModel = function(event) {
-                //console.log('map event');
-//                if(!scope.$$phase) {
-//                    scope.$apply();
-//                }
+                console.log('syncModel');
+
+                scope.config.center = scope.map.getCenter();
+                scope.config.zoom = scope.map.getZoom();
+                if(!scope.$$phase) {
+                    scope.$apply();
+                }
+                /*
+                var center = scope.map.getCenter();
+                //scope.config.center = {lon: center.lon; lat: center.lat};
+
+//              if(scope.$root.$$phase != '$apply' && scope.$root.$$phase != '$digest') {
+//              scope.$apply();
+//          }
+*/
             };
+
+            /*
+            var watchList = '[map.getCenter(), map.getZoom()]';
+            scope.$watch(watchList, function() {
+                syncModel();
+            }, true);
+*/
+            
+/*
+            scope.$watch('[config.center, config.zoom]', function(arr) {
+                console.log('New map center', arr);
+               scope.map.setCenter(arr[0], arr[1]);
+            }, true);
+*/
+//            scope.$watch('config.zoom', function(val) {
+//                scope.map.setZoom(val);
+//            });
+            
             
             map.events.register('moveend', this, syncModel);
             map.events.register('zoomend', this, syncModel);
