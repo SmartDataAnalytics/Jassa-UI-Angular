@@ -12,6 +12,7 @@
 	    <!-- endbower -->
 
     <link rel="stylesheet" href="css/jassa-ui-angular.css" />
+	<link rel="stylesheet" href="css/ng-grid/ng-grid.css" />
 	
     <script src="bower_components/jscache/cache.js"></script>
 
@@ -27,13 +28,17 @@
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
     <script src="js/jassa-ui-angular-tpls.js"></script>
 	
+	<script src="lib/ng-grid/ng-grid-2.0.7.debug.js"></script>
+    <script src="https://rawgithub.com/angular-ui/ng-grid/master/plugins/ng-grid-flexible-height.js"></script>
+	
+	
 	<script type="text/javascript">
     _.mixin(_.str.exports());
 
     var service = Jassa.service;
     var facete = Jassa.facete;
 
-    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ngGrid', 'ui.jassa']);
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
@@ -46,7 +51,8 @@
 
         $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
-
+		
+		
         $scope.facetTreeConfig = new facete.FacetTreeConfig();
 
 
@@ -56,6 +62,22 @@
             //alert('Selected Path: [' + path + ']');
             $scope.path = path;
         };
+        
+        
+
+        var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
+		facetTableConfig.togglePath(facete.Path.parse(''));
+		//var 7baseEf = new sparql.ElementFactoryConst(sparql.ElementString.create('?s ?p ?o'));
+		var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
+		var tableMod = facetTableConfig.getTableMod();
+
+		 
+		$scope.facetTableConfig = {
+			queryFactory: new facete.QueryFactoryFacetTable(facetTableConfig),
+			tableMod: tableMod
+		};
+		
+
     }]);
 	</script>
 
@@ -66,6 +88,9 @@
    <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
+
+
+	<sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
 </body>
 
 </html>

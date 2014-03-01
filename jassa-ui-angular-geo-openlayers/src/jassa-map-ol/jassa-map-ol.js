@@ -1,4 +1,4 @@
-angular.module('ui.jassa.jassa-map-ol', [])
+angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
 .controller('JassaMapOlCtrl', ['$scope', '$rootScope', function($scope, $rootScope) {
         
@@ -41,12 +41,14 @@ angular.module('ui.jassa.jassa-map-ol', [])
                 var viewStateFetcher = config.viewStateFetcher || defaultViewStateFetcher;
                 
                 var sparqlService = config.sparqlService;
-                var mapLinkFactory = config.mapLinkFactory;
+                var mapFactory = config.mapFactory;
                 //var conceptFactory = config.conceptFactory
-                var concept = config.concept;
+                var conceptFactory = config.conceptFactory;
+                var concept = conceptFactory.createConcept();
+                
                 var quadTreeConfig = config.quadTreeConfig;
                 
-                var promise = viewStateFetcher.fetchViewState(sparqlService, mapLinkFactory, concept, bounds, quadTreeConfig);
+                var promise = viewStateFetcher.fetchViewState(sparqlService, mapFactory, concept, bounds, quadTreeConfig);
                 
                 // TODO How to obtain the marker style?
                 promise.done(function(viewState) {
@@ -63,8 +65,12 @@ angular.module('ui.jassa.jassa-map-ol', [])
                         var docs = data.docs || [];
 
                         _(docs).each(function(doc) {
-     
-                            mapWrapper.addWkt(doc.id, doc.wkt);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
+                            var itemData = {
+                                id: doc.id
+                            };
+                            
+                            mapWrapper.addWkt(doc.id, doc.wkt, itemData);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
+                            
                         });
                     });
                 });
@@ -83,7 +89,9 @@ angular.module('ui.jassa.jassa-map-ol', [])
         template: '<div></div>',
         controller: 'JassaMapOlCtrl',
         scope: {
-            config: '='
+            config: '=',
+            onSelect: '&select',
+            onUnselect: '&unselect'
         },
         link: function (scope, element, attrs) {
             
@@ -147,6 +155,16 @@ angular.module('ui.jassa.jassa-map-ol', [])
 //                scope.map.setZoom(val);
 //            });
             
+            //$(this.el).on("ssbmap2featureselect"
+            $el.on('ssbmapfeatureselect', function(ev, data) {
+                console.log('args', arguments);
+                scope.onSelect({data: data});
+            });
+
+            $el.on('ssbmapfeatureunselect', function(ev, data) {
+                scope.onUnselect({data: data});
+            });
+                    
             
             map.events.register('moveend', this, syncModel);
             map.events.register('zoomend', this, syncModel);
@@ -192,8 +210,8 @@ angular.module('ui.jassa.jassa-map-ol', [])
                 //console.log('PAAAAA ' + geoConcept);
                 
                 
-                var mapLinkFactory = mapLinkFactories[0];
-                var promise = viewStateFetcher.fetchViewState(sparqlService, mapLinkFactory, concept, bounds);
+                var mapFactory = mapLinkFactories[0];
+                var promise = viewStateFetcher.fetchViewState(sparqlService, mapFactory, concept, bounds);
                 
                 promise.done(function(viewState) {
                     var nodes = viewState.getNodes();

@@ -314,30 +314,18 @@ $.widget('custom.ssbMap', {
             
             onSelect: function(feature) {
                                 
-                var vector = feature; // Note: We assume a vector feature - might have to check in the future                
+                //var vector = feature; // Note: We assume a vector feature - might have to check in the future                
+                var data = feature.data;
                 var geometry = feature.geometry;
                 
                 // FIXME Find a better way to get the click coordinates; but it might not exists yet, see http://trac.osgeo.org/openlayers/ticket/2089
                 var xy = this.handlers.feature.evt.xy;
                 
-                //console.log('[Select Feature] Got Geometry: ', geometry);
-
-                // TODO Something seems to go wrong here after RDFauthor hides itself
-                if(geometry instanceof OpenLayers.Geometry.Point) {
-                //if(geometry.CLASS_NAME = 'OpenLayers.Geometry.Point') {
-                    
-                        //OpenLayers.Event.stop(event);
-                        //console.log('aoeu', feature);
-                        var data = feature.data;
-                    
-                        var event = null;
-                        self._trigger('featureSelect', event, data);
-                        
-                    
-                } else if(geometry instanceof OpenLayers.Geometry.Polygon) {
-                    //console.log('What I think is a geometry is a: ', geometry);
                 
+                if(data.zoomable && geometry instanceof OpenLayers.Geometry.Polygon) {
                     
+                    //alert(JSON.stringify(data) + data.zoomable);
+
                     /*
                      * New method forzooming in onto the click position
                      */
@@ -351,29 +339,10 @@ $.widget('custom.ssbMap', {
                     }
                     
                     self.map.setCenter(clickLonLat, nextZoom);
-                    
-//                    if(false) {
-//                        /*
-//                         * Old method for zooming into the center of the bounds
-//                         */
-//                        var bounds = geometry.bounds;
-//                                            
-//                        var newBounds = bounds.scale(0.5);
-//                        var currentZoom = self.map.getZoom();
-//                        self.map.zoomToExtent(newBounds, false);
-//    
-//                        
-//                        // Zoom-in (increase the zoom level) if zoomToExtent did not do that already  
-//                        var newZoom = self.map.getZoom();                    
-//                        if(newZoom >= currentZoom) {
-//                            var nextZoom = newZoom + 1;
-//                            
-//                            var numZoomLevels = self.map.getNumZoomLevels();
-//                            if(nextZoom < numZoomLevels) {
-//                                self.map.zoomTo(nextZoom);
-//                            }
-//                        }
-//                    }
+                }
+                else {
+                    var event = null;
+                    self._trigger('featureSelect', event, data);
                 }
             }
         });
@@ -471,7 +440,8 @@ $.widget('custom.ssbMap', {
 
             feature.attributes = newAttrs
           */
-        feature.attributes = attrs;
+        //feature.attributes = attrs;
+        feature.data = attrs;
         //feature.geometry = g;
                 
         /*
@@ -652,7 +622,9 @@ $.widget('custom.ssbMap', {
 
         
         //console.log('Box style: ', this.styles.boxStyle);
-        var boxFeature = new OpenLayers.Feature.Vector(b.toGeometry(), {}, this.styles.boxStyle);
+        var boxFeature = new OpenLayers.Feature.Vector(b.toGeometry(), {
+            zoomable: true,
+        }, this.styles.boxStyle);
         
         this.boxLayer.addFeatures([boxFeature]);
         this.idToBox[id] = boxFeature;

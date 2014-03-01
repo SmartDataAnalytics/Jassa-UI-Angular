@@ -8,7 +8,6 @@
     <title>Jassa UI Angular: Facet Tree Demo</title>
 	
     <!-- bower:css -->
-	    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 	    <!-- endbower -->
 
     <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
@@ -21,7 +20,6 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <!-- endbower -->
 
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
@@ -41,31 +39,37 @@
     var facete = Jassa.facete;
 	var geo = Jassa.geo;
 
-    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa.openlayers']);
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
 		var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+		//var sparqlService = new service.SparqlServiceHttp('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/']);
 
 		sparqlService = new service.SparqlServiceCache(sparqlService);
 		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
         $scope.dataSources = [{
 			sparqlService: sparqlService,
-			mapLinkFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-			concept: facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s')),
+			mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+			conceptFactory: new facete.ConceptFactoryConst(facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s'))),
 		    quadTreeConfig: {
-				maxItemsPerTileCount: 1000,
-				maxGlobalItemCount: 5000
+				maxItemsPerTileCount: 2500,
+				maxGlobalItemCount: 100
 			}
 		}];
+        
+        $scope.selectGeom = function(data) {
+            alert(JSON.stringify(data));  
+        };
+        
     }]);
 	</script>
 
 </head>
 
 <body ng-controller="MyCtrl">
-   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="dataSources"></div>
+   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="dataSources" select="selectGeom(data)"></div>
 </body>
 
 </html>

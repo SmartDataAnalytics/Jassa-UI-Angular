@@ -31,7 +31,7 @@
 
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
 
-    <script src="../../../target/release/repo/jassa-ui-angular-geo-openlayers-tpls.js"></script>
+    <script src="js/jassa-ui-angular-geo-openlayers-tpls.js"></script>
 	
 	<script type="text/javascript">
     _.mixin(_.str.exports());
@@ -42,23 +42,120 @@
 	var sponate = Jassa.sponate;
     var facete = Jassa.facete;
 	var geo = Jassa.geo;
+	var util = Jassa.util;
+	
+	var client = Jassa.client;
 
-    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa', 'ui.jassa.openlayers']);
 
-    myModule.controller('MyCtrl', ['$scope', function($scope) {
+    myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
-		var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+        /*
+        {
+        var sparqlService = new Jassa.service.SparqlServiceHttp('http://geostats-angular/sparql');
+
+        sparqlService = new Jassa.service.SparqlServiceCache(sparqlService);
+        sparqlService = new Jassa.service.SparqlServicePaginate(sparqlService, 1000);
+
+        var store = new Jassa.sponate.StoreFacade(sparqlService, {
+            dbo: "http://dbpedia.org/ontology/", 
+            foaf: "http://xmlns.com/foaf/0.1/"
+        });
+
+        store.addMap({
+            name : "entity",
+            template : [{
+                id : "?s",
+                thumbnail : "?thumbnail",
+                homepage : "?homepage"
+            }],
+            from : "OPTIONAL { ?s dbo:thumbnail ?thumbnail . } \
+                    OPTIONAL { ?s foaf:homepage ?homepage . }"
+        });
+        var concept = new Jassa.facete.Concept(Jassa.sparql.ElementString.create("filter ( ?s = <" + $routeParams.uri + "> )"), Jassa.rdf.NodeFactory.createVar("s"));
+        store.entity.find().concept(concept).asList().done(function(docs){
+
+            console.log(docs);
+        });
+        }
+        
+        */
+        
+        
+		//var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+		//var sparqlService = new service.SparqlServiceHttp('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/']);
 		//var sparqlService = new service.SparqlServiceHttp('http://localhost:8800/sparql', ['http://localhost/geostats.virt.fixed.nt']);
-//		var sparqlService = new service.SparqlServiceHttp('http://localhost/fts-sparql', ['http://localhost/geostats.nt']);
+		
+		var sparqlServiceIri = 'http://localhost/sparql';
+		var defaultGraphIris = ['http://localhost/geostats.nt'];
+		var conceptPathFinderApiUrl = 'http://localhost:8080/jassa/api/path-finding';
+		//var conceptPathFinderApiUrl = 'http://cstadler.aksw.org/jassa/api/path-finding';
+		
+		
+		var sparqlService = new service.SparqlServiceHttp(sparqlServiceIri, defaultGraphIris);
 
 		sparqlService = new service.SparqlServiceCache(sparqlService);
 		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
+		
+		var facetTreeConfig = new facete.FacetTreeConfig();
+		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+		var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
+
+		
+		var refresh = null;
+		
+		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+		
+		
+		
+		$scope.ObjectUtils = util.ObjectUtils;
+		$scope.$watch('ObjectUtils.hashCode(facetTreeConfig)', function() {
+		    refresh();
+		});
+		
+
+		
+		$scope.setGeoPath = function(path) {
+		    geoConceptFactory.setPath(path);
+		}
+		
+		
+		/*
+		 * Concept Path Finding
+		 */
+		var refresh = function() {
+						
+		    var conceptPathFinder = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, sparqlServiceIri, defaultGraphIris);
+		    
+		    var sourceConcept = conceptFactory.createConcept(); 	
+			var targetConcept = geo.GeoConcepts.conceptGeoVocab; 
+			
+		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
+			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
+	
+			result.then(function(paths) {
+			    var tmp = _(paths).map(function(path) {			        
+			        var r = {
+						name: path.toString(),
+						path: path
+					};
+			        return r;
+			    });
+			   
+			    $scope.geoPaths = tmp;
+			}, function(err) {
+			    alert(err.responseText);
+			});
+		}
+		
+		
+		
+		
 
 		$scope.sparqlService = sparqlService;		
-        $scope.facetTreeConfig = new facete.FacetTreeConfig();
-
-        
+        $scope.facetTreeConfig = facetTreeConfig;
         
         $scope.path = null;
 
@@ -67,29 +164,36 @@
             $scope.path = path;
         };
 
-        /*
         var cm = $scope.facetTreeConfig.getFacetConfig().getConstraintManager();
 
         cm.addConstraint(
 			new facete.ConstraintSpecPathValue(
 			    'equal',
 			    facete.Path.parse('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-			    rdf.NodeFactory.createUri('http://dbpedia.org/ontologyCastle')
+			    rdf.NodeFactory.createUri('http://purl.org/linked-data/cube#Observation')
 			)
 		);
-        */
         
 
         $scope.dataSources = [{
 			sparqlService: sparqlService,
-			mapLinkFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-			//mapLinkFactory: geo.GeoMapFactoryUtils.ogc84MapFactory,
-			concept: facete.ConceptUtils.createSubjectConcept(rdf.NodeFactory.createVar('s')),
+			//mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+			mapFactory: mapFactory,
+			conceptFactory: geoConceptFactory,
 		    quadTreeConfig: {
 				maxItemsPerTileCount: 1000,
 				maxGlobalItemCount: 10000
 			}
 		}];
+        
+        $scope.selectGeom = function(data) {
+            alert('Select: ' + JSON.stringify(data));
+        }
+
+        $scope.unselectGeom = function(data) {
+            //alert('Unselect: ' + JSON.stringify(data));
+        }
+
     }]);
 	</script>
 
@@ -97,14 +201,26 @@
 
 <body ng-controller="MyCtrl">
 
-	<div style="position: absolute; top: 0px; left: 0px; width: 470px; max-height: 100%; overflow: auto; margin: 5px;">
+	<div style="position: absolute; top: 0px; left: 0px; width: 500px; max-height: 100%; overflow: auto; margin: 5px;">
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">GeoPaths</i>
+			</div>
+			<div class="panel-body">
+   				<ul>
+   					<li ng-repeat="geoPath in geoPaths"><a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a></li>
+   				</ul>
+			</div>
+		</div>
+
 
 		<div class="panel panel-info"> 
 			<div class="panel-heading">
 				<i class="panel-title">Facet Tree</i>
 			</div>
 			<div class="panel-body">
-			   <facet-tree style="width: 500px; height: 300px;" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
+			   <facet-tree sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
 			</div>
 		</div>
 
@@ -126,9 +242,11 @@
 			</div>
 		</div>
 
+
+
 	</div>
 
-<!--     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="dataSources"></div> -->
+    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
 </body>
 
