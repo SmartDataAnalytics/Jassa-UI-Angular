@@ -167,7 +167,7 @@ angular.module('ui.jassa.sparql-table', [])
     $scope.ObjectUtils = util.ObjectUtils;
     
     $scope.$watch('[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(config)]', function (newVal, oldVal) {
-        $scope.refreshData();
+        $scope.refresh();
     }, true);
 
     

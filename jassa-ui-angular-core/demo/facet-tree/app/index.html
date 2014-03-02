@@ -35,6 +35,9 @@
 	<script type="text/javascript">
     _.mixin(_.str.exports());
 
+    var util = Jassa.util;
+    var rdf = Jassa.rdf;
+    var sparql = Jassa.sparql;
     var service = Jassa.service;
     var facete = Jassa.facete;
 
@@ -64,16 +67,43 @@
         };
         
         
+        
+        var facetConfig = $scope.facetTreeConfig.getFacetConfig();
+        
+        
+        var vs = rdf.NodeFactory.createVar('s');
+        var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
+
+        $scope.ObjectUtils = util.ObjectUtils;
+        $scope.fcf = facetConceptFactory;
+        $scope.$watch('ObjectUtils.hashCode(fcf)', function() {
+           console.log('fcf:' + $scope.fcf.createConcept()); 
+        }, true);
+        
+        
+        var dataConcept = facete.ConceptUtils.createSubjectConcept(vs);
+        var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), facetConceptFactory);
+            
+        var tableMod = new facete.TableMod();
+        var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+        tableMod.addColumn('s');
+        tableMod.addColumn('_p_');
+        tableMod.addColumn('_o_');
+                
+        
+        /*        
 
         var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
 		facetTableConfig.togglePath(facete.Path.parse(''));
 		//var 7baseEf = new sparql.ElementFactoryConst(sparql.ElementString.create('?s ?p ?o'));
 		var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
 		var tableMod = facetTableConfig.getTableMod();
-
+		var queryFactory = new facete.QueryFactoryFacetTable(facetTableConfig);
+		*/
 		 
 		$scope.facetTableConfig = {
-			queryFactory: new facete.QueryFactoryFacetTable(facetTableConfig),
+			queryFactory: queryFactory,
 			tableMod: tableMod
 		};
 		
