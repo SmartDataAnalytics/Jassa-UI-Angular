@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     modules: [],//to be filled in by build task
     pkg: grunt.file.readJSON('package.json'),
     dist: 'dist',
-    filename: 'jassa-ui-angular-geo-openlayers',
+    filename: 'jassa-ui-angular-openlayers',
     filenamecustom: '<%= filename %>-custom',
 
     meta: {

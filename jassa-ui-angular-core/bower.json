@@ -5,12 +5,16 @@
     "Claus Stadler <cstadler@informatik.uni-leipzig.de>"
   ],
   "description": "UI for JAvascript Suite for Sparql Access",
-  "main": ["jassa-ui-angular-tpls.js", "jassa-ui-angular.css"],
+  "main": [
+    "jassa-ui-angular-tpls.js",
+    "jassa-ui-angular.css"
+  ],
   "dependencies": {
     "jassa": ">=0.0.1-SNAPSHOT",
     "angular": ">=1",
     "bootstrap": "3.1.0",
-    "angular-ui-bootstrap": ""
+    "angular-ui-bootstrap": "",
+    "ng-grid-bower": "~2.0.7"
   },
   "keywords": [
     "rdf",
@@ -31,4 +35,3 @@
     "tests"
   ]
 }
-

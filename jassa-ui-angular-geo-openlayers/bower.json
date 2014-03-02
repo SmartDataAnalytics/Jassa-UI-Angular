@@ -1,11 +1,14 @@
 {
-  "name": "jassa-ui-angular-geo-openlayers",
+  "name": "jassa-ui-angular-openlayers",
   "homepage": "https://github.com/GeoKnow/Jassa-UI-Angular",
   "authors": [
     "Claus Stadler <cstadler@informatik.uni-leipzig.de>"
   ],
   "description": "UI for JAvascript Suite for Sparql Access",
-  "main": ["jassa-ui-angular-geo-openlayers-tpls.js, jassa-ui-geo-openlayers.css"],
+  "main": [
+    "jassa-ui-angular-openlayers-tpls.js",
+    "jassa-ui-angular-openlayers.css"
+  ],
   "dependencies": {
     "jquery-ui": "1.10.3",
     "openlayers": "2.13.1",
