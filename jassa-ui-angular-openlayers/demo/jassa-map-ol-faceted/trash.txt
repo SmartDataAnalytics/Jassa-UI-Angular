@@ -1,0 +1,32 @@
+        /*
+        {
+        var sparqlService = new Jassa.service.SparqlServiceHttp('http://geostats-angular/sparql');
+
+        sparqlService = new Jassa.service.SparqlServiceCache(sparqlService);
+        sparqlService = new Jassa.service.SparqlServicePaginate(sparqlService, 1000);
+
+        var store = new Jassa.sponate.StoreFacade(sparqlService, {
+            dbo: "http://dbpedia.org/ontology/", 
+            foaf: "http://xmlns.com/foaf/0.1/"
+        });
+
+        store.addMap({
+            name : "entity",
+            template : [{
+                id : "?s",
+                thumbnail : "?thumbnail",
+                homepage : "?homepage"
+            }],
+            from : "OPTIONAL { ?s dbo:thumbnail ?thumbnail . } \
+                    OPTIONAL { ?s foaf:homepage ?homepage . }"
+        });
+        var concept = new Jassa.facete.Concept(Jassa.sparql.ElementString.create("filter ( ?s = <" + $routeParams.uri + "> )"), Jassa.rdf.NodeFactory.createVar("s"));
+        store.entity.find().concept(concept).asList().done(function(docs){
+
+            console.log(docs);
+        });
+        }
+        
+        */
+        
+

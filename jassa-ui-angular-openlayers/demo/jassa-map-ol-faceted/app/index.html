@@ -23,16 +23,27 @@
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/ng-grid-bower/ng-grid.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <!-- endbower -->
 
+	<!-- <script src="https://rawgithub.com/angular-ui/ng-grid/master/plugins/ng-grid-flexible-height.js"></script> -->
+    <script src="lib/ng-grid-flexible-height/ng-grid-flexible-height.js"></script>
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <script src="js/jassa-ui-angular-openlayers-tpls.js"></script>
+
+<!--
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
 
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
 
-    <script src="js/jassa-ui-angular-geo-openlayers-tpls.js"></script>
-	
+-->
+
 	<script type="text/javascript">
     _.mixin(_.str.exports());
 
@@ -46,54 +57,30 @@
 	
 	var client = Jassa.client;
 
-    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa', 'ui.jassa.openlayers']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers']);
 
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
-
-        /*
-        {
-        var sparqlService = new Jassa.service.SparqlServiceHttp('http://geostats-angular/sparql');
-
-        sparqlService = new Jassa.service.SparqlServiceCache(sparqlService);
-        sparqlService = new Jassa.service.SparqlServicePaginate(sparqlService, 1000);
-
-        var store = new Jassa.sponate.StoreFacade(sparqlService, {
-            dbo: "http://dbpedia.org/ontology/", 
-            foaf: "http://xmlns.com/foaf/0.1/"
-        });
-
-        store.addMap({
-            name : "entity",
-            template : [{
-                id : "?s",
-                thumbnail : "?thumbnail",
-                homepage : "?homepage"
-            }],
-            from : "OPTIONAL { ?s dbo:thumbnail ?thumbnail . } \
-                    OPTIONAL { ?s foaf:homepage ?homepage . }"
-        });
-        var concept = new Jassa.facete.Concept(Jassa.sparql.ElementString.create("filter ( ?s = <" + $routeParams.uri + "> )"), Jassa.rdf.NodeFactory.createVar("s"));
-        store.entity.find().concept(concept).asList().done(function(docs){
-
-            console.log(docs);
-        });
-        }
-        
-        */
-        
         
 		//var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
 		//var sparqlService = new service.SparqlServiceHttp('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/']);
 		//var sparqlService = new service.SparqlServiceHttp('http://localhost:8800/sparql', ['http://localhost/geostats.virt.fixed.nt']);
 		
-		var sparqlServiceIri = 'http://localhost/sparql';
-		var defaultGraphIris = ['http://localhost/geostats.nt'];
-		var conceptPathFinderApiUrl = 'http://localhost:8080/jassa/api/path-finding';
+		var sparqlProxyServiceIri = 'http://localhost:7532/cache/sparql';
+		
+		//var sparqlServiceIri = 'http://localhost/sparql';
+		var sparqlServiceIri = 'http://localhost/freebase/germany/sparql';
+		//var defaultGraphIris = ['http://localhost/geostats.nt'];
+		//var sparqlServiceIri = 'http://cstadler.aksw.org/conti/freebase/germany/sparql';
+		var defaultGraphIris = ['http://freebase.com/2013-09-22/data/'];
+
+		//var conceptPathFinderApiUrl = 'http://localhost:8080/jassa/api/path-finding';
+		var conceptPathFinderApiUrl = 'http://localhost:7532/api/path-finding';
 		//var conceptPathFinderApiUrl = 'http://cstadler.aksw.org/jassa/api/path-finding';
 		
 		
-		var sparqlService = new service.SparqlServiceHttp(sparqlServiceIri, defaultGraphIris);
-
+		//var sparqlService = new service.SparqlServiceHttp(sparqlServiceIri, defaultGraphIris);
+		var sparqlService = new service.SparqlServiceHttp(sparqlProxyServiceIri, defaultGraphIris, {}, {'service-uri': sparqlServiceIri});
+		
 		sparqlService = new service.SparqlServiceCache(sparqlService);
 		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
@@ -101,14 +88,15 @@
 		var facetTreeConfig = new facete.FacetTreeConfig();
 		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
-		var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
+		//var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
+		//var geoConcept = geo.GeoConcepts.conceptGeoVocab;
 
+        var mapFactory =  geo.GeoMapFactoryUtils.wgs84MapFactory;
+		var geoConcept = geo.GeoConcepts.conceptWgs84;
 		
 		var refresh = null;
 		
 		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-		
-		
 		
 		$scope.ObjectUtils = util.ObjectUtils;
 		$scope.$watch('ObjectUtils.hashCode(facetTreeConfig)', function() {
@@ -130,7 +118,7 @@
 		    var conceptPathFinder = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, sparqlServiceIri, defaultGraphIris);
 		    
 		    var sourceConcept = conceptFactory.createConcept(); 	
-			var targetConcept = geo.GeoConcepts.conceptGeoVocab; 
+			var targetConcept = geoConcept; 
 			
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
 			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
@@ -166,6 +154,7 @@
 
         var cm = $scope.facetTreeConfig.getFacetConfig().getConstraintManager();
 
+/*
         cm.addConstraint(
 			new facete.ConstraintSpecPathValue(
 			    'equal',
@@ -173,7 +162,7 @@
 			    rdf.NodeFactory.createUri('http://purl.org/linked-data/cube#Observation')
 			)
 		);
-        
+*/      
 
         $scope.dataSources = [{
 			sparqlService: sparqlService,
@@ -182,7 +171,7 @@
 			conceptFactory: geoConceptFactory,
 		    quadTreeConfig: {
 				maxItemsPerTileCount: 1000,
-				maxGlobalItemCount: 10000
+				maxGlobalItemCount: 2000
 			}
 		}];
         

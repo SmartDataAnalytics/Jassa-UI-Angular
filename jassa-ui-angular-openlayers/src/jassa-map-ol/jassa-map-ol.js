@@ -68,8 +68,10 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
                             var itemData = {
                                 id: doc.id
                             };
-                            
-                            mapWrapper.addWkt(doc.id, doc.wkt, itemData);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
+
+							var wkt = doc.wkt.getLiteralLexicalForm();
+
+                            mapWrapper.addWkt(doc.id, wkt, itemData);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
                             
                         });
                     });
