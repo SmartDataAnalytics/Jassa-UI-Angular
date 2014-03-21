@@ -14,7 +14,8 @@
     "angular": ">=1",
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap": "",
-    "ng-grid-bower": "~2.0.7"
+    "ng-grid-bower": "~2.0.7",
+    "angular-sanitize": "~1.2.14"
   },
   "keywords": [
     "rdf",

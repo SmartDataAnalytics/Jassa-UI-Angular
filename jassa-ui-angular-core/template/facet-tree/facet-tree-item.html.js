@@ -10,7 +10,7 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
     "		<a ng-visible=\"facet.isHovered || facet.table.isContained\" href=\"\" ng-click=\"toggleTableLink(facet.item.getPath())\"><span class=\"glyphicon glyphicon-list-alt\"></span></a>\n" +
     "\n" +
     "\n" +
-    "		<span style=\"float: right\" class=\"badge\">{{facet.item.getDistinctValueCount()}}</span>	\n" +
+    "		<span style=\"float: right\" class=\"badge\" ng-bind-html=\"(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())\"></span>	\n" +
     "	</div>\n" +
     "	<div ng-if=\"facet.isExpanded\" style=\"width:100%\"> \n" +
     "\n" +
