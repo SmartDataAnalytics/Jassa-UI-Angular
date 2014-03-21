@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html ng-app="FacetTreeDemo">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Jassa UI Angular: Facet Tree Demo</title>
+	
+    <!-- bower:css -->
+	    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+	    <!-- endbower -->
+
+    <link rel="stylesheet" href="css/jassa-ui-angular.css" />
+	<link rel="stylesheet" href="css/ng-grid/ng-grid.css" />
+	
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <!-- endbower -->
+
+    <script src="lib/jassa/jassa.js"></script>
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+    <script src="js/jassa-ui-angular-tpls.js"></script>
+	
+	<script src="lib/ng-grid/ng-grid-2.0.7.debug.js"></script>
+    <script src="https://rawgithub.com/angular-ui/ng-grid/master/plugins/ng-grid-flexible-height.js"></script>
+	
+	
+	<script type="text/javascript">
+    _.mixin(_.str.exports());
+
+    var util = Jassa.util;
+    var rdf = Jassa.rdf;
+    var sparql = Jassa.sparql;
+    var service = Jassa.service;
+    var facete = Jassa.facete;
+
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ngGrid', 'ui.jassa']);
+
+    myModule.controller('MyCtrl', ['$scope', function($scope) {
+
+        $scope.$watch('facetTreeConfig.hashCode()', function(newState) {
+            console.log('Config change detected', newState);
+        });
+
+
+        var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
+
+        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://linkedgeodata.org/sparql', []);
+//        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
+		
+		
+        $scope.facetTreeConfig = new facete.FacetTreeConfig();
+
+
+        $scope.path = null;
+
+        $scope.selectFacet = function(path) {
+            //alert('Selected Path: [' + path + ']');
+            $scope.path = path;
+        };
+        
+        
+        
+        var facetConfig = $scope.facetTreeConfig.getFacetConfig();
+        
+        
+        var vs = rdf.NodeFactory.createVar('s');
+        var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
+
+        $scope.ObjectUtils = util.ObjectUtils;
+        $scope.fcf = facetConceptFactory;
+        $scope.$watch('ObjectUtils.hashCode(fcf)', function() {
+           console.log('fcf:' + $scope.fcf.createConcept()); 
+        }, true);
+        
+        
+        var dataConcept = facete.ConceptUtils.createSubjectConcept(vs);
+        var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), facetConceptFactory);
+            
+        var tableMod = new facete.TableMod();
+        var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+        tableMod.addColumn('s');
+        tableMod.addColumn('_p_');
+        tableMod.addColumn('_o_');
+                
+        
+        /*        
+
+        var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
+		facetTableConfig.togglePath(facete.Path.parse(''));
+		//var 7baseEf = new sparql.ElementFactoryConst(sparql.ElementString.create('?s ?p ?o'));
+		var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
+		var tableMod = facetTableConfig.getTableMod();
+		var queryFactory = new facete.QueryFactoryFacetTable(facetTableConfig);
+		*/
+		 
+		$scope.facetTableConfig = {
+			queryFactory: queryFactory,
+			tableMod: tableMod
+		};
+		
+
+    }]);
+	</script>
+
+</head>
+
+<body ng-controller="MyCtrl">
+   <h1>Facet Tree Demo</h1>
+   <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
+   <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
+   <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
+
+
+	<sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
+</body>
+
+</html>
+

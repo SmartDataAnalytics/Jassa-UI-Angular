@@ -33,7 +33,7 @@ angular.module('ui.jassa.sparql-table', [])
         }
     };
 
-    
+/*    
     var createQueryCountQuery = function(query, outputVar) {
         //TODO Deterimine whether a sub query is needed
         var result = new sparql.Query();
@@ -43,6 +43,7 @@ angular.module('ui.jassa.sparql-table', [])
         
         return result;
     };
+*/
 
     var createNgGridOptionsFromQuery = function(query) {
         var projectVarList = query.getProjectVars().getVarList();
@@ -64,9 +65,14 @@ angular.module('ui.jassa.sparql-table', [])
     
 
     service.SparqlTableService = Class.create({
-        initialize: function(sparqlService, query) {
+        /**
+         * TODO Possibly add primaryCountLimit - i.e. a limit that is never counted beyond, even if the backend might be fast enough
+         */
+        initialize: function(sparqlService, query, timeoutInMillis, secondaryCountLimit) {
             this.sparqlService = sparqlService;
             this.query = query;
+            this.timeoutInMillis = timeoutInMillis || 3000;
+            this.secondaryCountLimit = secondaryCountLimit || 1000;
         },
         
         fetchCount: function() {
@@ -74,16 +80,20 @@ angular.module('ui.jassa.sparql-table', [])
 
             query.setLimit(null);
             query.setOffset(null);
-            
+  
+            var result = service.ServiceUtils.fetchCountQuery(this.sparqlService, this.query, this.timeoutInMillis, this.secondaryCountLimit);
+          
+/*
             var countVar = rdf.NodeFactory.createVar('_c_');
             var countQuery = createQueryCountQuery(query, countVar);
             var countQe = this.sparqlService.createQueryExecution(countQuery);
             var promise = service.ServiceUtils.fetchInt(countQe, countVar);
-
+*/
             
-            console.log('Count Query: ' + countQuery);
+            //console.log('Count Query: ' + countQuery);
 
-            return promise;
+            //return promise;
+            return result;
         },
         
         fetchData: function(limit, offset) {
@@ -198,8 +208,9 @@ angular.module('ui.jassa.sparql-table', [])
         
         var promise = tableService.fetchCount();
         
-        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(count) {
-            $scope.totalServerItems = count;
+        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(countInfo) {
+            // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
+            $scope.totalServerItems = countInfo.count;
         });
     };
     

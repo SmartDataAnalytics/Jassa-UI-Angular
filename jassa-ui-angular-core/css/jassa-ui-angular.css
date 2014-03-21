@@ -46,26 +46,6 @@ input[type=text] .btn-xs, input[type=password] .btn-xs {
 /* 		background-color: #EEEEEE; */
 }
 
-.portlet {
-/* 		border: 1px; */
-/* 		border-collapse: true; */
-/* 		border-style: solid; */
-/* 		border-color: #cccccc; */
-/* 		padding-right: 0px; */
-	padding: 5px;
-/* 		padding-bottom: 16px; */
-/*  		margin-top: 3px; */
-		margin: 5px;
-/*  		margin-bottom: 3px; */
-/*  		background-color: #EFEFEF; */
-		background-color: rgba(239, 239, 239, 0.7);
-		
-/*  		background : url("resources/images/facete-ui/background.png") repeat scroll 0 0 rgba(0, 0, 0, 0); */
-/*  		background-color: #eeeeee; */
-/* 		background-color: #EEEEEE; */
-}
-
-
 a {
     cursor: pointer
 }

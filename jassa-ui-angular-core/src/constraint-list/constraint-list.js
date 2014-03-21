@@ -6,17 +6,8 @@ angular.module('ui.jassa.constraint-list', [])
 
     //var constraintManager;
 
-    $scope.$watch('sparqlService', function() {
-        update();
-    });
-    
-    $scope.$watch('facetTreeConfig.hashCode()', function() {
-        update();
-    }, true);
-
-
     var updateConfig = function() {
-        var isConfigured = !!$scope.facetTreeConfig;
+        var isConfigured = $scope.facetTreeConfig;
         //debugger;
         $scope.constraintManager = isConfigured ? $scope.facetTreeConfig.getFacetConfig().getConstraintManager() : null;
     };
@@ -25,6 +16,14 @@ angular.module('ui.jassa.constraint-list', [])
         updateConfig();
         self.refresh();
     };
+
+
+    $scope.ObjectUtils = Jassa.util.ObjectUtils;
+
+    var watchList = '[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(facetTreeConfig)]';
+    $scope.$watch(watchList, function() {
+		update();
+	}, true);
     
     
     var renderConstraint = function(constraint) {

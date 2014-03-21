@@ -123,24 +123,14 @@ angular.module('ui.jassa.facet-value-list', [])
         updateFacetTreeService();
         self.refresh();
     };
-    
-    $scope.$watch('sparqlService', function() {
-        update();
-    });
-    
-    $scope.$watch('facetTreeConfig.hashCode()', function() {
-        update();
-    }, true);
-    
-    $scope.$watch('path', function() {
-        update();
-    }, true);
 
-    
-    $scope.$watch('pagination.currentPage', function() {
-        //console.log("Change");
+    $scope.ObjectUtils = Jassa.util.ObjectUtils;
+
+    var watchList = '[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(facetTreeConfig), "" + path, pagination.currentPage]';
+    $scope.$watch(watchList, function() {
         update();
-    });
+    }, true);
+                  
 
 
     $scope.toggleConstraint = function(item) {

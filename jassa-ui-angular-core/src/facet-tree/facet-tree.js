@@ -22,15 +22,14 @@ angular.module('ui.jassa.facet-tree', [])
         self.refresh();
     };
     
-    $scope.$watch('sparqlService', function() {
-    //console.log('args', $scope.sparqlService);
-        update();
-    });
-    
-    $scope.$watch('facetTreeConfig.hashCode()', function() {
+
+    $scope.ObjectUtils = Jassa.util.ObjectUtils;
+
+    var watchList = '[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(facetTreeConfig)]';
+    $scope.$watch(watchList, function() {
         update();
     }, true);
-              
+                  
       
     $scope.doFilter = function(path, filterString) {
         $scope.facetTreeConfig.getPathToFilterString().put(path, filterString);
