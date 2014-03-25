@@ -165,11 +165,11 @@ angular.module('ui.jassa.facet-value-list', [])
         
         var dataPromise = fetcher.fetchData(offset, pageSize);
 
-        Jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $rootScope).then(function(count) {
+        Jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $scope.$root, function(count) {
             $scope.pagination.totalItems = count;
         });
         
-        Jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $rootScope).then(function(items) {
+        Jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $scope.$root, function(items) {
             $scope.facetValues = items;
         });
 

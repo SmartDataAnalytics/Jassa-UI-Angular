@@ -207,8 +207,22 @@ angular.module('ui.jassa.sparql-table', [])
         tableService = tableService || createTableService();
         
         var promise = tableService.fetchCount();
+
+//        $q.when(promise).then(function(countInfo) {
+//            $scope.totalServerItems = countInfo.count;
+//        });
         
-        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(countInfo) {
+//        promise.done(function(countInfo) {
+//           $scope.totalServerItems = countInfo.count;
+//            
+//            if ($scope && !$scope.$root.$$phase) {
+//                $scope.$root.$apply();
+//            }
+//        });
+//
+        
+
+        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
             // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
             $scope.totalServerItems = countInfo.count;
         });
@@ -224,8 +238,22 @@ angular.module('ui.jassa.sparql-table', [])
 
         
         var promise = tableService.fetchData(pageSize, offset);
-        
-        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope).then(function(data) {
+
+//        promise.done(function(data) {
+//            $scope.myData = data;
+//            
+//            if ($scope && !$scope.$root.$$phase) {
+//                $scope.$root.$apply();
+//            }
+//        });
+
+        /*
+        $q.when(promise).then(function(data) {
+            $scope.myData = data;
+        });
+        */
+
+        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
             $scope.myData = data;
         });
     };

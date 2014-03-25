@@ -21,6 +21,8 @@
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <!-- endbower -->
 
     <script src="lib/jassa/jassa.js"></script>
@@ -42,7 +44,7 @@
     var service = Jassa.service;
     var facete = Jassa.facete;
 
-    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ngGrid', 'ui.jassa']);
+    var myModule = angular.module('FacetTreeDemo', ['ui.bootstrap', 'ngGrid', 'ui.jassa', 'ngSanitize']);
 
     myModule.controller('MyCtrl', ['$scope', function($scope) {
 
@@ -53,7 +55,9 @@
 
         var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
-        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://linkedgeodata.org/sparql', []);
+//        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://linkedgeodata.org/sparql', []);
+        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/']);
+
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
 		
 		
@@ -70,7 +74,28 @@
         
         
         var facetConfig = $scope.facetTreeConfig.getFacetConfig();
-        
+        //var tableMod = new facete.TableMod();
+        var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
+		var tableMod = facetTableConfig.getTableMod();
+
+		var taggerMap = facetConfig.getPathTaggerManager().getTaggerMap();
+		//taggerMap['filter'] = new facete.ItemTaggerFilterString($scope.facetTreeConfig.getPathToFilterString());
+		taggerMap['table'] = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
+
+
+
+
+//        $scope.facetTreePlugins = ['<span ng-show="facet.item.getTags()[table].isContained">Yaaaaay {{facet.item.getTags()}}</span>'];
+
+		$scope.pluginContext = {
+			toggleTableLink: function(path) {
+                facetTableConfig.togglePath(path);
+                //var pathTags = facetConfig.getPathTaggerManager().createTags(path);
+                //alert(JSON.stringify(pathTags));
+			}
+		};
+
+		$scope.facetTreePlugins = ['<a ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'];
         
         var vs = rdf.NodeFactory.createVar('s');
         var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
@@ -85,28 +110,33 @@
         var dataConcept = facete.ConceptUtils.createSubjectConcept(vs);
         var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), facetConceptFactory);
             
-        var tableMod = new facete.TableMod();
         var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-
+/*
         tableMod.addColumn('s');
         tableMod.addColumn('_p_');
         tableMod.addColumn('_o_');
                 
-        
-        /*        
-
-        var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
-		facetTableConfig.togglePath(facete.Path.parse(''));
-		//var 7baseEf = new sparql.ElementFactoryConst(sparql.ElementString.create('?s ?p ?o'));
-		var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
-		var tableMod = facetTableConfig.getTableMod();
-		var queryFactory = new facete.QueryFactoryFacetTable(facetTableConfig);
-		*/
-		 
 		$scope.facetTableConfig = {
 			queryFactory: queryFactory,
 			tableMod: tableMod
 		};
+*/
+
+
+        
+//        var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig(), tableMod);
+		facetTableConfig.togglePath(facete.Path.parse(''));
+		//var baseEf = new sparql.ElementFactoryConst(sparql.ElementString.create('?s ?p ?o'));
+		var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
+		//var tableMod = facetTableConfig.getTableMod();
+		var queryFactory = new facete.QueryFactoryFacetTable(facetTableConfig);
+
+
+		$scope.facetTableConfig = {
+			queryFactory: queryFactory,
+			tableMod: tableMod
+		};
+		 
 		
 
     }]);
@@ -116,7 +146,7 @@
 
 <body ng-controller="MyCtrl">
    <h1>Facet Tree Demo</h1>
-   <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
+   <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="pluginContext"></facet-tree>
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 

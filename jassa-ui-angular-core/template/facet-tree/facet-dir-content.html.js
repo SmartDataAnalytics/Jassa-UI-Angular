@@ -21,7 +21,8 @@ angular.module("template/facet-tree/facet-dir-content.html", []).run(["$template
     "					total-items=\"dirset.childFacetCount\" page=\"dirset.pageIndex\"\n" +
     "					boundary-links=\"true\" rotate=\"false\"\n" +
     "					on-select-page=\"selectFacetPage(page, facet)\" first-text=\"<<\"\n" +
-    "					previous-text=\"<\" next-text=\">\" last-text=\">>\" />\n" +
+    "					previous-text=\"<\" next-text=\">\" last-text=\">>\">\n" +
+    "				</pagination>\n" +
     "			</div>\n" +
     "\n" +
     "		</form>\n" +

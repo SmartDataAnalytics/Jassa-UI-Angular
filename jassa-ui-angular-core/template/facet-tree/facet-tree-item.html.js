@@ -7,8 +7,7 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
     "		<a data-rdf-term=\"{{facet.item.getNode().toString()}}\" title=\"{{facet.item.getNode().getUri()}}\" href=\"\" ng-click=\"toggleSelected(facet.item.getPath())\">{{facet.item.getNode().getUri()}}</a>\n" +
     "\n" +
     "\n" +
-    "		<a ng-visible=\"facet.isHovered || facet.table.isContained\" href=\"\" ng-click=\"toggleTableLink(facet.item.getPath())\"><span class=\"glyphicon glyphicon-list-alt\"></span></a>\n" +
-    "\n" +
+    "		<template-list style=\"list-style:none; display: inline; padding-left: 0px;\" templates=\"plugins\" data=\"facet\" context=\"pluginContext\"></template-list>\n" +
     "\n" +
     "		<span style=\"float: right\" class=\"badge\" ng-bind-html=\"(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())\"></span>	\n" +
     "	</div>\n" +

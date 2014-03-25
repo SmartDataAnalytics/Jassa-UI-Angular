@@ -5,6 +5,7 @@
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap": "",
     "angular": ">=1",
-    "jassa": "=0.0.2-SNAPSHOT"
+    "jassa": "=0.0.2-SNAPSHOT",
+    "angular-sanitize": "~1.2.14"
   }
 }

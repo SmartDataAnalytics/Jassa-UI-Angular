@@ -1,4 +1,4 @@
-angular.module('ui.jassa.facet-tree', [])
+angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
 /**
  * Controller for the SPARQL based FacetTree
@@ -140,7 +140,7 @@ angular.module('ui.jassa.facet-tree', [])
  * - facetTreeConfig
  * - labelMap (maybe this should be part of the facetTreeConfig) 
  */
-.directive('facetTree', function($parse) {
+.directive('facetTree', function() {
     return {
         restrict: 'EA',
         replace: true,
@@ -150,6 +150,8 @@ angular.module('ui.jassa.facet-tree', [])
         scope: {
             sparqlService: '=',
             facetTreeConfig: '=',
+            plugins: '=',
+            pluginContext: '=', //plugin context
             onSelect: '&select'
         },
         controller: 'FacetTreeCtrl',
