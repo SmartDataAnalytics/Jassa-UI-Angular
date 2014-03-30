@@ -1,26 +1,53 @@
+//TODO Move to some better place
+Jassa.setOlMapCenter = function(map, config) {
+    var zoom = config.zoom;
+
+    var center = config.center;
+    var olCenter = null;
+    if(center && center.lon != null && center.lat != null) {
+        var lonlat = new OpenLayers.LonLat(center.lon, center.lat);
+        olCenter = lonlat.clone().transform(map.displayProjection, map.projection);
+    }
+
+    if(olCenter != null) {
+        map.setCenter(olCenter, zoom);
+    }
+    else if(zoom != null) {
+        map.setZoom(zoom);
+    }
+};
+
+
+
 angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
 .controller('JassaMapOlCtrl', ['$scope', '$rootScope', function($scope, $rootScope) {
         
         var refresh;
-
-//        $scope.center = null;
-//        $scope.zoom = null;
-//        $scope.config = [];
         
         var defaultViewStateFetcher = new Jassa.geo.ViewStateFetcher();
-
-        console.log('scope', $scope);
-        console.log('config: ' + Jassa.util.ObjectUtils.hashCode($scope.config), $scope.config);
 
         // Make Jassa's ObjectUtils known to the scope - features the hashCode utility function
         $scope.ObjectUtils = Jassa.util.ObjectUtils;
         
-        //var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(config), viewStateFetcher]';
-        var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(config)]'; //viewStateFetcher
+        
+        $scope.$watch('config', function(config, oldConfig) {
+            //console.log('Config update: ', config);
+            
+            if(_(config).isEqual(oldConfig)) {
+                return;
+            }
+            
+            //console.log('Compared: ' + JSON.stringify(config) + ' -> ' + JSON.stringify(oldConfig));
+            
+            Jassa.setOlMapCenter($scope.map, config);
+        }, true);
+        
+
+        var watchList = '[map.center, map.zoom, ObjectUtils.hashCode(sources)]'; //viewStateFetcher
         
         $scope.$watch(watchList, function() {
-            console.log('Map refresh: ' + Jassa.util.ObjectUtils.hashCode($scope.config));
+            //console.log('Map refresh: ' + Jassa.util.ObjectUtils.hashCode($scope.config));
             refresh();
         }, true);
         
@@ -31,22 +58,22 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
  
             mapWrapper.clearItems();
 
-            var configs = $scope.config;
+            var dataSources = $scope.sources;
             
             
             var bounds = Jassa.geo.openlayers.MapUtils.getExtent($scope.map);
             
-            _(configs).each(function(config) {
+            _(dataSources).each(function(dataSource) {
 
-                var viewStateFetcher = config.viewStateFetcher || defaultViewStateFetcher;
+                var viewStateFetcher = dataSource.viewStateFetcher || defaultViewStateFetcher;
                 
-                var sparqlService = config.sparqlService;
-                var mapFactory = config.mapFactory;
-                //var conceptFactory = config.conceptFactory
-                var conceptFactory = config.conceptFactory;
+                var sparqlService = dataSource.sparqlService;
+                var mapFactory = dataSource.mapFactory;
+                //var conceptFactory = dataSource.conceptFactory
+                var conceptFactory = dataSource.conceptFactory;
                 var concept = conceptFactory.createConcept();
                 
-                var quadTreeConfig = config.quadTreeConfig;
+                var quadTreeConfig = dataSource.quadTreeConfig;
                 
                 var promise = viewStateFetcher.fetchViewState(sparqlService, mapFactory, concept, bounds, quadTreeConfig);
                 
@@ -66,7 +93,8 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
                         _(docs).each(function(doc) {
                             var itemData = {
-                                id: doc.id
+                                id: doc.id,
+                                config: dataSource // Make the dataSource object part of the marker's data
                             };
 
 							var wkt = doc.wkt.getLiteralLexicalForm();
@@ -86,12 +114,13 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 //http://jsfiddle.net/A2G3D/1/
 .directive('jassaMapOl', function($parse) {
     return {
-        restrict: 'EA', // says that this directive is only for html elements
+        restrict: 'EA',
         replace: true,
         template: '<div></div>',
         controller: 'JassaMapOlCtrl',
         scope: {
             config: '=',
+            sources: '=',
             onSelect: '&select',
             onUnselect: '&unselect'
         },
@@ -104,62 +133,25 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             map.widget = widget;
             
             scope.map = map;
-            //scope.$parent.map = map;
-                        
-            /*
-            var getCenter = $parse('map.center');
-            var setCenter = getCenter.assign;
+
+            Jassa.setOlMapCenter(scope.map, scope.config);
+
             
-            var getCenter = $parse('map.center');
-            var setCenter = getCenter.assign;
-            */
-            
-            //var model = $parse(attrs.jassaMapOl);
-
-
-//            if(model) {
-//                //model.assign(scope, map);
-//            }
-
-
             var syncModel = function(event) {
-                console.log('syncModel');
+                var tmp = scope.map.getCenter();
+                var center = tmp.transform(scope.map.projection, scope.map.displayProjection);
+                
+                //console.log('syncModel', center);
 
-                scope.config.center = scope.map.getCenter();
+                scope.config.center = {lon: center.lon, lat: center.lat};
                 scope.config.zoom = scope.map.getZoom();
-                if(!scope.$$phase) {
+                if(!scope.$root.$$phase) {
                     scope.$apply();
                 }
-                /*
-                var center = scope.map.getCenter();
-                //scope.config.center = {lon: center.lon; lat: center.lat};
-
-//              if(scope.$root.$$phase != '$apply' && scope.$root.$$phase != '$digest') {
-//              scope.$apply();
-//          }
-*/
             };
 
-            /*
-            var watchList = '[map.getCenter(), map.getZoom()]';
-            scope.$watch(watchList, function() {
-                syncModel();
-            }, true);
-*/
             
-/*
-            scope.$watch('[config.center, config.zoom]', function(arr) {
-                console.log('New map center', arr);
-               scope.map.setCenter(arr[0], arr[1]);
-            }, true);
-*/
-//            scope.$watch('config.zoom', function(val) {
-//                scope.map.setZoom(val);
-//            });
-            
-            //$(this.el).on("ssbmap2featureselect"
             $el.on('ssbmapfeatureselect', function(ev, data) {
-                console.log('args', arguments);
                 scope.onSelect({data: data});
             });
 
@@ -176,129 +168,3 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 })
 
 ;
-
-
-
-
-/*
-    var bounds = ns.MapUtils.getExtent($scope.map)
-    //console.log('extent', bounds);
-    
-//     if(viewStateCtrl == null) {
-//         viewStateCtrl = new ns.ViewStateCtrlOpenLayers($scope.map.widget);
-//     }
-
-
-    $scope.map.widget.clearItems();
-
-    
-    var mapLinkIndex = 0;
-    
-    
-            var sparqlService = sparqlServiceFactory.createSparqlService(wsConf.sparqlServiceIri, wsConf.defaultGraphIris);
-            var facetConfig = conceptSpace.getFacetTreeConfig().getFacetConfig();
-            var facetConceptGenerator = facete.FaceteUtils.createFacetConceptGenerator(facetConfig);
-
-            var paths = conceptSpace.getData().activeMapLinkPaths.getArray();
-            
-
-            _(paths).each(function(path) {
-                
-                var markerFillColor = markerFillColors[mapLinkIndex];
-                var markerStrokeColor = markerStrokeColors[mapLinkIndex];
-                
-                var concept = facetConceptGenerator.createConceptResources(path); 
-                
-                //console.log('PAAAAA ' + geoConcept);
-                
-                
-                var mapFactory = mapLinkFactories[0];
-                var promise = viewStateFetcher.fetchViewState(sparqlService, mapFactory, concept, bounds);
-                
-                promise.done(function(viewState) {
-                    var nodes = viewState.getNodes();
-                    
-                    _(nodes).each(function(node) {
-                        //console.log('booooo', node);
-                        if(!node.isLoaded) {
-                            //console.log('box: ' + node.getBounds());
-                            $scope.map.widget.addBox('' + node.getBounds(), node.getBounds());
-                        }
-                        
-                        var data = node.data || {};
-                        var docs = data.docs || [];
-
-                        _(docs).each(function(doc) {
-     
-                            $scope.map.widget.addWkt(doc.id, doc.wkt, {fillColor: markerFillColor, strokeColor: markerStrokeColor});
-                        });                 
-                    });
-                });
-                
-                ++mapLinkIndex;
-            });
-                                
-        });
-    });
-    */
-    
-    //var concept = fctService.createConceptFacetValues(new facete.Path());
-/* TODO RE-ENABLE           
-    viewStateFetcher.fetchViewState(bounds).done(function(viewState) {
-       //var nodes = viewState.getNodes();
-       //console.log('viewStateNodes', nodes);
-       
-       viewStateCtrl.updateView(viewState);            
-    });
-*/
-/*            
-    var promise = qtc.fetchData(bounds);
-    promise.done(function(nodes) {
-        $scope.map.widget.clearItems();
-        console.log('nodes', nodes);
-
-        _(nodes).each(function(node) {
-            
-            if(!node.isLoaded) {
-                console.log('box: ' + node.getBounds());
-                $scope.map.widget.addBox('' + node.getBounds(), node.getBounds());
-            }
-            
-            var data = node.data || {};
-            var docs = data.docs || [];
-
-            _(docs).each(function(doc) {
-
-                $scope.map.widget.addWkt(doc.id, doc.wkt);
-                
-                //var wktParser = new OpenLayers.Format.WKT();
-                //var polygonFeature = wktParser.read(wkt);
-                //console.log('wkt: ', polygonFeature);
-                //polygonFeature.geometry.transform(map.displayProjection, map.getProjectionObject());         
-            });                 
-        });
-        
-//      vectors.addFeatures([polygonFeature]);
-    });
-
-};
-
-$scope.$watch('map.center', function(center) {
-    refresh();
-});
-
-$scope.$watch('map.zoom', function(zoom) {
-    refresh();
-});
-
-$scope.$watch('ObjectUtils.hashCode(config)', function(newHashCode) {
-    refresh();
-});
-
-
-refresh = function() {
-    console.log('refereshing');
-};
-
-
-*/

@@ -27,7 +27,7 @@
 
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
 
-    <script src="../../../target/release/repo/jassa-ui-angular-geo-openlayers-tpls.js"></script>
+    <script src="../../../target/release/repo/jassa-ui-angular-openlayers-tpls.js"></script>
 	
 	<script type="text/javascript">
     _.mixin(_.str.exports());
@@ -63,13 +63,30 @@
             alert(JSON.stringify(data));  
         };
         
+		$scope.mapConfig = {
+			center: { lon: 50, lat: 50 },
+			zoom: 8
+		};
+
+		$scope.setCenter = function() {
+			$scope.mapConfig.center = { lon: 20, lat: 20 };
+			$scope.mapConfig.zoom = 4;
+		};
+
+        $scope.$watch('mapConfig', function(v) {
+            console.log('Config changed: ' + JSON.stringify(v));
+        }, true);
+
     }]);
 	</script>
 
 </head>
 
 <body ng-controller="MyCtrl">
-   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="dataSources" select="selectGeom(data)"></div>
+   <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%" config="mapConfig" data-sources="dataSources" select="selectGeom(data)"></div>
+
+
+<button ng-click="setCenter()" style="position: absolute; left: 10px; top: 10px;">Set center</button>
 </body>
 
 </html>
