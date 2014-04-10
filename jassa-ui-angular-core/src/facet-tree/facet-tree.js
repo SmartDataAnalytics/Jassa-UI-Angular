@@ -22,6 +22,17 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
         self.refresh();
     };
     
+    
+    $scope.setFacetHover = function(facet, isHovered) {
+        facet.isHovered = isHovered;
+        if(facet.incoming) {
+            facet.incoming.isHovered = isHovered;
+        }
+        
+        if(facet.outgoing) {
+            facet.outgoing.isHovered = isHovered;
+        }
+    };
 
     $scope.ObjectUtils = Jassa.util.ObjectUtils;
 

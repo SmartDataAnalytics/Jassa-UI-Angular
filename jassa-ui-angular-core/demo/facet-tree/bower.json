@@ -1,10 +1,7 @@
 {
-  "name": "sml-codemirror-demo",
+  "name": "jassa-ui-angular-core-demo",
   "version": "0.0.1",
   "dependencies": {
-    "bootstrap": "3.1.0",
-    "angular-ui-bootstrap": "",
-    "angular": ">=1",
-    "jassa": "0.0.1-SNAPSHOT"
+    "jassa-ui-angular": "0.0.1-SNAPSHOT"
   }
 }
