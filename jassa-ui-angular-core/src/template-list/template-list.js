@@ -15,7 +15,7 @@ angular.module('ui.jassa.template-list', [])
         replace: true,
         templateUrl: 'template/template-list/template-list.html',
         transclude: true,
-        require: 'templateList',
+        //require: 'templateList',
         scope: {
             templates: '=',
             data: '=',
@@ -24,7 +24,7 @@ angular.module('ui.jassa.template-list', [])
         controller: 'TemplateListCtrl',
         compile: function() {
             return {
-                pre: function(scope, elm, attrs, controller) {
+                pre: function(scope, elm, attrs) {
                     angular.forEach(scope.templates, function(template) {
                         var li = $compile('<li style="display: inline;"></li>')(scope);
                         

@@ -50,7 +50,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
     self.refresh = function() {
                   
         var facet = $scope.facet;
-        var startPath = facet ? facet.item.getPath() : new facete.Path();
+        var startPath = facet ? facet.item.getPath() : new Jassa.facete.Path();
     
         if($scope.facetTreeService) {
           
