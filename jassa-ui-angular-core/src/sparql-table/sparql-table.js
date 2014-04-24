@@ -50,9 +50,13 @@ angular.module('ui.jassa.sparql-table', [])
 
     
     $scope.$watch('gridOptions.sortInfo', function(sortInfo) {
-        var tableMod = $scope.config.tableMod;
+        var config = $scope.config;
 
-        syncTableMod(sortInfo, tableMod);
+        var tableMod = config ? config.tableMod : null;
+
+        if(tableMod != null) {
+            syncTableMod(sortInfo, tableMod);
+        }
         
         $scope.refreshData();
     }, true);
