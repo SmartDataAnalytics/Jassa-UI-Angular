@@ -46,7 +46,7 @@ angular.module('ui.jassa.facet-value-list', [])
     $scope.toggleConstraint = function(item) {
         var constraintManager = facetValueService.getFacetTreeConfig().getFacetConfig().getConstraintManager();
         
-        var constraint = new facete.ConstraintSpecPathValue(
+        var constraint = new Jassa.facete.ConstraintSpecPathValue(
                 'equal',
                 item.path,
                 item.node);
