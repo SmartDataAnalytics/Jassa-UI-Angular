@@ -22,101 +22,11 @@ angular.module('ui.jassa.facet-value-list', [])
     
     var self = this;
 
-    var ns = {};
-    ns.FacetValueService = Class.create({
-        initialize: function(sparqlService, facetTreeConfig) {
-            this.sparqlService = sparqlService;
-            this.facetTreeConfig = facetTreeConfig;
-        },
-      
-        getFacetTreeConfig: function() {
-            return this.facetTreeConfig;
-        },
-        
-        createFacetValueFetcher: function(path, filterText) {
-
-            var facetConfig = this.facetTreeConfig.getFacetConfig();
-
-            var facetConceptGenerator = Jassa.facete.FaceteUtils.createFacetConceptGenerator(facetConfig);
-            var concept = facetConceptGenerator.createConceptResources(path, true);
-            var constraintTaggerFactory = new Jassa.facete.ConstraintTaggerFactory(facetConfig.getConstraintManager());
-            
-            var store = new Jassa.sponate.StoreFacade(this.sparqlService);
-            var labelMap = Jassa.sponate.SponateUtils.createDefaultLabelMap();
-            store.addMap(labelMap, 'labels');
-            labelsStore = store.labels;
-            
-            var criteria = {};
-            if(filterText) {
-                criteria = {$or: [
-                    {hiddenLabels: {$elemMatch: {id: {$regex: filterText, $options: 'i'}}}},
-                    {id: {$regex: filterText, $options: 'i'}}
-                ]};
-            }
-            var baseFlow = labelsStore.find(criteria).concept(concept, true);
-
-            var result = new ns.FacetValueFetcher(baseFlow, this.facetTreeConfig, path);
-            return result;
-        }
-    });
-
-    
-    ns.FacetValueFetcher = Class.create({
-                
-        initialize: function(baseFlow, facetTreeConfig, path) {
-            this.baseFlow = baseFlow;
-            this.facetTreeConfig = facetTreeConfig;
-            this.path = path;
-        },
-        
-        fetchCount: function() {
-            var countPromise = this.baseFlow.count();
-            return countPromise;
-        },
-        
-        fetchData: function(offset, limit) {
-            
-            var dataFlow = this.baseFlow.skip(offset).limit(limit);
-
-            var self = this;
-
-            var dataPromise = dataFlow.asList(true).pipe(function(docs) {
-                var path = self.path;
-                
-                var facetConfig = self.facetTreeConfig.getFacetConfig();
-                var constraintTaggerFactory = new Jassa.facete.ConstraintTaggerFactory(facetConfig.getConstraintManager());
-                
-                var tagger = constraintTaggerFactory.createConstraintTagger(path);
-                
-                var r = _(docs).map(function(doc) {
-                    // TODO Sponate must support retaining node objects
-                    //var node = rdf.NodeFactory.parseRdfTerm(doc.id);
-                    var node = doc.id;
-                    
-                    var label = doc.displayLabel ? doc.displayLabel : '' + doc.id;
-                    //console.log('displayLabel', label);
-                    var tmp = {
-                        displayLabel: label,
-                        path: path,
-                        node: node,
-                        tags: tagger.getTags(node)
-                    };
-
-                    return tmp;
-                    
-                });
-
-                return r;
-            });
-            
-            return dataPromise;
-        }
-    });
 
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig && $scope.path;
 
-        facetValueService = isConfigured ? new ns.FacetValueService($scope.sparqlService, $scope.facetTreeConfig) : null;
+        facetValueService = isConfigured ? new Jassa.facete.FacetValueService($scope.sparqlService, $scope.facetTreeConfig) : null;
     };
     
     var update = function() {

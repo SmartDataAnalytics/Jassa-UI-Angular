@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html ng-app="ResizableDemo">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Jassa UI Angular: Resizable Demo</title>
+	
+    <!-- bower:css -->
+	    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+	    <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+	    <!-- endbower -->
+
+    <link rel="stylesheet" href="css/jassa-ui-angular.css" />
+	<link rel="stylesheet" href="css/ng-grid/ng-grid.css" />
+	
+<!--     <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery.ui.resizable.css" /> -->
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery.ui.all.css" />
+
+
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/ng-grid-bower/ng-grid.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <!-- endbower -->
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+    <script src="js/jassa-ui-angular-tpls.js"></script>
+	
+	<script src="lib/ng-grid/ng-grid-2.0.7.debug.js"></script>
+<!--    <script src="https://rawgithub.com/angular-ui/ng-grid/master/plugins/ng-grid-flexible-height.js"></script> -->
+	
+	
+	<script type="text/javascript">
+
+    angular.module('ResizableDemo', ['ngSanitize', 'ui.bootstrap', 'ngGrid', 'ui.jassa'])
+
+    .controller('MyCtrl', ['$scope', function($scope) {
+        $scope.resizableConfig = {handles: 'n, s, e, w' };
+
+
+        $scope.origBounds = null;
+        
+        $scope.boundsX = {};
+        
+        $scope.onResizeInit = function(bounds) {
+            $scope.origBounds = bounds;
+            console.log('origBounds', $scope.origBounds);
+        };
+        
+        $scope.resetSize = function() {
+            
+            console.log('Status', $scope.boundsX, $scope.origBounds);
+            //$scope.boundsX=$scope.origBounds;
+            angular.copy($scope.origBounds, $scope.boundsX);
+        };
+        
+
+        $scope.onResize = function(evt, ui, bounds) {
+            console.log('ORIG BOUNDS', $scope.origBounds);
+        };
+
+
+    }])
+
+    ;
+	</script>
+
+</head>
+
+<body ng-controller="MyCtrl">
+    <div style="width:100px; height: 100px; background-color: green; pointer-events: auto;">
+
+        <div resizable="{handles: 'n, e, s, w'}"  style="width:50px; height: 50px; background-color: grey;">
+            test
+        </div>
+    </div>
+</body>
+
+</html>
+

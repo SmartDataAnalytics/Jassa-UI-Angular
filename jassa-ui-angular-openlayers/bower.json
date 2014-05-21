@@ -13,7 +13,7 @@
     "jquery-ui": "1.10.3",
     "openlayers": "2.13.1",
     "angular": "1.2.16-build.63+sha.8d4d437",
-    "jassa": "0.0.2-SNAPSHOT"
+    "jassa": "0.0.3-SNAPSHOT"
   },
   "keywords": [
     "rdf",

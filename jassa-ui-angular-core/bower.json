@@ -10,12 +10,13 @@
     "jassa-ui-angular.css"
   ],
   "dependencies": {
-    "jassa": "0.0.2-SNAPSHOT",
+    "jassa": "0.0.3-SNAPSHOT",
     "angular": "1.2.16-build.63+sha.8d4d437",
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap": "",
     "ng-grid-bower": "2.0.7",
-    "angular-sanitize": "v1.2.16-build.63+sha.8d4d437"
+    "angular-sanitize": "v1.2.16-build.63+sha.8d4d437",
+    "jquery-ui": "1.10.3"
   },
   "keywords": [
     "rdf",

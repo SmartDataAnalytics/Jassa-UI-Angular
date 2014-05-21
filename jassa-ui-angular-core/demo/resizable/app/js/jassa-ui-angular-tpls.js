@@ -1,0 +1,1 @@
+../../../../target/release/repo/jassa-ui-angular-tpls.js
