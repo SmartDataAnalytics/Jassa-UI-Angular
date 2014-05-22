@@ -2,110 +2,110 @@ angular.module('ui.jassa.facet-typeahead', [])
 
 .directive('facetTypeahead', ['$compile', '$q', '$parse', function($compile, $q, $parse) {
 
-	var FacetTypeAheadServiceAngular = Class.create({
-		initialize: function($scope, $q, configExpr, id) {
-		    this.$scope = $scope;
-		    this.$q = $q;
+    var FacetTypeAheadServiceAngular = Class.create({
+        initialize: function($scope, $q, configExpr, id) {
+            this.$scope = $scope;
+            this.$q = $q;
 
-		    this.configExpr = configExpr;
-		    this.id = id;
-		},
-		
-		getSuggestions: function(filterString) {
-		    var config = this.configExpr(this.$scope);
+            this.configExpr = configExpr;
+            this.id = id;
+        },
+        
+        getSuggestions: function(filterString) {
+            var config = this.configExpr(this.$scope);
 
-		    var sparqlService = config.sparqlService;             
-		    var fct = config.facetTreeConfig;
+            var sparqlService = config.sparqlService;
+            var fct = config.facetTreeConfig;
 
-		    // Get the attributes from the config
-		    var idToModelPathMapping = config.idToModelPathMapping;
-		    
-		    var modelPathMapping = idToModelPathMapping[this.id];
+            // Get the attributes from the config
+            var idToModelPathMapping = config.idToModelPathMapping;
+            
+            var modelPathMapping = idToModelPathMapping[this.id];
 
-		    if(!modelPathMapping) {
-		        console.log('Cannot retrieve model-path mapping for facet-typeahead directive with id ' + id);
-		        throw 'Bailing out';
-		    }
-		    
-		    var limit = modelPathMapping.limit || config.defaultLimit || 10;
-		    var offset = modelPathMapping.offset || config.defaultOffset || 0;            
-
-
-		    var pathSpec = modelPathMapping.pathExpr(this.scope);
-		    var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
-		    
-		    // Hack - the facetService should only depend on FacetConfig
-		    var tmp = fct.getFacetConfig();
-		    
-		    var cm = tmp.getConstraintManager();
-		    var cmClone = cm.shallowClone();
-		    
-		    var facetConfig = new Jassa.facete.FacetConfig();
-		    facetConfig.setConstraintManager(cmClone);
-		    facetConfig.setBaseConcept(tmp.getBaseConcept());
-		    facetConfig.setRootFacetNode(tmp.getRootFacetNode());
-		    facetConfig.setLabelMap(tmp.getLabelMap());
-		    
-		    var facetTreeConfig = new Jassa.facete.FacetTreeConfig();
-		    //facetTreeConfig.setFacetConfig(facetConfig);
-		    // TODO HACK Use a setter instead
-		    facetTreeConfig.facetConfig = facetConfig;
-
-		    
-		    // Compile constraints
-		    var self = this;
-		    
-		    var constraintSpecs = _(idToModelPathMapping).map(function(item) {
-		        var valStr = item.modelExpr(self.$scope);
-		        if(!valStr || valStr.trim() === '') {
-		            return null;
-		        }
-
-		        var val = rdf.NodeFactory.createPlainLiteral(valStr);
-		        var pathSpec = item.pathExpr(self.$scope);
-		        var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
+            if(!modelPathMapping) {
+                console.log('Cannot retrieve model-path mapping for facet-typeahead directive with id ' + id);
+                throw 'Bailing out';
+            }
+            
+            var limit = modelPathMapping.limit || config.defaultLimit || 10;
+            var offset = modelPathMapping.offset || config.defaultOffset || 0;
 
 
-		        var r = new Jassa.facete.ConstraintSpecPathValue('regex', path, val);
-		        return r;
-		    });
-		    
-		    constraintSpecs = _(constraintSpecs).compact();
-		    
-		    _(constraintSpecs).each(function(constraint) {
-		        cmClone.addConstraint(constraint);
-		    });
+            var pathSpec = modelPathMapping.pathExpr(this.scope);
+            var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
+            
+            // Hack - the facetService should only depend on FacetConfig
+            var tmp = fct.getFacetConfig();
+            
+            var cm = tmp.getConstraintManager();
+            var cmClone = cm.shallowClone();
+            
+            var facetConfig = new Jassa.facete.FacetConfig();
+            facetConfig.setConstraintManager(cmClone);
+            facetConfig.setBaseConcept(tmp.getBaseConcept());
+            facetConfig.setRootFacetNode(tmp.getRootFacetNode());
+            facetConfig.setLabelMap(tmp.getLabelMap());
+            
+            var facetTreeConfig = new Jassa.facete.FacetTreeConfig();
+            //facetTreeConfig.setFacetConfig(facetConfig);
+            // TODO HACK Use a setter instead
+            facetTreeConfig.facetConfig = facetConfig;
 
-		    
-		    var facetValueService = new Jassa.facete.FacetValueService(sparqlService, facetTreeConfig);
-		    var fetcher = facetValueService.createFacetValueFetcher(path, filterString);
-		    
-		    var p1 = fetcher.fetchData(offset, limit); //offset);
-		    var p2 = fetcher.fetchCount();
-		    
-		    var p3 = jQuery.when.apply(null, [p1, p2]).pipe(function(data, count) {
-		        var r = {
-		            offset: this.offset,
-		            count: count,
-		            data: data
-		        };
-		        
-		        return r;
-		    });
-		    
-		    
-		    var p4 = p3.pipe(function(data) {
-		        var r = _(data.data).map(function(item) {
-		           return item.displayLabel;
-		        });
-		        
-		        return r;
-		    });
+            
+            // Compile constraints
+            var self = this;
+            
+            var constraintSpecs = _(idToModelPathMapping).map(function(item) {
+                var valStr = item.modelExpr(self.$scope);
+                if(!valStr || valStr.trim() === '') {
+                    return null;
+                }
 
-		    var result = Jassa.sponate.angular.bridgePromise(p4, this.$q.defer(), this.$scope.$root);
-		    return result;
-		}
-	});
+                var val = rdf.NodeFactory.createPlainLiteral(valStr);
+                var pathSpec = item.pathExpr(self.$scope);
+                var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
+
+
+                var r = new Jassa.facete.ConstraintSpecPathValue('regex', path, val);
+                return r;
+            });
+            
+            constraintSpecs = _(constraintSpecs).compact();
+            
+            _(constraintSpecs).each(function(constraint) {
+                cmClone.addConstraint(constraint);
+            });
+
+            
+            var facetValueService = new Jassa.facete.FacetValueService(sparqlService, facetTreeConfig);
+            var fetcher = facetValueService.createFacetValueFetcher(path, filterString);
+            
+            var p1 = fetcher.fetchData(offset, limit); //offset);
+            var p2 = fetcher.fetchCount();
+            
+            var p3 = jQuery.when.apply(null, [p1, p2]).pipe(function(data, count) {
+                var r = {
+                    offset: this.offset,
+                    count: count,
+                    data: data
+                };
+                
+                return r;
+            });
+            
+            
+            var p4 = p3.pipe(function(data) {
+                var r = _(data.data).map(function(item) {
+                   return item.displayLabel;
+                });
+                
+                return r;
+            });
+
+            var result = Jassa.sponate.angular.bridgePromise(p4, this.$q.defer(), this.$scope.$root);
+            return result;
+        }
+    });
 
 
 
@@ -196,7 +196,7 @@ angular.module('ui.jassa.facet-typeahead', [])
                         
                         newConfig.idToModelPathMapping[instanceId] = {
                             modelExpr: modelExpr,
-                            modelExprStr: modelExprStr, 
+                            modelExprStr: modelExprStr,
                             pathExprStr: pathExprStr,
                             pathExpr: pathExpr
                         };
