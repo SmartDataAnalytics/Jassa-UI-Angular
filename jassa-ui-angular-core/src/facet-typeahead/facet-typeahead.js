@@ -32,7 +32,7 @@ angular.module('ui.jassa.facet-typeahead', [])
 
 
             var pathSpec = modelPathMapping.pathExpr(this.scope);
-            var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
+            var path = Jassa.facete.PathUtils.parsePathSpec(pathSpec);
             
             // Hack - the facetService should only depend on FacetConfig
             var tmp = fct.getFacetConfig();
@@ -63,7 +63,7 @@ angular.module('ui.jassa.facet-typeahead', [])
 
                 var val = rdf.NodeFactory.createPlainLiteral(valStr);
                 var pathSpec = item.pathExpr(self.$scope);
-                var path = FacetTypeAheadUtils.parsePathSpec(pathSpec);
+                var path = Jassa.facete.PathUtils.parsePathSpec(pathSpec);
 
 
                 var r = new Jassa.facete.ConstraintSpecPathValue('regex', path, val);
