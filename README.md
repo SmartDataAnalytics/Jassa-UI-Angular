@@ -54,7 +54,7 @@ $scope.selectFacet = function(path) {
 #### Facet Tree
 A SPARQL-based data-driven widget for showing a (possibly) nested facet tree for a selected set of resources. Nodes in the tree feature support for regex search and pagination.
 
-![Facet Tree](jassa-ui-angular-dissemination/images/facet-tree.png)
+![facet-tree](jassa-ui-angular-dissemination/images/facet-tree.png)
 
 ```html
 <facet-tree
@@ -69,7 +69,7 @@ A SPARQL-based data-driven widget for showing a (possibly) nested facet tree for
 #### Facet Value List
 A SPARQL-based data-driven widget for showing the list of values for a given facet selection. Supports regex search and pagination.
 
-![Facet Tree](jassa-ui-angular-dissemination/images/facet-value-list.png)
+![facet-value-list](jassa-ui-angular-dissemination/images/facet-value-list.png)
 
 ```html
 <facet-value-list
@@ -82,7 +82,7 @@ A SPARQL-based data-driven widget for showing the list of values for a given fac
 #### Constraint List
 A widget which summarizes active constraints (which are part of the facetTreeConfig).
 
-![Facet Tree](jassa-ui-angular-dissemination/images/constraint-list.png)
+![constraint-list](jassa-ui-angular-dissemination/images/constraint-list.png)
 
 ```html
 <constraint-list
@@ -95,7 +95,7 @@ A widget which summarizes active constraints (which are part of the facetTreeCon
 #### Facet-based Typeahead
 Want to link the autosuggestions of a set of input elements to facets? Check this out:
 
-![Facet Tree](jassa-ui-angular-dissemination/images/facet-typeahead.png)
+![facet-typeahead](jassa-ui-angular-dissemination/images/facet-typeahead.png)
 
 [Demo](http://cstadler.aksw.org/jassa-ui/facet-typeahead-demo/)
 
@@ -134,7 +134,7 @@ Technically, facet-typeahead replaces itself upon angular's linking phase with u
 A map display based on (OpenLayers)[http://openlayers.org/] that works out of the box on a SPARQL endpoint. This includes DBpedia.
 The map logic will use a tile based strategy for areas that would contain too much data.
 
-![Facet Tree](jassa-ui-angular-dissemination/images/jassa-map-ol.png)
+![jassa-map-ol](jassa-ui-angular-dissemination/images/jassa-map-ol.png)
 
 [Demo](http://cstadler.aksw.org/jassa-ui/jassa-map-ol-demo/)
 
