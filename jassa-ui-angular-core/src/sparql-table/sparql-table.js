@@ -83,7 +83,13 @@ angular.module('ui.jassa.sparql-table', [])
 
     $scope.refresh = function() {
         var tableService = createTableService();
+
+        if($scope.disableRequests) {
+            $scope.myData = [];
+            return;
+        }
         
+
         $scope.refreshSchema(tableService);
         $scope.refreshPageCount(tableService);
         $scope.refreshData(tableService);
@@ -177,6 +183,7 @@ angular.module('ui.jassa.sparql-table', [])
         scope: {
             sparqlService: '=',
             config: '=',
+            disable-requests: '=',
             onSelect: '&select',
             onUnselect: '&unselect'
         },
