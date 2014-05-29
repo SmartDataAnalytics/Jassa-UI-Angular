@@ -183,7 +183,7 @@ angular.module('ui.jassa.sparql-table', [])
         scope: {
             sparqlService: '=',
             config: '=',
-            disable-requests: '=',
+            disableRequests: '=',
             onSelect: '&select',
             onUnselect: '&unselect'
         },
