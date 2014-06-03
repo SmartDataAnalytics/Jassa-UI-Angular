@@ -14,8 +14,8 @@
 
 		<span style="float: right" class="badge" ng-bind-html="(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())"></span>
 		
-		<div ng-if="facet.isExpanded && facet.isHovered && facet.isIncomingActive === true" style="width:100%" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
-		<div ng-if="facet.isExpanded && facet.isHovered && facet.isOutgoingActive === true" style="width:100%" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+		<div ng-if="facet.isExpanded && facet.item.getTags().controls.isContained && facet.isIncomingActive === true" style="width:100%" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+		<div ng-if="facet.isExpanded && facet.item.getTags().controls.isContained && facet.isOutgoingActive === true" style="width:100%" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
 	</div>
 	<div ng-if="facet.isExpanded" style="width:100%"> 
 

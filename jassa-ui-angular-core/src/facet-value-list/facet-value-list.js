@@ -36,20 +36,21 @@ angular.module('ui.jassa.facet-value-list', [])
 
     $scope.ObjectUtils = Jassa.util.ObjectUtils;
 
-    var watchList = '[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(facetTreeConfig), "" + path, pagination.currentPage]';
+    var watchList = '[ObjectUtils.hashCode(facetTreeConfig), "" + path, pagination.currentPage]';
     $scope.$watch(watchList, function() {
         update();
     }, true);
-                  
+    
+    $scope.$watch('sparqlService', function() {
+        update();
+    });
+    
 
 
     $scope.toggleConstraint = function(item) {
         var constraintManager = facetValueService.getFacetTreeConfig().getFacetConfig().getConstraintManager();
         
-        var constraint = new Jassa.facete.ConstraintSpecPathValue(
-                'equal',
-                item.path,
-                item.node);
+        var constraint = new Jassa.facete.ConstraintEquals(item.path, item.node);
 
         // TODO Integrate a toggle constraint method into the filterManager
         constraintManager.toggleConstraint(constraint);

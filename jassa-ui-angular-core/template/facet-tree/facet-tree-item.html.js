@@ -16,8 +16,8 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
     "\n" +
     "		<span style=\"float: right\" class=\"badge\" ng-bind-html=\"(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())\"></span>\n" +
     "		\n" +
-    "		<div ng-if=\"facet.isExpanded && facet.isHovered && facet.isIncomingActive === true\" style=\"width:100%\" ng-repeat=\"dirset in [facet.incoming]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
-    "		<div ng-if=\"facet.isExpanded && facet.isHovered && facet.isOutgoingActive === true\" style=\"width:100%\" ng-repeat=\"dirset in [facet.outgoing]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
+    "		<div ng-if=\"facet.isExpanded && facet.item.getTags().controls.isContained && facet.isIncomingActive === true\" style=\"width:100%\" ng-repeat=\"dirset in [facet.incoming]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
+    "		<div ng-if=\"facet.isExpanded && facet.item.getTags().controls.isContained && facet.isOutgoingActive === true\" style=\"width:100%\" ng-repeat=\"dirset in [facet.outgoing]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
     "	</div>\n" +
     "	<div ng-if=\"facet.isExpanded\" style=\"width:100%\"> \n" +
     "\n" +

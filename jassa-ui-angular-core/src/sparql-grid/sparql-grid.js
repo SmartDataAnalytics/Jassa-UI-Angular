@@ -1,19 +1,18 @@
-angular.module('ui.jassa.sparql-table', [])
+angular.module('ui.jassa.sparql-grid', [])
 
-.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
+.controller('SparqlGridCtrl', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
 
-    var rdf = Jassa.rdf;
-    var sparql = Jassa.sparql;
-    var service = Jassa.service;
-    var util = Jassa.util;
+    var rdf = jassa.rdf;
+    var sparql = jassa.sparql;
+    var service = jassa.service;
+    var util = jassa.util;
     
-    var sponate = Jassa.sponate;
+    var sponate = jassa.sponate;
 
     
     var syncTableMod = function(sortInfo, tableMod) {
-        util.ArrayUtils.clear(tableMod.getSortConditions());
         
-        
+        var newSortConditions = [];
         for(var i = 0; i < sortInfo.fields.length; ++i) {
             var columnId = sortInfo.fields[i];
             var dir = sortInfo.directions[i];
@@ -28,9 +27,17 @@ angular.module('ui.jassa.sparql-table', [])
             
             if(d !== 0) {
                 var sortCondition = new facete.SortCondition(columnId, d);
-                tableMod.getSortConditions().push(sortCondition);
+                newSortConditions.push(sortCondition);
             }
         }
+
+        var oldSortConditions = tableMod.getSortConditions();
+        
+        var isTheSame = _(newSortConditions).isEqual(oldSortConditions);
+        if(!isTheSame) {
+            util.ArrayUtils.replace(oldSortConditions, newSortConditions);
+        }
+
     };
 
     
@@ -65,13 +72,22 @@ angular.module('ui.jassa.sparql-table', [])
     $scope.$watch('[pagingOptions, filterOptions]', function (newVal, oldVal) {
         $scope.refreshData();
     }, true);
-        
+    
+    var update = function() {
+        $scope.refresh();
+    };
+    
+    
     $scope.ObjectUtils = util.ObjectUtils;
     
-    $scope.$watch('[ObjectUtils.hashCode(sparqlService), ObjectUtils.hashCode(config)]', function (newVal, oldVal) {
-        $scope.refresh();
+    $scope.$watch('[ObjectUtils.hashCode(config), disableRequests]', function (newVal, oldVal) {
+        update();
     }, true);
-
+    
+    $scope.$watch('sparqlService', function() {
+        update();
+    });
+    
     
     $scope.totalServerItems = 0;
         
@@ -85,7 +101,7 @@ angular.module('ui.jassa.sparql-table', [])
         var tableService = createTableService();
 
         if($scope.disableRequests) {
-            $scope.myData = [];
+            util.ArrayUtils.clear($scope.myData);
             return;
         }
         
@@ -98,7 +114,13 @@ angular.module('ui.jassa.sparql-table', [])
     $scope.refreshSchema = function(tableService) {
         tableService = tableService || createTableService();
 
-        $scope.colDefs = tableService.getSchema();
+        var oldSchema = $scope.colDefs;
+        var newSchema = tableService.getSchema();
+        
+        var isTheSame = _(newSchema).isEqual(oldSchema);
+        if(!isTheSame) {
+            $scope.colDefs = newSchema;
+        }
     };
 
     $scope.refreshPageCount = function(tableService) {
@@ -106,7 +128,7 @@ angular.module('ui.jassa.sparql-table', [])
         
         var promise = tableService.fetchCount();
 
-        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
             // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
             $scope.totalServerItems = countInfo.count;
         });
@@ -123,8 +145,15 @@ angular.module('ui.jassa.sparql-table', [])
         
         var promise = tableService.fetchData(pageSize, offset);
 
-        Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
-            $scope.myData = data;
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
+            var isTheSame = _(data).isEqual($scope.myData);
+            if(!isTheSame) {
+                $scope.myData = data;
+            }
+            //util.ArrayUtils.replace($scope.myData, data);
+            
+            // Using equals gives digest iterations exceeded errors; could be https://github.com/angular-ui/ng-grid/issues/873
+            //$scope.myData = data;
         });
     };
 
@@ -160,7 +189,7 @@ angular.module('ui.jassa.sparql-table', [])
 
     
 
-    $scope.refresh();
+    //$scope.refresh();
 }])
 
 
@@ -173,13 +202,13 @@ angular.module('ui.jassa.sparql-table', [])
  * }
  * 
  */
-.directive('sparqlTable', ['$parse', function($parse) {
+.directive('sparqlGrid', ['$parse', function($parse) {
     return {
         restrict: 'EA', // says that this directive is only for html elements
         replace: true,
         //template: '<div></div>',
-        templateUrl: 'template/sparql-table/sparql-table.html',
-        controller: 'SparqlTableCtrl',
+        templateUrl: 'template/sparql-grid/sparql-grid.html',
+        controller: 'SparqlGridCtrl',
         scope: {
             sparqlService: '=',
             config: '=',

@@ -55,7 +55,7 @@ angular.module('ui.jassa.facet-typeahead', [])
             // Compile constraints
             var self = this;
             
-            var constraintSpecs = _(idToModelPathMapping).map(function(item) {
+            var constraints = _(idToModelPathMapping).map(function(item) {
                 var valStr = item.modelExpr(self.$scope);
                 if(!valStr || valStr.trim() === '') {
                     return null;
@@ -66,13 +66,13 @@ angular.module('ui.jassa.facet-typeahead', [])
                 var path = Jassa.facete.PathUtils.parsePathSpec(pathSpec);
 
 
-                var r = new Jassa.facete.ConstraintSpecPathValue('regex', path, val);
+                var r = new Jassa.facete.ConstraintRegex(path, val);
                 return r;
             });
             
-            constraintSpecs = _(constraintSpecs).compact();
+            constraints = _(constraints).compact();
             
-            _(constraintSpecs).each(function(constraint) {
+            _(constraints).each(function(constraint) {
                 cmClone.addConstraint(constraint);
             });
 
