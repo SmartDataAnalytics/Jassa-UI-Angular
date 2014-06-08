@@ -222,7 +222,7 @@ For some dependencies bower-install task does not know what to add to your HTML 
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
 
 
-Note: [This issue](https://github.com/angular-ui/bootstrap/issues/1791) causes Angular-UI-Bootstrap v0.10.0 to throw an exception when using expressions for the active state of tabs. The issue seems to be fixed in master, but there is no bower release yet. Hence, you need to fall back to this [slightly modified version](https://github.com/GeoKnow/Jassa-UI-Angular/blob/master/jassa-ui-angular-core/demo/facet-tree/app/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js).
+Note: [This issue](https://github.com/angular-ui/bootstrap/issues/1791) causes Angular-UI-Bootstrap v0.10.0 to throw an exception when using expressions for the active state of tabs. The issue seems to be fixed in master, but there is no bower release yet. Hence, you need to fall back to this [slightly modified version](https://raw.githubusercontent.com/GeoKnow/Jassa-UI-Angular/master/jassa-ui-angular-core/demo/facet-tree/app/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js).
 
 
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
