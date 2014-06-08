@@ -132,7 +132,7 @@ Note that `facet-typeahead` reads out the `ng-model` attribute and will use the 
 Technically, facet-typeahead replaces itself upon angular's linking phase with ui-bootstrap's [typeahead directive](http://angular-ui.github.io/bootstrap/).
 
 ### Map display
-A map display based on (OpenLayers)[http://openlayers.org/] that works out of the box on a SPARQL endpoint. This includes DBpedia.
+A map display based on [OpenLayers](http://openlayers.org/) that works out of the box on a SPARQL endpoint. This includes DBpedia.
 The map logic will use a tile based strategy for areas that would contain too much data.
 
 ![jassa-map-ol](jassa-ui-angular-dissemination/images/jassa-map-ol.png)
