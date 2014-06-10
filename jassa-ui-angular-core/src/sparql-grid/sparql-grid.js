@@ -5,10 +5,9 @@ angular.module('ui.jassa.sparql-grid', [])
     var rdf = jassa.rdf;
     var sparql = jassa.sparql;
     var service = jassa.service;
-    var util = jassa.util;
-    
+    var util = jassa.util;    
     var sponate = jassa.sponate;
-
+    var facete = jassas.facete;
     
     var syncTableMod = function(sortInfo, tableMod) {
         

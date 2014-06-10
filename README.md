@@ -40,7 +40,7 @@ var baseVar = rdf.NodeFactory.createVar('s');
 var castles = new facete.Concept(baseElement, baseVar);
 
 // The facetTreeConfig is now configured to the set of castles
-facetTreeConfig.setBaseConcept(castles);
+facetTreeConfig.getFacetConfig().setBaseConcept(castles);
 
 $scope.sparqlService = sparqlService;
 $scope.facetTreeConfig = facetTreeConfig;

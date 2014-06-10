@@ -26,7 +26,7 @@ angular.module('ui.jassa.facet-value-list', [])
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig && $scope.path;
 
-        facetValueService = isConfigured ? new Jassa.facete.FacetValueService($scope.sparqlService, $scope.facetTreeConfig) : null;
+        facetValueService = isConfigured ? new jassa.facete.FacetValueService($scope.sparqlService, $scope.facetTreeConfig) : null;
     };
     
     var update = function() {
@@ -34,7 +34,7 @@ angular.module('ui.jassa.facet-value-list', [])
         self.refresh();
     };
 
-    $scope.ObjectUtils = Jassa.util.ObjectUtils;
+    $scope.ObjectUtils = jassa.util.ObjectUtils;
 
     var watchList = '[ObjectUtils.hashCode(facetTreeConfig), "" + path, pagination.currentPage]';
     $scope.$watch(watchList, function() {
@@ -50,7 +50,7 @@ angular.module('ui.jassa.facet-value-list', [])
     $scope.toggleConstraint = function(item) {
         var constraintManager = facetValueService.getFacetTreeConfig().getFacetConfig().getConstraintManager();
         
-        var constraint = new Jassa.facete.ConstraintEquals(item.path, item.node);
+        var constraint = new jassa.facete.ConstraintEquals(item.path, item.node);
 
         // TODO Integrate a toggle constraint method into the filterManager
         constraintManager.toggleConstraint(constraint);
@@ -76,11 +76,11 @@ angular.module('ui.jassa.facet-value-list', [])
         
         var dataPromise = fetcher.fetchData(offset, pageSize);
 
-        Jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $scope.$root, function(count) {
+        jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $scope.$root, function(count) {
             $scope.pagination.totalItems = count;
         });
         
-        Jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $scope.$root, function(items) {
+        jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $scope.$root, function(items) {
             $scope.facetValues = items;
         });
 

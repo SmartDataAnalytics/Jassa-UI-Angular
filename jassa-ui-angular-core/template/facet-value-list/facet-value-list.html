@@ -7,7 +7,7 @@
               <tr><th>Value</th><th>Constrained</th></tr>
 <!-- <th>Count</th> -->
 	    <tr ng-repeat="item in facetValues">
-                  <td>{{item.displayLabel}}</td>
+                  <td><span title="{{item.node.toString()}}">{{item.displayLabel}}</span></td>
 <!--                    <td>todo</td> -->
                   <td><input type="checkbox" ng-model="item.tags.isConstrainedEqual" ng-change="toggleConstraint(item)" /></td>
               </tr>

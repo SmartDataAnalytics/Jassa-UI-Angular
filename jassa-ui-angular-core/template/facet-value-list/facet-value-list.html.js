@@ -9,7 +9,7 @@ angular.module("template/facet-value-list/facet-value-list.html", []).run(["$tem
     "              <tr><th>Value</th><th>Constrained</th></tr>\n" +
     "<!-- <th>Count</th> -->\n" +
     "	    <tr ng-repeat=\"item in facetValues\">\n" +
-    "                  <td>{{item.displayLabel}}</td>\n" +
+    "                  <td><span title=\"{{item.node.toString()}}\">{{item.displayLabel}}</span></td>\n" +
     "<!--                    <td>todo</td> -->\n" +
     "                  <td><input type=\"checkbox\" ng-model=\"item.tags.isConstrainedEqual\" ng-change=\"toggleConstraint(item)\" /></td>\n" +
     "              </tr>\n" +
