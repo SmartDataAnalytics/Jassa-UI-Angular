@@ -1,6 +1,6 @@
 angular.module('ui.jassa.constraint-list', [])
 
-.controller('ConstraintListCtrl', ['$scope', '$rootScope', function($scope, $rootScope) {
+.controller('ConstraintListCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
     var self = this;
 
@@ -29,6 +29,9 @@ angular.module('ui.jassa.constraint-list', [])
         update();
     });
     
+    $scope.$watch('labelService', function() {
+        update();
+    });
     
     
     var renderConstraint = function(constraint) {
@@ -53,25 +56,25 @@ angular.module('ui.jassa.constraint-list', [])
     self.refresh = function() {
 
         var constraintManager = $scope.constraintManager;
-        
-        var items;
-        if(!constraintManager) {
-            items = [];
-        }
-        else {
-            var constraints = constraintManager.getConstraints();
-            
-            items =_(constraints).map(function(constraint) {
+        var constraints = constraintManager ? constraintManager.getConstraints() : [];
+
+        var promise = $scope.labelService.lookup(constraints);
+
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
+
+            var items =_(constraints).map(function(constraint) {
+                var label = map.get(constraint);
+
                 var r = {
                     constraint: constraint,
-                    label: '' + renderConstraint(constraint)
+                    label: label
                 };
                 
                 return r;
             });
-        }
 
-        $scope.constraints = items;
+            $scope.constraints = items;
+        });
     };
     
     $scope.removeConstraint = function(item) {
@@ -97,6 +100,7 @@ angular.module('ui.jassa.constraint-list', [])
         require: 'constraintList',
         scope: {
             sparqlService: '=',
+            labelService: '=',
             facetTreeConfig: '=',
             onSelect: '&select'
         },

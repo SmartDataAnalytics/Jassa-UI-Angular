@@ -1,4 +1,4 @@
 <ul>
   	<li ng-show="constraints.length == 0" style="color: #aaaaaa;">(no constraints)</li>
-   	<li ng-repeat="constraint in constraints"><a href="" ng-click="removeConstraint(constraint)">{{constraint.label}}</a></li>
+   	<li ng-repeat="constraint in constraints"><a href="" ng-click="removeConstraint(constraint)" ng-bind-html="constraint.label"></a></li>
 </ul>
