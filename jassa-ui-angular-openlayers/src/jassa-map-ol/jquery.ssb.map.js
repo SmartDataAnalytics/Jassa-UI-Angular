@@ -158,13 +158,14 @@ $.widget('custom.ssbMap', {
 //                pointRadius: '${radius}',
 //                pointerEvents: 'visiblePainted',
 //    
-                fontColor: '#0000FF', //'#0000FF',
+//                fontColor: '#0000FF', //'#0000FF',
+                fontColor: '${fontColor}',
                 fontSize: '12px',
                 fontFamily: 'Courier New, monospace',
                 fontWeight: 'bold',
                 //labelAlign: 'cm',
 //                
-                label: '', //'${label}',
+                label: '${shortLabel}', //'${label}',
                 //labelXOffset: 0,
                 labelYOffset: 21
 //                labelOutlineColor: '#0080FF',
@@ -306,7 +307,7 @@ $.widget('custom.ssbMap', {
         this.selectFeatureController = new OpenLayers.Control.SelectFeature([this.boxLayer, this.featureLayer], {
 
             onUnselect: function(feature) {
-                var data = feature.data;
+                var data = feature.attributes;
                 
                 var event = null;
                 self._trigger('featureUnselect', event, data);
@@ -315,7 +316,7 @@ $.widget('custom.ssbMap', {
             onSelect: function(feature) {
                                 
                 //var vector = feature; // Note: We assume a vector feature - might have to check in the future                
-                var data = feature.data;
+                var data = feature.attributes;
                 var geometry = feature.geometry;
                 
                 // FIXME Find a better way to get the click coordinates; but it might not exists yet, see http://trac.osgeo.org/openlayers/ticket/2089
@@ -440,8 +441,8 @@ $.widget('custom.ssbMap', {
 
             feature.attributes = newAttrs
           */
-        //feature.attributes = attrs;
-        feature.data = attrs;
+        feature.attributes = attrs;
+        //feature.data = attrs;
         //feature.geometry = g;
                 
         /*

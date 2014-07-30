@@ -2,7 +2,7 @@ angular.module("template/constraint-list/constraint-list.html", []).run(["$templ
   $templateCache.put("template/constraint-list/constraint-list.html",
     "<ul>\n" +
     "  	<li ng-show=\"constraints.length == 0\" style=\"color: #aaaaaa;\">(no constraints)</li>\n" +
-    "   	<li ng-repeat=\"constraint in constraints\"><a href=\"\" ng-click=\"removeConstraint(constraint)\">{{constraint.label}}</a></li>\n" +
+    "   	<li ng-repeat=\"constraint in constraints\"><a href=\"\" ng-click=\"removeConstraint(constraint)\" ng-bind-html=\"constraint.label\"></a></li>\n" +
     "</ul>\n" +
     "");
 }]);

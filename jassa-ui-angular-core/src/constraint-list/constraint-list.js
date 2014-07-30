@@ -58,7 +58,7 @@ angular.module('ui.jassa.constraint-list', [])
         var constraintManager = $scope.constraintManager;
         var constraints = constraintManager ? constraintManager.getConstraints() : [];
 
-        var promise = $scope.labelService.lookup(constraints);
+        var promise = jassa.service.LookupServiceUtils.lookup($scope.labelService, constraints);
 
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
 
