@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html ng-app="JassaEditDemo">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>JassaEditDemo</title>
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.tmp) styles/main.css -->
+	
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+
+    <!-- endbuild -->
+
+
+    <!-- build:js scripts/scripts.js -->
+	
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <!-- endbower -->
+
+    <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <!-- endbuild -->
+
+
+	<script type="text/javascript">
+    _.mixin(_.str.exports());
+
+	var rdf = jassa.rdf;
+	var sparql = jassa.sparql;
+    var service = jassa.service;
+	var sponate = jassa.sponate;
+    var facete = jassa.facete;
+    var util = jassa.util;
+
+    var geo = jassa.geo;
+
+	var vocab = jassa.vocab;
+	
+	
+	var ObjectRef = Class.create({
+	    initialize: function(subject, predicate, objectIndex) {
+	        this.subject = subject;
+	        this.predicate = predicate;
+	        this.objectIndex = objectIndex;
+	    },
+	    
+	    getSubject: function() {
+	        return this.subject;
+	    },
+	    
+	    getPredicate: function() {
+	        return this.predicate;
+	    },
+	    
+	    getObjectIndex: function() {
+	        return this.objectIndex;
+	    },
+	    
+	    toString: function() {
+	        return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
+	    }
+	});
+	
+	
+	var ns = {};
+
+
+	ns.NodeMapper = Class.create({
+        toNode: function(obj) {
+            console.log('Implement me');
+        },
+        toObject: function(node) {
+            console.log('Implement me');
+        }
+	});
+
+	
+	ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
+	    initialize: function(lang) {
+	        this.lang = lang;
+	    },
+
+	    // obj is expected to be a string
+	    toNode: function(obj) {
+	        var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
+	        return result;
+	    },
+
+	    toObject: function(node) {
+	        var result = node.getLiteralValue();
+	        return result;
+	    }
+	});
+
+	ns.EditHandler = Class.create({
+	    getData: function() {
+	        console.log('Implement me');
+	    },
+	    setData: function(data) {
+	        console.log('Implement me');
+	    }
+	});
+	
+    ns.EditHandlerImpl = Class.create({
+        initialize: function(graph, objectRef, nodeMapper) {
+            this.graph = graph;
+            this.objectRef = objectRef;
+            this.nodeMapper = nodeMapper;
+        },
+        
+        getData: function() {
+            var node = ObjectRefUtils.getObject(this.graph, this.objectRef);
+            
+            var result = node == null ? null : this.nodeMapper.toObject(node);
+            return result;
+        },
+        
+        setData: function(data) {
+            // TODO What if data is null?
+
+            var node = this.nodeMapper.toNode(data);
+
+            if(node != null) {
+                var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
+                this.graph.remove(t);
+            }
+            
+            // TODO Make sure to get the ordering right
+            
+            var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
+            this.graph.add(nt);         
+        }
+    });
+
+    var foo = ns;
+
+    
+    
+	var ns = jassa.rdf;
+	ns.GraphImpl = Class.create({
+	    initialize: function() {
+	        this.triples = new util.HashSet();
+	    },
+
+	    add: function(triple) {
+	        this.triples.add(triple);
+	    },
+	    
+	    remove: function(triple) {
+	        this.triples.remove(triple);
+	    },
+	    
+	    contains: function(triple) {
+	        return this.triples.contains(triple);
+	    },
+	    
+	    toArray: function() {
+	        return this.triples.entries();
+	    },
+
+	    toString: function() {
+	        return '' + this.triples;
+	    }
+	});
+	
+	var ObjectRefUtils = {
+	    getObject: function(graph, objectRef) {
+	        var candidateTriple = this.getTriple(graph, objectRef);
+	        
+	        var result = candidateTriple ? candidateTriple.getObject() : null;
+	        return result;
+	    },
+	        
+	    getTriple: function(graph, objectRef) {
+	        var ts = graph.toArray();
+	        var i = 0;
+
+	        var result = _(ts).find(function(t) {
+	            var c = objectRef.getSubject().equals(t.getSubject()) &&
+	                    objectRef.getPredicate().equals(t.getPredicate());
+	            
+	            if(c && objectRef.getObjectIndex() === i) {
+	                return true;
+	            }
+
+	            if(c) {
+	                ++i;
+	            }
+	        });
+	            
+	        return result;
+	    }
+	};
+	
+	
+    angular.module('JassaEditDemo', ['ui.bootstrap', 'ui.jassa.openlayers'])
+
+    /*
+    .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {
+        $scope.$watch('editHandler.getData()', function(val) {
+            $scope.ngModel = val;
+        });
+        
+        $scope.$watch('ngModel', function() {
+            
+        });
+    }])
+    */
+    
+    .directive('jassaEditText', function() {
+	    return {
+	        restrict: 'EA',
+	        replace: true,
+	        //templateUrl: 'template/constraint-list/constraint-list.html',
+	        template: '<input type="text" class="form-control" placeholder="Foo"></input>',
+	        transclude: false,
+	        //require: 'constraintList',
+	        require: 'ngModel',
+	        scope: {
+	            'editHandler': '='
+	            //model: '=ngModel'
+	            //'ngModel': '='
+	        },
+	        //controller: 'JassaEditTextCtrl',
+	        link: function(scope, element, attrs, ngModel) {
+	            scope.$watch(function () {
+	                return ngModel.$modelValue;
+	            }, function(newValue) {
+	                console.log('model changed: ', newValue);
+	                scope.editHandler.setData(newValue);
+	            });
+	            
+	            scope.$watch(function() {
+	                return scope.editHandler.getData();
+	            }, function(newValue) {
+	                console.log('data reset: ', newValue);
+	                ngModel.$modelValue = newValue;
+	            });
+	        }
+	    };
+	})
+    
+    .controller('AppCtrl', ['$scope', function($scope) {
+        var graph = new rdf.GraphImpl();
+        
+        var s = rdf.NodeFactory.createUri('http://s');
+        var p = rdf.NodeFactory.createUri('http://p');
+        var o1 = rdf.NodeFactory.createUri('http://o1');
+        var o2 = rdf.NodeFactory.createUri('http://o2');
+        
+        //var t1 = new rdf.Triple(s, p, o1);
+        var t2 = new rdf.Triple(s, p, o2);
+        
+        //graph.add(t1);
+        graph.add(t2);
+        
+        console.log(graph);
+        //console.log(graph.contains(t1));
+        
+        var ref = new ObjectRef(s, p, 0);
+        
+        console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
+
+        var nodeMapper = new foo.NodeMapperPlainLiteral('en');
+        $scope.myEditHandler = new foo.EditHandlerImpl(graph, ref, nodeMapper);
+        
+        $scope.myModel = "hello world";
+        
+        $scope.graph = graph;
+        $scope.$watch('"" + graph', function() {
+            console.log('Graph: ' + graph);
+        });
+    }]);
+	</script>
+
+</head>
+
+<body ng-controller="AppCtrl">
+
+    <jassa-edit-text ng-model="myModel" edit-handler="myEditHandler"></jassa-edit-text>
+</body>
+
+</html>
+
