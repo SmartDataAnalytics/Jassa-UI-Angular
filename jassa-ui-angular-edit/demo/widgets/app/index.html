@@ -153,7 +153,10 @@
             // TODO Make sure to get the ordering right
             
             var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
-            this.graph.add(nt);         
+            this.graph.add(nt);
+            
+            
+            //this.tripleManager.registerTriplesForRef(this.objectRef, [nt]);
         }
     });
 
