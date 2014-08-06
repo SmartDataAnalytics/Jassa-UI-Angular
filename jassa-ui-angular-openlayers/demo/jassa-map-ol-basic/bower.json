@@ -1,10 +1,7 @@
 {
-  "name": "jassa-map-ol-demo",
+  "name": "jassa-ui-angular-openlayers-demo-basic<",
   "version": "0.0.1",
   "dependencies": {
-    "jquery-ui": "1.10.3",
-    "openlayers": "2.13.1",
-    "angular": ">=1",
-    "jassa": "0.0.2"
+    "jassa-ui-angular-openlayers": "0.0.4-SNAPSHOT"
   }
 }
