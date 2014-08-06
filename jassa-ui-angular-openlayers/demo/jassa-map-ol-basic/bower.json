@@ -2,6 +2,7 @@
   "name": "jassa-ui-angular-openlayers-demo-basic<",
   "version": "0.0.1",
   "dependencies": {
-    "jassa-ui-angular-openlayers": "0.0.4-SNAPSHOT"
+    "jassa-ui-angular-openlayers": "0.0.4-SNAPSHOT",
+    "bootstrap": "3.1.0"
   }
 }
