@@ -75,45 +75,23 @@
         var conceptB = facete.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');      
         var conceptC = facete.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
                 
-        
         var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
-
-            // The 'core' service from which to retrieve the initial data
-            var bboxListService = new service.ListServiceBbox(sparqlService, geoMapFactory, concept);
-
-            // Wrap this service for augmenting (enriching) it with labels
-            var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService);
-            lookupServiceLabels = new service.LookupServiceTransform(lookupServiceLabels, function(doc, id) {
-                var result = {
-                    shortLabel: doc
-                };                    
-                return result;
-            });
-                
-            var augmenterLabels = new service.AugmenterLookup(lookupServiceLabels);
-            bboxListService = new service.ListServiceAugmenter(bboxListService, augmenterLabels);
             
-            // Also add style information
-            var lookupServiceStyle = new service.LookupServiceConst({
-                fillColor: fillColor,
-                fontColor: fillColor,
-                   strokeColor: fillColor,
-
-                stroke: true,
-                strokeLinecap: 'round',
-                strokeWidth: 100,
-                pointRadius: 12,
-                labelAlign: 'cm'
-            });
-	
-	        var augmenterStyle = new service.AugmenterLookup(lookupServiceStyle);
-	        bboxListService = new service.ListServiceAugmenter(bboxListService, augmenterStyle);
+            var attrs = {
+		        fillColor: fillColor,
+		        fontColor: fillColor,
+		        strokeColor: fillColor,
+		
+		        stroke: true,
+		        strokeLinecap: 'round',
+		        strokeWidth: 100,
+		        pointRadius: 12,
+		        labelAlign: 'cm'
+            };
             
-	        // Wrap the list service with clustering support
-            var result = new service.DataServiceBboxCache(bboxListService, 1500, 500, 2);
-            
+            var result = geo.GeoDataSourceUtils.createGeoDataSourceLabels(sparqlService, geoMapFactory, concept, attrs);
             return result;
-        };
+        }
         
         var bounds = new geo.Bounds(7.0, 49.0, 9, 51.0);
 
