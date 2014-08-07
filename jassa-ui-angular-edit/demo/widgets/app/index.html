@@ -115,7 +115,7 @@
 	    }
 	});
 
-	ns.EditHandler = Class.create({
+	ns.ValueStore = Class.create({
 	    getData: function() {
 	        console.log('Implement me');
 	    },
@@ -124,7 +124,7 @@
 	    }
 	});
 	
-    ns.EditHandlerImpl = Class.create({
+    ns.ValueStoreImpl = Class.create({
         initialize: function(graph, objectRef, nodeMapper) {
             this.graph = graph;
             this.objectRef = objectRef;
@@ -223,7 +223,7 @@
 
     /*
     .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {
-        $scope.$watch('editHandler.getData()', function(val) {
+        $scope.$watch('valueStore.getData()', function(val) {
             $scope.ngModel = val;
         });
         
@@ -243,7 +243,7 @@
 	        //require: 'constraintList',
 	        require: 'ngModel',
 	        scope: {
-	            'editHandler': '='
+	            'valueStore': '='
 	            //model: '=ngModel'
 	            //'ngModel': '='
 	        },
@@ -253,11 +253,11 @@
 	                return ngModel.$modelValue;
 	            }, function(newValue) {
 	                console.log('model changed: ', newValue);
-	                scope.editHandler.setData(newValue);
+	                scope.valueStore.setData(newValue);
 	            });
 	            
 	            scope.$watch(function() {
-	                return scope.editHandler.getData();
+	                return scope.valueStore.getData();
 	            }, function(newValue) {
 	                console.log('data reset: ', newValue);
 	                ngModel.$modelValue = newValue;
@@ -288,7 +288,7 @@
         console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
 
         var nodeMapper = new foo.NodeMapperPlainLiteral('en');
-        $scope.myEditHandler = new foo.EditHandlerImpl(graph, ref, nodeMapper);
+        $scope.myValueStore = new foo.ValueStoreImpl(graph, ref, nodeMapper);
         
         $scope.myModel = "hello world";
         
@@ -303,7 +303,7 @@
 
 <body ng-controller="AppCtrl">
 
-    <jassa-edit-text ng-model="myModel" edit-handler="myEditHandler"></jassa-edit-text>
+    <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
 </body>
 
 </html>
