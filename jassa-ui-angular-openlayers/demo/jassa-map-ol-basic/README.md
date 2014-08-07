@@ -13,10 +13,53 @@ For example, accessing Jassa's factory object for RDF terms (called nodes), is a
 var s = jassa.rdf.NodeFactory.createUri('http://example.org');
 ```
 
+
+## The Map Widget
+[Source Code for the JQuery Map Plugin](https://github.com/GeoKnow/Jassa-UI-Angular/blob/master/jassa-ui-angular-openlayers/src/jassa-map-ol/jquery.ssb.map.js)
+[Source Code for the AngularJS wrapper](https://github.com/GeoKnow/Jassa-UI-Angular/blob/master/jassa-ui-angular-openlayers/src/jassa-map-ol/jassa-map-ol.js)
+
+The map directive draws data from an array of data source objects.
+
+```javascript
+
+angular.module('jassa.demo.map.ol.basic', ['ui.bootstrap', 'ui.jassa.openlayers'])
+
+.controller('AppCtrl', ['$scope', function($scope) {
+
+   $scope.dataSources = [
+        createMapDataSource(sparqlServiceA, geoMapFactoryVirt, conceptA, '#CC0020'),
+        createMapDataSource(sparqlServiceB, geoMapFactoryWgs, conceptB, '#2000CC')
+        //createMapDataSource(sparqlServiceC, geoMapFactoryAsWktVirt, conceptC, '#663300'),
+    ];
+        
+    $scope.selectGeom = function(data) {
+        alert(JSON.stringify(data));
+    };
+        
+    $scope.mapConfig = {
+        center: { lon: 8, lat: 50 },
+        zoom: 8
+    };
+
+```
+
+```html
+<div 
+    jassa-map-ol="map"
+    style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;"
+    config="mapConfig"
+    data-sources="dataSources"
+    select="selectGeom(data)">
+</div>
+```
+
+
 ## Data Access Abstraction
 Jassa's service module comes with APIs for the following common data access patterns:
 
 ### Lookup Services
+[Source file](https://github.com/GeoKnow/Jassa/blob/master/jassa-js/src/main/webapp/resources/js/service/lookup-services.js)
+
 The LookupService interface is intended for asynchronous lookup of items based
 on arrays of keys.
 
@@ -67,6 +110,15 @@ class LookupServiceTimeout<K, V>
 }
 
 
+/**
+ * A lookup service that yields the same data regardless of the key.
+ * 
+ */
+class LookupServiceConst<K, V>
+    extends LookupServiceBase<K, V>
+{
+    LookupServiceConst(V data);
+}
 
 /**
  * Use a sponate source, such as myStore.myCastleSource, as a lookup service.
@@ -80,8 +132,16 @@ class LookupServiceSponate
 
 /**
  * TODO Currently named LookupServiceIdFilter
+ *
+ * Filters keys according to the predicate and only delegates those keys to
+ * the underyling service that pass the test.
  */
-class LookupServiceKeyFilter
+class LookupServiceKeyFilter<K, V>
+    extends LookupServiceDelegateBase<K, V>
+{
+    LookupServiceKeyFilter(LookupSurvice<K, V>, Function<K> predicate);
+}
+
 
 
 ```
@@ -90,6 +150,9 @@ class LookupServiceKeyFilter
 
 
 ### List Services
+
+[Source file](https://github.com/GeoKnow/Jassa/blob/master/jassa-js/src/main/webapp/resources/js/service/concept-lookup-services.js)
+
 A list service offers "concept"-based lookup. The notion of concept is essentially
 any object referring to a set of items, and could be a tag ('must_read'), a bounding box, or a SPARQL concept (See `jassa.sparql.Concept` - TODO currently the class is under jassa.facete.Concept).
 It is up to the implementation of the list service to use a suitable interpretation of the provide concept
@@ -101,6 +164,67 @@ interface ListService<C, K> {
     Promise<Array<K> fetchItems(C concept, Long limit, Long offset);
     Promise<Long> fetchCount(C concept, Long scanLimit);
 }
+
+
+
+/**
+ * A list service that fetches ressources based on bounding boxes.
+ * The geoMapFactory abstracts from spatial RDF vocabularies, such as GeoSPARQL and WGS84, and is supports creating properly constraint SPARQL graph patterns from
+ * given bounding boxes.
+ * The concept is used as an additional filter over all the resources matched by the geoMapFactory.
+ * This means, that internally, a combined SPARQL query is created from the geoMapFactory and the concept.
+ * For instance, "Airports locatedIn Europe".
+ * 
+ */
+class ListServiceBbox
+    implements ListService<jassa.geo.Bounds, Object>
+{
+    ListServiceBbox(jassa.service.SparqlService sparqlService, jassa.geo.MapFactory geoMapFactory, jassa.sparql.Concept concept);
+}
+
+
+/**
+ * A list service that first retrieves a set of resources based on a jassa.sparql.Concept, and then pipes the resources to a lookup service.
+ * Can be used to e.g. first retrieve resources within a given bounding box, and in a separate step retrieve corresponding labels.
+ */
+class ListServiceConceptKeyLookup<V>
+    implements ListService<jassa.sparql.Concept, jassa.rdf.Node>
+{
+    ListServiceConceptKeyLookup(SparqlService sparqlService, LookupService<jassa.rdf.Node, V> lookupService);
+}
+
+
+/**
+ *
+ */
+class ListServiceAsyncTransform<C, V>
+    implements ListService<C, W>
+{
+    ListServiceAugmenter(ListService<C, V> listService, AsyncTransform<Array<V>, Array<W>> asyncTransform);
+}
+
+
+
+interface AsyncTransform<I, O>
+{
+    Promise<O> transform(I input);
+}
+
+interface AsyncTransformArray<I, O>
+    extends AsyncTransform<Array<I>, Array<O>>
+{
+}
+
+class AsyncTransformerLookupService<I, O>
+    implements AsyncTransformArray<I, O>
+{
+    //Function<I, itemToKeyFn,
+    AsyncTransformerLookupService(LookupService<I, O> lookupService, mergeFn);
+
+    transform(Array<I> items);
+}
+
+
 ```
 
 
