@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html ng-app="JassaEditDemo">
+<html ng-app="jassa.ui.edit.demo.widgets">
 
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <title>JassaEditDemo</title>
+    <title>RDF Edit Demo</title>
 
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
-    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <!-- endbower -->
 
     <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
@@ -36,7 +35,6 @@
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
-    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <!-- endbower -->
 
     <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
@@ -221,7 +219,7 @@
 	};
 	
 	
-    angular.module('JassaEditDemo', ['ui.bootstrap', 'ui.jassa.openlayers'])
+    angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
     /*
     .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {

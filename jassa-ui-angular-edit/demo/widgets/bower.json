@@ -1,7 +1,8 @@
 {
-  "name": "jassa-ui-angular-core-demo",
+  "name": "jassa-ui-angular-edit-demo-widgets",
   "version": "0.0.1",
   "dependencies": {
-    "jassa-ui-angular": "0.0.4-SNAPSHOT"
+    "jassa-ui-angular": "0.0.4-SNAPSHOT",
+    "bootstrap": "3.1.0"
   }
 }
