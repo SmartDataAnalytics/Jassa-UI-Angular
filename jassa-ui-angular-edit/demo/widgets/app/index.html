@@ -83,8 +83,113 @@
 	        return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
 	    }
 	});
+
+
+            //this.map = new util.HashMap();	
 	
-	
+
+/*
+    var NodeState = Class.create({
+        initialize: function() {
+            this.termType = null;
+            this.lexicalForm = null;
+            this.datatype = null;
+            this.lang = null;
+        },
+
+        getLexicalForm: function() {
+            return this.lexicalForm;
+        },
+
+        getLang: function() {
+            return this.lang;
+        },
+
+        setLexicalForm: function(lexicalForm) {
+            this.lexicalForm = lexicalForm;
+        },
+
+        setLang: function(lang) {
+            this.lang = lang;
+        }
+    });
+*/
+
+    var NodeStateUtils = {
+        createNode: function(nodeState) {
+            // TODO Implement properly
+            if(nodeState.lexicalForm == null) {
+                return null;
+            }
+
+            var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+
+            return result;
+        }
+    };
+
+
+    var TripleBuilder = Class.create({
+        initialize: function() {
+            //this.map = new util.HashMap();
+            this.map = {};
+        },
+        getSafe: function(objectRef) {
+            var key = '' + objectRef;
+            var result = this.map[key];
+
+            if(result == null) {
+                result = {};
+                this.map[key] = result;
+            }
+
+            return result;
+        },
+        remove: function(objectRef) {
+            var key = '' + objectRef;
+            delete this.map[key];
+        }
+    });
+
+
+    var GraphInserter = Class.create({
+        initialize: function(graph) {
+            this.graph = graph;
+            this.tripleBuilder = new TripleBuilder();
+        },
+
+        get: function(objectRef) {
+            // TODO Maybe we need to check if the reference has been overridden in the triple builder
+            var result = ObjectRefUtils.getTriple(this.graph, objectRef);
+            return result;
+        },
+
+        set: function(objectRef, data) {
+            var val = this.tripleBuilder.getSafe(objectRef);
+            _(val).extend(data);
+
+            var node = NodeStateUtils.createNode(val);
+            if(node != null) {
+                var t = ObjectRefUtils.getTriple(this.graph, objectRef);
+
+                if(t != null) {
+		            this.graph.remove(t);
+		        }
+		        
+                var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
+		        this.graph.add(nt);
+            }
+        }
+    });
+
+    var GraphInserterUtils = {
+        getObject: function(graphInserter, objectRef) {
+            var t = graphInserter.get(objectRef);
+            var result = t == null ? null : t.getObject();
+            return result;
+        }
+    };
+
 	var ns = {};
 
 
@@ -99,12 +204,16 @@
 
 	
 	ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
+        /**
+         * @param fnLang function returning a language tag
+         */
 	    initialize: function(lang) {
 	        this.lang = lang;
 	    },
 
 	    // obj is expected to be a string
 	    toNode: function(obj) {
+            //var lang = this.fnLang();
 	        var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
 	        return result;
 	    },
@@ -115,6 +224,8 @@
 	    }
 	});
 
+    
+
 	ns.ValueStore = Class.create({
 	    getData: function() {
 	        console.log('Implement me');
@@ -124,39 +235,72 @@
 	    }
 	});
 	
-    ns.ValueStoreImpl = Class.create({
-        initialize: function(graph, objectRef, nodeMapper) {
+    ns.ValueStoreLex = Class.create({
+        initialize: function(graphInserter, objectRef) {
+            this.graphInserter = graphInserter;
+            this.objectRef = objectRef;
+        },
+        
+        getData: function() {
+            var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+            var result = o == null ? null : o.getLiteralLexicalForm();
+            return result;
+        },
+        
+        setData: function(data) {
+            this.graphInserter.set(this.objectRef, {lexicalForm: data});
+        }
+    });
+
+    ns.ValueStoreLang = Class.create({
+        initialize: function(graphInserter, objectRef) {
+            this.graphInserter = graphInserter;
+            this.objectRef = objectRef;
+        },
+        
+        getData: function() {
+            var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+            var result = o == null ? null : o.getLiteralLanguage();
+            return result;
+        },
+        
+        setData: function(data) {
+            this.graphInserter.set(this.objectRef, {lang: data});
+        }
+    });
+
+   
+/*
+    ns.ValueStoreLang = Class.create({
+        initialize: function(graph, objectRef) {
             this.graph = graph;
             this.objectRef = objectRef;
-            this.nodeMapper = nodeMapper;
         },
         
         getData: function() {
             var node = ObjectRefUtils.getObject(this.graph, this.objectRef);
             
-            var result = node == null ? null : this.nodeMapper.toObject(node);
+            var result = node == null ? null : node.getLiteralLanguage();
             return result;
         },
         
-        setData: function(data) {
-            // TODO What if data is null?
-
-            var node = this.nodeMapper.toNode(data);
-
-            if(node != null) {
-                var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
+        setData: function(lang) {
+            var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
+            if(t != null) {
                 this.graph.remove(t);
+                
+                var o = t.getObject();
+                // TODO Add validation that we are dealing with literal nodes
+
+                var str = o.getLiteralValue();
+                var node = rdf.NodeFactory.createPlainLiteral(str, lang);
+
+                var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
+                this.graph.add(nt);
             }
-            
-            // TODO Make sure to get the ordering right
-            
-            var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
-            this.graph.add(nt);
-            
-            
-            //this.tripleManager.registerTriplesForRef(this.objectRef, [nt]);
         }
     });
+*/
 
     var foo = ns;
 
@@ -287,9 +431,16 @@
         
         console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
 
-        var nodeMapper = new foo.NodeMapperPlainLiteral('en');
-        $scope.myValueStore = new foo.ValueStoreImpl(graph, ref, nodeMapper);
-        
+        $scope.lang = 'en';
+
+
+        var graphInserter = new GraphInserter(graph);
+
+
+        $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);        
+        $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
+
+
         $scope.myModel = "hello world";
         
         $scope.graph = graph;
@@ -304,6 +455,8 @@
 <body ng-controller="AppCtrl">
 
     <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
+    <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+
 </body>
 
 </html>
