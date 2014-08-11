@@ -122,6 +122,18 @@
                 return null;
             }
 
+            if(nodeState.hasOwnProperty('datatype')) {
+               console.log('datatype NODESTATE', nodeState);
+               var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+               return result;
+            }
+
+            if(nodeState.hasOwnProperty('lang')) {
+              console.log('lang NODESTATE', nodeState);
+              var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+              return result;
+            }
+
             var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
 
             return result;
@@ -166,7 +178,12 @@
 
         set: function(objectRef, data) {
             var val = this.tripleBuilder.getSafe(objectRef);
+
+          console.log('GRAPHINSERT val davor', val);
             _(val).extend(data);
+
+            console.log('GRAPHINSERT val danach', val);
+            console.log('GRAPHINSERT data', data);
 
             var node = NodeStateUtils.createNode(val);
             if(node != null) {
@@ -260,6 +277,7 @@
         
         getData: function() {
             var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+            console.log('o',o);
             var result = o == null ? null : o.getLiteralLanguage();
             return result;
         },
@@ -269,6 +287,22 @@
         }
     });
 
+    ns.ValueStoreDatatype = Class.create({
+      initialize: function(graphInserter, objectRef) {
+        this.graphInserter = graphInserter;
+        this.objectRef = objectRef;
+      },
+
+      getData: function() {
+        var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+        var result = o == null ? null : o.getLiteralDatatype();
+        return result;
+      },
+
+      setData: function(data) {
+        this.graphInserter.set(this.objectRef, {datatype: data});
+      }
+    });
    
 /*
     ns.ValueStoreLang = Class.create({
@@ -408,28 +442,196 @@
 	            });
 	        }
 	    };
-	})
+	  })
+
+    .directive('jassaEditMap', function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        //templateUrl: 'template/constraint-list/constraint-list.html',
+        template: '<div id="jassa-edit-map" style="width: 100%; height: 300px;"><input type="radio" value="polygon" name="geometry" checked="checked"/><label>Polygon</label><input type="radio" value="Box" name="geometry"/><label>Box</label><input id="wkt" class="form-control" type="text" value="POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))""/></div>',
+        transclude: false,
+        //require: 'constraintList',
+        require: 'ngModel',
+        scope: {
+          'config': '=',
+          'geometry': '=',
+          'valueStore': '='
+        },
+        //controller: 'JassaEditMapCtrl',
+        link: function(scope, element, attrs, ngModel) {
+          console.log('link function map');
+          //console.log('geometry', scope.geometry);
+          //console.log('mapConfig', scope.config);
+          //console.log('valueStoreMap', scope.valueStore);
+
+
+          scope.$watch(function() {
+            return scope.config.data;
+          }, function(newValue) {
+            console.log('map data changed !!!!: ', newValue);
+            scope.valueStore.setData(newValue);
+          });
+
+          scope.$watch(function() {
+            return scope.valueStore.getData();
+          }, function(newValue) {
+            console.log('data reset for map value: ', newValue);
+            //newValue; set input field
+          });
+
+
+          var map, drawControls, polygonLayer, wkt, vectors;
+
+          function init() {
+            map = new OpenLayers.Map('jassa-edit-map');
+
+            var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
+                    "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
+
+            var pointLayer = new OpenLayers.Layer.Vector("Point Layer");
+            var lineLayer = new OpenLayers.Layer.Vector("Line Layer");
+            polygonLayer = new OpenLayers.Layer.Vector("Polygon Layer");
+            var boxLayer = new OpenLayers.Layer.Vector("Box layer");
+            vectors = new OpenLayers.Layer.Vector("Vector Layer");
+
+            map.addLayers([wmsLayer, pointLayer, lineLayer, polygonLayer, boxLayer]);
+            map.addControl(new OpenLayers.Control.LayerSwitcher());
+            map.addControl(new OpenLayers.Control.MousePosition());
+
+            polygonLayer.events.on({
+              sketchcomplete : GeometryWasDrawn
+            });
+
+            boxLayer.events.on({
+              sketchcomplete: GeometryWasDrawn
+            });
+
+            pointLayer.events.on({
+              sketchcomplete: GeometryWasDrawn
+            });
+
+            lineLayer.events.on({
+              sketchcomplete: GeometryWasDrawn
+            });
+
+            wkt = new OpenLayers.Format.WKT();
+
+            drawControls = {
+              point: new OpenLayers.Control.DrawFeature(pointLayer,
+                      OpenLayers.Handler.Point),
+              line: new OpenLayers.Control.DrawFeature(lineLayer,
+                      OpenLayers.Handler.Path),
+              polygon: new OpenLayers.Control.DrawFeature(polygonLayer,
+                      OpenLayers.Handler.Polygon),
+              box: new OpenLayers.Control.DrawFeature(boxLayer,
+                      OpenLayers.Handler.RegularPolygon, {
+                        handlerOptions: {
+                          sides: 4,
+                          irregular: true
+                        }
+                      }
+              )
+            };
+
+            for (var key in drawControls) {
+              map.addControl(drawControls[key]);
+            }
+
+            map.setCenter(new OpenLayers.LonLat(0, 0), 4);
+          }
+
+          function GeometryWasDrawn(polygonObject) {
+            console.log('drawn polygon', polygonObject);
+            //console.log('bounds', polygonLayer.features[0].geometry.getBounds());
+            console.log('polygonLayer', polygonLayer);
+            /*var ft = polygonLayer.features;
+            for(var i=0; i< ft.length; i++){
+              console.log(polygonLayer.features[i].geometry.getBounds());
+              displayWKT(polygonLayer.features[i]);
+            };*/
+            var wktValue = generateWKT(polygonObject.feature);
+            scope.config.data = wktValue;
+            console.log('new map config', scope.config);
+            scope.$apply();
+            document.getElementById('wkt').value = wktValue;
+          }
+
+          function generateWKT(feature) {
+            var str = wkt.write(feature);
+            // not a good idea in general, just for this demo
+            str = str.replace(/,/g, ', ');
+            //document.getElementById('info').innerHTML = str;
+            //console.log('display wkt', str);
+            return str;
+          }
+
+          function parseWKT() {
+            var element = document.getElementById('wkt');
+            var features = wkt.read(element.value);
+            var bounds;
+            if(features) {
+              if(features.constructor != Array) {
+                features = [features];
+              }
+              for(var i=0; i<features.length; ++i) {
+                if (!bounds) {
+                  bounds = features[i].geometry.getBounds();
+                } else {
+                  bounds.extend(features[i].geometry.getBounds());
+                }
+
+              }
+              polygonLayer.addFeatures(features);
+              map.zoomToExtent(bounds);
+              var plural = (features.length > 1) ? 's' : '';
+              console.log('Added WKT-String. Feature' + plural + ' added');
+            } else {
+              console.log('Bad WKT');
+            }
+          }
+
+
+          // init openlayers
+          init();
+
+          // dummy test for parsing wkt string
+          parseWKT();
+
+          // set geometry
+          var control = drawControls[scope.geometry];
+          control.activate();
+        }
+      };
+    })
     
     .controller('AppCtrl', ['$scope', function($scope) {
         var graph = new rdf.GraphImpl();
         
         var s = rdf.NodeFactory.createUri('http://s');
-        var p = rdf.NodeFactory.createUri('http://p');
+        var p1 = rdf.NodeFactory.createUri('http://p');
+        var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
         var o1 = rdf.NodeFactory.createUri('http://o1');
         var o2 = rdf.NodeFactory.createUri('http://o2');
+        var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
         
-        //var t1 = new rdf.Triple(s, p, o1);
-        var t2 = new rdf.Triple(s, p, o2);
-        
-        //graph.add(t1);
+        var t1 = new rdf.Triple(s, p1, o1);
+        var t2 = new rdf.Triple(s, p1, o2);
+        var t3 = new rdf.Triple(s, p2, o3);
+
+        graph.add(t1);
         graph.add(t2);
+        graph.add(t3);
         
-        console.log(graph);
+        console.log('graph', graph);
         //console.log(graph.contains(t1));
         
-        var ref = new ObjectRef(s, p, 0);
+        var ref = new ObjectRef(s, p1, 0);
+        var ref2 = new ObjectRef(s, p1, 1);
+        var ref3 = new ObjectRef(s, p2, 0);
         
         console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
+        console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
 
         $scope.lang = 'en';
 
@@ -442,7 +644,24 @@
 
 
         $scope.myModel = "hello world";
-        
+
+        // Map Widget Configuration
+        $scope.myMapsModel = "Foo";
+        // OpenLayers Map
+        $scope.mapConfig = {
+          'zoom' : 8,
+          'data' : 'POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))'
+        };
+
+        $scope.geometryConfig = "polygon";
+
+
+        // generate graph
+
+        $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
+        $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
+
+        $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
         $scope.graph = graph;
         $scope.$watch('"" + graph', function() {
             console.log('Graph: ' + graph);
@@ -454,8 +673,12 @@
 
 <body ng-controller="AppCtrl">
 
+    <h1>Simple edit with input</h1>
     <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
     <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+    <h1>Map widget</h1>
+    <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
+    <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
 
 </body>
 
