@@ -123,13 +123,11 @@
             }
 
             if(nodeState.hasOwnProperty('datatype')) {
-               console.log('datatype NODESTATE', nodeState);
                var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
                return result;
             }
 
             if(nodeState.hasOwnProperty('lang')) {
-              console.log('lang NODESTATE', nodeState);
               var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
               return result;
             }
@@ -179,11 +177,7 @@
         set: function(objectRef, data) {
             var val = this.tripleBuilder.getSafe(objectRef);
 
-          console.log('GRAPHINSERT val davor', val);
             _(val).extend(data);
-
-            console.log('GRAPHINSERT val danach', val);
-            console.log('GRAPHINSERT data', data);
 
             var node = NodeStateUtils.createNode(val);
             if(node != null) {
@@ -469,7 +463,7 @@
           scope.$watch(function() {
             return scope.config.data;
           }, function(newValue) {
-            console.log('map data changed !!!!: ', newValue);
+            console.log('map data changed: ', newValue);
             scope.valueStore.setData(newValue);
           });
 
@@ -542,9 +536,6 @@
           }
 
           function GeometryWasDrawn(polygonObject) {
-            console.log('drawn polygon', polygonObject);
-            //console.log('bounds', polygonLayer.features[0].geometry.getBounds());
-            console.log('polygonLayer', polygonLayer);
             /*var ft = polygonLayer.features;
             for(var i=0; i< ft.length; i++){
               console.log(polygonLayer.features[i].geometry.getBounds());
@@ -552,17 +543,13 @@
             };*/
             var wktValue = generateWKT(polygonObject.feature);
             scope.config.data = wktValue;
-            console.log('new map config', scope.config);
             scope.$apply();
             document.getElementById('wkt').value = wktValue;
           }
 
           function generateWKT(feature) {
             var str = wkt.write(feature);
-            // not a good idea in general, just for this demo
             str = str.replace(/,/g, ', ');
-            //document.getElementById('info').innerHTML = str;
-            //console.log('display wkt', str);
             return str;
           }
 
