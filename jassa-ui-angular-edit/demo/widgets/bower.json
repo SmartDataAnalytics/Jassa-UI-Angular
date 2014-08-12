@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "jassa-ui-angular": "0.0.4-SNAPSHOT",
-    "bootstrap": "3.1.0"
+    "bootstrap": "3.1.0",
+    "openlayers": "2.13.1"
   }
 }
