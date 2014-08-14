@@ -32,7 +32,7 @@ angular.module('ui.jassa.facet-typeahead', [])
 
 
             var pathSpec = modelPathMapping.pathExpr(this.scope);
-            var path = Jassa.facete.PathUtils.parsePathSpec(pathSpec);
+            var path = jassa.facete.PathUtils.parsePathSpec(pathSpec);
             
             // Hack - the facetService should only depend on FacetConfig
             var tmp = fct.getFacetConfig();
@@ -40,13 +40,13 @@ angular.module('ui.jassa.facet-typeahead', [])
             var cm = tmp.getConstraintManager();
             var cmClone = cm.shallowClone();
             
-            var facetConfig = new Jassa.facete.FacetConfig();
+            var facetConfig = new jassa.facete.FacetConfig();
             facetConfig.setConstraintManager(cmClone);
             facetConfig.setBaseConcept(tmp.getBaseConcept());
             facetConfig.setRootFacetNode(tmp.getRootFacetNode());
             facetConfig.setLabelMap(tmp.getLabelMap());
             
-            var facetTreeConfig = new Jassa.facete.FacetTreeConfig();
+            var facetTreeConfig = new jassa.facete.FacetTreeConfig();
             //facetTreeConfig.setFacetConfig(facetConfig);
             // TODO HACK Use a setter instead
             facetTreeConfig.facetConfig = facetConfig;
@@ -61,12 +61,12 @@ angular.module('ui.jassa.facet-typeahead', [])
                     return null;
                 }
 
-                var val = rdf.NodeFactory.createPlainLiteral(valStr);
+                var val = jassa.rdf.NodeFactory.createPlainLiteral(valStr);
                 var pathSpec = item.pathExpr(self.$scope);
-                var path = Jassa.facete.PathUtils.parsePathSpec(pathSpec);
+                var path = jassa.facete.PathUtils.parsePathSpec(pathSpec);
 
 
-                var r = new Jassa.facete.ConstraintRegex(path, val);
+                var r = new jassa.facete.ConstraintRegex(path, val);
                 return r;
             });
             
@@ -77,7 +77,7 @@ angular.module('ui.jassa.facet-typeahead', [])
             });
 
             
-            var facetValueService = new Jassa.facete.FacetValueService(sparqlService, facetTreeConfig);
+            var facetValueService = new jassa.facete.FacetValueService(sparqlService, facetTreeConfig);
             var fetcher = facetValueService.createFacetValueFetcher(path, filterString);
             
             var p1 = fetcher.fetchData(offset, limit); //offset);
@@ -102,7 +102,7 @@ angular.module('ui.jassa.facet-typeahead', [])
                 return r;
             });
 
-            var result = Jassa.sponate.angular.bridgePromise(p4, this.$q.defer(), this.$scope.$root);
+            var result = jassa.sponate.angular.bridgePromise(p4, this.$q.defer(), this.$scope.$root);
             return result;
         }
     });
