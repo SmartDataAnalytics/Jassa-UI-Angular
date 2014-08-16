@@ -491,7 +491,7 @@
           });
 
 
-          var map, drawControls, polygonLayer, wkt, vectors;
+          var map, drawControls, wkt, vectors;
 
           function init() {
             map = new OpenLayers.Map('jassa-edit-map');
@@ -542,11 +542,6 @@
           }
 
           function GeometryWasDrawn(drawnGeometry) {
-            /*var ft = polygonLayer.features;
-            for(var i=0; i< ft.length; i++){
-              console.log(polygonLayer.features[i].geometry.getBounds());
-              displayWKT(polygonLayer.features[i]);
-            };*/
             var wktValue = generateWKT(drawnGeometry.feature);
             scope.config.data = wktValue;
             scope.$apply();
