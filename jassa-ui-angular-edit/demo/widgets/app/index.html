@@ -2,685 +2,729 @@
 <html ng-app="jassa.ui.edit.demo.widgets">
 
 <head>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <title>RDF Edit Demo</title>
+<title>RDF Edit Demo</title>
 
-    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <!-- build:css(.tmp) styles/main.css -->
-	
-    <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
-    <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
-    <!-- endbower -->
+<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+<!-- build:css(.tmp) styles/main.css -->
 
-    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+<!-- bower:css -->
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
+<link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+<!-- endbower -->
 
-    <!-- endbuild -->
+<link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
 
-
-    <!-- build:js scripts/scripts.js -->
-	
-    <script src="bower_components/jscache/cache.js"></script>
-
-    <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
-    <script src="bower_components/jassa/jassa.js"></script>
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
-    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
-    <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
-    <!-- endbower -->
-
-    <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
-    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
-
-    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
-
-    <!-- endbuild -->
+<!-- endbuild -->
 
 
-	<script type="text/javascript">
-    _.mixin(_.str.exports());
+<!-- build:js scripts/scripts.js -->
 
-	var rdf = jassa.rdf;
-	var sparql = jassa.sparql;
-    var service = jassa.service;
-	var sponate = jassa.sponate;
-    var facete = jassa.facete;
-    var util = jassa.util;
+<script src="bower_components/jscache/cache.js"></script>
 
-    var geo = jassa.geo;
+<!-- bower:js -->
+<script src="bower_components/jquery/jquery.js"></script>
+<script src="bower_components/underscore/underscore.js"></script>
+<script src="bower_components/jassa/jassa.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="bower_components/ng-grid/build/ng-grid.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+<script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+<script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+<!-- endbower -->
 
-	var vocab = jassa.vocab;
-	
-	
-	var ObjectRef = Class.create({
-	    initialize: function(subject, predicate, objectIndex) {
-	        this.subject = subject;
-	        this.predicate = predicate;
-	        this.objectIndex = objectIndex;
-	    },
-	    
-	    getSubject: function() {
-	        return this.subject;
-	    },
-	    
-	    getPredicate: function() {
-	        return this.predicate;
-	    },
-	    
-	    getObjectIndex: function() {
-	        return this.objectIndex;
-	    },
-	    
-	    toString: function() {
-	        return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
-	    }
-	});
+<script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+<script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+<script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+<!-- endbuild -->
 
 
-            //this.map = new util.HashMap();	
-	
+<script type="text/javascript">
+_.mixin(_.str.exports());
+
+var rdf = jassa.rdf;
+var sparql = jassa.sparql;
+var service = jassa.service;
+var sponate = jassa.sponate;
+var facete = jassa.facete;
+var util = jassa.util;
+
+var geo = jassa.geo;
+
+var vocab = jassa.vocab;
+
+
+var ObjectRef = Class.create({
+  initialize: function(subject, predicate, objectIndex) {
+    this.subject = subject;
+    this.predicate = predicate;
+    this.objectIndex = objectIndex;
+  },
+
+  getSubject: function() {
+    return this.subject;
+  },
+
+  getPredicate: function() {
+    return this.predicate;
+  },
+
+  getObjectIndex: function() {
+    return this.objectIndex;
+  },
+
+  toString: function() {
+    return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
+  }
+});
+
+
+//this.map = new util.HashMap();
+
 
 /*
-    var NodeState = Class.create({
-        initialize: function() {
-            this.termType = null;
-            this.lexicalForm = null;
-            this.datatype = null;
-            this.lang = null;
-        },
+ var NodeState = Class.create({
+ initialize: function() {
+ this.termType = null;
+ this.lexicalForm = null;
+ this.datatype = null;
+ this.lang = null;
+ },
 
-        getLexicalForm: function() {
-            return this.lexicalForm;
-        },
+ getLexicalForm: function() {
+ return this.lexicalForm;
+ },
 
-        getLang: function() {
-            return this.lang;
-        },
+ getLang: function() {
+ return this.lang;
+ },
 
-        setLexicalForm: function(lexicalForm) {
-            this.lexicalForm = lexicalForm;
-        },
+ setLexicalForm: function(lexicalForm) {
+ this.lexicalForm = lexicalForm;
+ },
 
-        setLang: function(lang) {
-            this.lang = lang;
-        }
-    });
-*/
+ setLang: function(lang) {
+ this.lang = lang;
+ }
+ });
+ */
 
-    var NodeStateUtils = {
-        createNode: function(nodeState) {
-            // TODO Implement properly
-            if(nodeState.lexicalForm == null) {
-                return null;
-            }
+var NodeStateUtils = {
+  createNode: function(nodeState) {
+    // TODO Implement properly
+    if(nodeState.lexicalForm == null) {
+      return null;
+    }
 
-            if(nodeState.hasOwnProperty('datatype')) {
-               var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
-               return result;
-            }
+    if(nodeState.hasOwnProperty('datatype')) {
+      var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+      return result;
+    }
 
-            if(nodeState.hasOwnProperty('lang')) {
-              var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
-              return result;
-            }
+    if(nodeState.hasOwnProperty('lang')) {
+      var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+      return result;
+    }
 
-            var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+    var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
 
-            return result;
-        }
-    };
-
-
-    var TripleBuilder = Class.create({
-        initialize: function() {
-            //this.map = new util.HashMap();
-            this.map = {};
-        },
-        getSafe: function(objectRef) {
-            var key = '' + objectRef;
-            var result = this.map[key];
-
-            if(result == null) {
-                result = {};
-                this.map[key] = result;
-            }
-
-            return result;
-        },
-        remove: function(objectRef) {
-            var key = '' + objectRef;
-            delete this.map[key];
-        }
-    });
+    return result;
+  }
+};
 
 
-    var GraphInserter = Class.create({
-        initialize: function(graph) {
-            this.graph = graph;
-            this.tripleBuilder = new TripleBuilder();
-        },
+var TripleBuilder = Class.create({
+  initialize: function() {
+    //this.map = new util.HashMap();
+    this.map = {};
+  },
+  getSafe: function(objectRef) {
+    var key = '' + objectRef;
+    var result = this.map[key];
 
-        get: function(objectRef) {
-            // TODO Maybe we need to check if the reference has been overridden in the triple builder
-            var result = ObjectRefUtils.getTriple(this.graph, objectRef);
-            return result;
-        },
+    if(result == null) {
+      result = {};
+      this.map[key] = result;
+    }
 
-        set: function(objectRef, data) {
-            var val = this.tripleBuilder.getSafe(objectRef);
-
-            _(val).extend(data);
-
-            var node = NodeStateUtils.createNode(val);
-            if(node != null) {
-                var t = ObjectRefUtils.getTriple(this.graph, objectRef);
-
-                if(t != null) {
-		            this.graph.remove(t);
-		        }
-		        
-                var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
-		        this.graph.add(nt);
-            }
-        }
-    });
-
-    var GraphInserterUtils = {
-        getObject: function(graphInserter, objectRef) {
-            var t = graphInserter.get(objectRef);
-            var result = t == null ? null : t.getObject();
-            return result;
-        }
-    };
-
-	var ns = {};
+    return result;
+  },
+  remove: function(objectRef) {
+    var key = '' + objectRef;
+    delete this.map[key];
+  }
+});
 
 
-	ns.NodeMapper = Class.create({
-        toNode: function(obj) {
-            console.log('Implement me');
-        },
-        toObject: function(node) {
-            console.log('Implement me');
-        }
-	});
+var GraphInserter = Class.create({
+  initialize: function(graph) {
+    this.graph = graph;
+    this.tripleBuilder = new TripleBuilder();
+  },
 
-	
-	ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
-        /**
-         * @param fnLang function returning a language tag
-         */
-	    initialize: function(lang) {
-	        this.lang = lang;
-	    },
+  get: function(objectRef) {
+    // TODO Maybe we need to check if the reference has been overridden in the triple builder
+    var result = ObjectRefUtils.getTriple(this.graph, objectRef);
+    return result;
+  },
 
-	    // obj is expected to be a string
-	    toNode: function(obj) {
-            //var lang = this.fnLang();
-	        var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
-	        return result;
-	    },
+  set: function(objectRef, data) {
+    var val = this.tripleBuilder.getSafe(objectRef);
 
-	    toObject: function(node) {
-	        var result = node.getLiteralValue();
-	        return result;
-	    }
-	});
+    _(val).extend(data);
 
-    
+    var node = NodeStateUtils.createNode(val);
+    if(node != null) {
+      var t = ObjectRefUtils.getTriple(this.graph, objectRef);
 
-	ns.ValueStore = Class.create({
-	    getData: function() {
-	        console.log('Implement me');
-	    },
-	    setData: function(data) {
-	        console.log('Implement me');
-	    }
-	});
-	
-    ns.ValueStoreLex = Class.create({
-        initialize: function(graphInserter, objectRef) {
-            this.graphInserter = graphInserter;
-            this.objectRef = objectRef;
-        },
-        
-        getData: function() {
-            var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-            var result = o == null ? null : o.getLiteralLexicalForm();
-            return result;
-        },
-        
-        setData: function(data) {
-            this.graphInserter.set(this.objectRef, {lexicalForm: data});
-        }
-    });
+      if(t != null) {
+        this.graph.remove(t);
+      }
 
-    ns.ValueStoreLang = Class.create({
-        initialize: function(graphInserter, objectRef) {
-            this.graphInserter = graphInserter;
-            this.objectRef = objectRef;
-        },
-        
-        getData: function() {
-            var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-            console.log('o',o);
-            var result = o == null ? null : o.getLiteralLanguage();
-            return result;
-        },
-        
-        setData: function(data) {
-            this.graphInserter.set(this.objectRef, {lang: data});
-        }
-    });
+      var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
+      this.graph.add(nt);
+    }
+  }
+});
 
-    ns.ValueStoreDatatype = Class.create({
-      initialize: function(graphInserter, objectRef) {
-        this.graphInserter = graphInserter;
-        this.objectRef = objectRef;
-      },
+var GraphInserterUtils = {
+  getObject: function(graphInserter, objectRef) {
+    var t = graphInserter.get(objectRef);
+    var result = t == null ? null : t.getObject();
+    return result;
+  }
+};
 
-      getData: function() {
-        var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-        var result = o == null ? null : o.getLiteralDatatype();
-        return result;
-      },
+var ns = {};
 
-      setData: function(data) {
-        this.graphInserter.set(this.objectRef, {datatype: data});
+
+ns.NodeMapper = Class.create({
+  toNode: function(obj) {
+    console.log('Implement me');
+  },
+  toObject: function(node) {
+    console.log('Implement me');
+  }
+});
+
+
+ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
+  /**
+   * @param fnLang function returning a language tag
+   */
+  initialize: function(lang) {
+    this.lang = lang;
+  },
+
+  // obj is expected to be a string
+  toNode: function(obj) {
+    //var lang = this.fnLang();
+    var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
+    return result;
+  },
+
+  toObject: function(node) {
+    var result = node.getLiteralValue();
+    return result;
+  }
+});
+
+
+
+ns.ValueStore = Class.create({
+  getData: function() {
+    console.log('Implement me');
+  },
+  setData: function(data) {
+    console.log('Implement me');
+  }
+});
+
+ns.ValueStoreLex = Class.create({
+  initialize: function(graphInserter, objectRef) {
+    this.graphInserter = graphInserter;
+    this.objectRef = objectRef;
+  },
+
+  getData: function() {
+    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+    var result = o == null ? null : o.getLiteralLexicalForm();
+    return result;
+  },
+
+  setData: function(data) {
+    this.graphInserter.set(this.objectRef, {lexicalForm: data});
+  }
+});
+
+ns.ValueStoreLang = Class.create({
+  initialize: function(graphInserter, objectRef) {
+    this.graphInserter = graphInserter;
+    this.objectRef = objectRef;
+  },
+
+  getData: function() {
+    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+    console.log('o',o);
+    var result = o == null ? null : o.getLiteralLanguage();
+    return result;
+  },
+
+  setData: function(data) {
+    this.graphInserter.set(this.objectRef, {lang: data});
+  }
+});
+
+ns.ValueStoreDatatype = Class.create({
+  initialize: function(graphInserter, objectRef) {
+    this.graphInserter = graphInserter;
+    this.objectRef = objectRef;
+  },
+
+  getData: function() {
+    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+    var result = o == null ? null : o.getLiteralDatatype();
+    return result;
+  },
+
+  setData: function(data) {
+    this.graphInserter.set(this.objectRef, {datatype: data});
+  }
+});
+
+/*
+ ns.ValueStoreLang = Class.create({
+ initialize: function(graph, objectRef) {
+ this.graph = graph;
+ this.objectRef = objectRef;
+ },
+
+ getData: function() {
+ var node = ObjectRefUtils.getObject(this.graph, this.objectRef);
+
+ var result = node == null ? null : node.getLiteralLanguage();
+ return result;
+ },
+
+ setData: function(lang) {
+ var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
+ if(t != null) {
+ this.graph.remove(t);
+
+ var o = t.getObject();
+ // TODO Add validation that we are dealing with literal nodes
+
+ var str = o.getLiteralValue();
+ var node = rdf.NodeFactory.createPlainLiteral(str, lang);
+
+ var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
+ this.graph.add(nt);
+ }
+ }
+ });
+ */
+
+var foo = ns;
+
+
+
+var ns = jassa.rdf;
+ns.GraphImpl = Class.create({
+  initialize: function() {
+    this.triples = new util.HashSet();
+  },
+
+  add: function(triple) {
+    this.triples.add(triple);
+  },
+
+  remove: function(triple) {
+    this.triples.remove(triple);
+  },
+
+  contains: function(triple) {
+    return this.triples.contains(triple);
+  },
+
+  toArray: function() {
+    return this.triples.entries();
+  },
+
+  toString: function() {
+    return '' + this.triples;
+  }
+});
+
+var ObjectRefUtils = {
+  getObject: function(graph, objectRef) {
+    var candidateTriple = this.getTriple(graph, objectRef);
+
+    var result = candidateTriple ? candidateTriple.getObject() : null;
+    return result;
+  },
+
+  getTriple: function(graph, objectRef) {
+    var ts = graph.toArray();
+    var i = 0;
+
+    var result = _(ts).find(function(t) {
+      var c = objectRef.getSubject().equals(t.getSubject()) &&
+              objectRef.getPredicate().equals(t.getPredicate());
+
+      if(c && objectRef.getObjectIndex() === i) {
+        return true;
+      }
+
+      if(c) {
+        ++i;
       }
     });
-   
-/*
-    ns.ValueStoreLang = Class.create({
-        initialize: function(graph, objectRef) {
-            this.graph = graph;
-            this.objectRef = objectRef;
-        },
-        
-        getData: function() {
-            var node = ObjectRefUtils.getObject(this.graph, this.objectRef);
-            
-            var result = node == null ? null : node.getLiteralLanguage();
-            return result;
-        },
-        
-        setData: function(lang) {
-            var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
-            if(t != null) {
-                this.graph.remove(t);
-                
-                var o = t.getObject();
-                // TODO Add validation that we are dealing with literal nodes
 
-                var str = o.getLiteralValue();
-                var node = rdf.NodeFactory.createPlainLiteral(str, lang);
+    return result;
+  }
+};
 
-                var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
-                this.graph.add(nt);
+
+angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
+
+  /*
+   .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {
+   $scope.$watch('valueStore.getData()', function(val) {
+   $scope.ngModel = val;
+   });
+
+   $scope.$watch('ngModel', function() {
+
+   });
+   }])
+   */
+
+        .directive('jassaEditText', function() {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<input type="text" class="form-control" placeholder="Foo"></input>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
             }
-        }
-    });
-*/
+          };
+        })
 
-    var foo = ns;
+        .directive('jassaEditMap', function() {
+          return {
+            restrict: 'E',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<div id="jassa-edit-map" style="width: 100%; height: 300px;"><input type="radio" value="point" name="geometry" ng-model="chooseGeometry" /><label>Point</label><input type="radio" value="line" name="geometry" ng-model="chooseGeometry" /><label>Line</label><input type="radio" value="polygon" name="geometry" ng-model="chooseGeometry" /><label>Polygon</label><input type="radio" value="box" name="geometry" ng-model="chooseGeometry" /><label>Box</label><input type="text" class="form-control" ng-model="wkt" /></div>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'config': '=',
+              'geometry': '=',
+              'valueStore': '='
+            },
+            //controller: 'JassaEditMapCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              console.log('link function map');
+              //console.log('geometry', scope.geometry);
+              //console.log('mapConfig', scope.config);
+              //console.log('valueStoreMap', scope.valueStore);
+              scope.wkt = scope.config.data;
+              scope.chooseGeometry = scope.geometry;
 
-    
-    
-	var ns = jassa.rdf;
-	ns.GraphImpl = Class.create({
-	    initialize: function() {
-	        this.triples = new util.HashSet();
-	    },
+              scope.$watch(function() {
+                return scope.wkt;
+              }, function(newValue) {
+                console.log('new value of input', newValue);
+                parseWKT();
+              });
 
-	    add: function(triple) {
-	        this.triples.add(triple);
-	    },
-	    
-	    remove: function(triple) {
-	        this.triples.remove(triple);
-	    },
-	    
-	    contains: function(triple) {
-	        return this.triples.contains(triple);
-	    },
-	    
-	    toArray: function() {
-	        return this.triples.entries();
-	    },
+              scope.$watch(function() {
+                return scope.config.data;
+              }, function(newValue) {
+                console.log('map data changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
 
-	    toString: function() {
-	        return '' + this.triples;
-	    }
-	});
-	
-	var ObjectRefUtils = {
-	    getObject: function(graph, objectRef) {
-	        var candidateTriple = this.getTriple(graph, objectRef);
-	        
-	        var result = candidateTriple ? candidateTriple.getObject() : null;
-	        return result;
-	    },
-	        
-	    getTriple: function(graph, objectRef) {
-	        var ts = graph.toArray();
-	        var i = 0;
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset for map value: ', newValue);
+                scope.wkt = scope.config.data;
+              });
 
-	        var result = _(ts).find(function(t) {
-	            var c = objectRef.getSubject().equals(t.getSubject()) &&
-	                    objectRef.getPredicate().equals(t.getPredicate());
-	            
-	            if(c && objectRef.getObjectIndex() === i) {
-	                return true;
-	            }
-
-	            if(c) {
-	                ++i;
-	            }
-	        });
-	            
-	        return result;
-	    }
-	};
-	
-	
-    angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
-
-    /*
-    .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {
-        $scope.$watch('valueStore.getData()', function(val) {
-            $scope.ngModel = val;
-        });
-        
-        $scope.$watch('ngModel', function() {
-            
-        });
-    }])
-    */
-    
-    .directive('jassaEditText', function() {
-	    return {
-	        restrict: 'EA',
-	        replace: true,
-	        //templateUrl: 'template/constraint-list/constraint-list.html',
-	        template: '<input type="text" class="form-control" placeholder="Foo"></input>',
-	        transclude: false,
-	        //require: 'constraintList',
-	        require: 'ngModel',
-	        scope: {
-	            'valueStore': '='
-	            //model: '=ngModel'
-	            //'ngModel': '='
-	        },
-	        //controller: 'JassaEditTextCtrl',
-	        link: function(scope, element, attrs, ngModel) {
-	            scope.$watch(function () {
-	                return ngModel.$modelValue;
-	            }, function(newValue) {
-	                console.log('model changed: ', newValue);
-	                scope.valueStore.setData(newValue);
-	            });
-	            
-	            scope.$watch(function() {
-	                return scope.valueStore.getData();
-	            }, function(newValue) {
-	                console.log('data reset: ', newValue);
-	                ngModel.$modelValue = newValue;
-	            });
-	        }
-	    };
-	  })
-
-    .directive('jassaEditMap', function() {
-      return {
-        restrict: 'E',
-        replace: true,
-        //templateUrl: 'template/constraint-list/constraint-list.html',
-        template: '<div id="jassa-edit-map" style="width: 100%; height: 300px;"><input type="radio" value="point" name="geometry" ng-model="chooseGeometry" /><label>Point</label><input type="radio" value="line" name="geometry" ng-model="chooseGeometry" /><label>Line</label><input type="radio" value="polygon" name="geometry" ng-model="chooseGeometry" /><label>Polygon</label><input type="radio" value="box" name="geometry" ng-model="chooseGeometry" /><label>Box</label><input type="text" class="form-control" ng-model="wkt" /></div>',
-        transclude: false,
-        //require: 'constraintList',
-        require: 'ngModel',
-        scope: {
-          'config': '=',
-          'geometry': '=',
-          'valueStore': '='
-        },
-        //controller: 'JassaEditMapCtrl',
-        link: function(scope, element, attrs, ngModel) {
-          console.log('link function map');
-          //console.log('geometry', scope.geometry);
-          //console.log('mapConfig', scope.config);
-          //console.log('valueStoreMap', scope.valueStore);
-          scope.wkt = scope.config.data;
-          scope.chooseGeometry = scope.geometry;
-
-          scope.$watch(function() {
-            return scope.wkt;
-          }, function(newValue) {
-            console.log('new value of input', newValue);
-            parseWKT();
-          });
-
-          scope.$watch(function() {
-            return scope.config.data;
-          }, function(newValue) {
-            console.log('map data changed: ', newValue);
-            scope.valueStore.setData(newValue);
-          });
-
-          scope.$watch(function() {
-            return scope.valueStore.getData();
-          }, function(newValue) {
-            console.log('data reset for map value: ', newValue);
-            scope.wkt = scope.config.data;
-          });
-
-          scope.$watch(function() {
-            return scope.chooseGeometry;
-          }, function(newValue) {
-            console.log('radio', scope.chooseGeometry);
-            scope.geometry = newValue;
-            toggleControl();
-          });
+              scope.$watch(function() {
+                return scope.chooseGeometry;
+              }, function(newValue) {
+                console.log('radio', scope.chooseGeometry);
+                scope.geometry = newValue;
+                toggleControl();
+              });
 
 
-          var map, drawControls, wkt, vectors;
+              var map, drawControls, polygonLayer, panel, wkt, vectors;
 
-          function init() {
-            map = new OpenLayers.Map('jassa-edit-map');
+              function init() {
+                map = new OpenLayers.Map('jassa-edit-map');
 
-            var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
-                    "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
+                var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
+                        "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
 
-            // allow testing of specific renderers via "?renderer=Canvas", etc
-            var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
-            renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+                panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
 
-            vectors = new OpenLayers.Layer.Vector("Vector Layer", {
-              renderers: renderer
-            });
+                var snapVertex = {methods: ['vertex', 'edge'], layers: [vectors]};
 
-            map.addLayers([wmsLayer, vectors]);
-            map.addControl(new OpenLayers.Control.LayerSwitcher());
-            map.addControl(new OpenLayers.Control.MousePosition());
 
-            vectors.events.on({
-              sketchcomplete: GeometryWasDrawn
-            });
 
-            wkt = new OpenLayers.Format.WKT();
+                // allow testing of specific renderers via "?renderer=Canvas", etc
+                var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+                renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 
-            drawControls = {
-              point: new OpenLayers.Control.DrawFeature(vectors,
-                      OpenLayers.Handler.Point),
-              line: new OpenLayers.Control.DrawFeature(vectors,
-                      OpenLayers.Handler.Path),
-              polygon: new OpenLayers.Control.DrawFeature(vectors,
-                      OpenLayers.Handler.Polygon),
-              box: new OpenLayers.Control.DrawFeature(vectors,
-                      OpenLayers.Handler.RegularPolygon, {
-                        handlerOptions: {
-                          sides: 4,
-                          irregular: true
-                        }
-                      }),
-              modify: new OpenLayers.Control.ModifyFeature(vectors)
-            };
+                vectors = new OpenLayers.Layer.Vector("Vector Layer", {
+                  renderers: renderer
+                });
 
-            for (var key in drawControls) {
-              map.addControl(drawControls[key]);
-            }
+                map.addLayers([wmsLayer, vectors]);
+                map.addControl(new OpenLayers.Control.LayerSwitcher());
+                map.addControl(new OpenLayers.Control.MousePosition());
 
-            map.setCenter(new OpenLayers.LonLat(0, 0), 4);
-          }
+                vectors.events.on({
+                  sketchcomplete: GeometryWasDrawn
+                });
 
-          function GeometryWasDrawn(drawnGeometry) {
-            var wktValue = generateWKT(drawnGeometry.feature);
-            scope.config.data = wktValue;
-            scope.$apply();
-          }
+                wkt = new OpenLayers.Format.WKT();
 
-          function generateWKT(feature) {
-            var str = wkt.write(feature);
-            str = str.replace(/,/g, ', ');
-            return str;
-          }
+                drawControls = {
+                  point: new OpenLayers.Control.DrawFeature(vectors,
+                          OpenLayers.Handler.Point, {
+                            displayClass: 'olControlDrawFeaturePoint',
+                            handlerOptions: snapVertex}),
+                  line: new OpenLayers.Control.DrawFeature(vectors,
+                          OpenLayers.Handler.Path, {
+                            displayClass: 'olControlDrawFeaturePath',
+                            handlerOptions: snapVertex}),
+                  polygon: new OpenLayers.Control.DrawFeature(vectors,
+                          OpenLayers.Handler.Polygon, {
+                            displayClass: 'olControlDrawFeaturePolygon',
+                            handlerOptions: snapVertex}),
+                  box: new OpenLayers.Control.DrawFeature(vectors,
+                          OpenLayers.Handler.RegularPolygon, {
+                            displayClass: 'olControlDrawFeatureBox',
+                            handlerOptions: _.extend({
+                              sides: 4,
+                              irregular: true
+                            }, snapVertex)
+                          }),
+                  modify: new OpenLayers.Control.ModifyFeature(vectors, {
+                    snappingOptions: snapVertex,
+                    onModificationStart: onModificationStart,
+                    onModification: onModification,
+                    onModificationEnd: onModificationEnd
+                  })
+                };
 
-          function parseWKT() {
-            //var element = document.getElementById('wkt');
-            var features = wkt.read(scope.config.data);
-            var bounds;
-            if(features) {
-              if(features.constructor != Array) {
-                features = [features];
-              }
-              for(var i=0; i<features.length; ++i) {
-                if (!bounds) {
-                  bounds = features[i].geometry.getBounds();
-                } else {
-                  bounds.extend(features[i].geometry.getBounds());
+                panel.addControls(drawControls['modify']);
+                map.addControl(panel);
+                panel.activateControl(drawControls.modify);
+
+                for (var key in drawControls) {
+                  map.addControl(drawControls[key]);
                 }
 
+                map.setCenter(new OpenLayers.LonLat(0, 0), 4);
               }
-              vectors.addFeatures(features);
-              map.zoomToExtent(bounds);
-              var plural = (features.length > 1) ? 's' : '';
-              console.log('Added WKT-String. Feature' + plural + ' added');
-            } else {
-              console.log('Bad WKT');
-            }
-          }
 
-          function toggleControl() {
-            console.log('toggleControl', scope.geometry);
-            var control = drawControls[scope.geometry];
-            for(key in drawControls) {
-              var control = drawControls[key];
-              if(scope.geometry == key && scope.chooseGeometry) {
-                control.activate();
-              } else {
-                control.deactivate();
+              function GeometryWasDrawn(drawnGeometry) {
+                /*var ft = polygonLayer.features;
+                 for(var i=0; i< ft.length; i++){
+                 console.log(polygonLayer.features[i].geometry.getBounds());
+                 displayWKT(polygonLayer.features[i]);
+                 };*/
+                var wktValue = generateWKT(drawnGeometry.feature);
+                scope.config.data = wktValue;
+                scope.$apply();
               }
+
+              function generateWKT(feature) {
+                var str = wkt.write(feature);
+                str = str.replace(/,/g, ', ');
+                return str;
+              }
+
+              function parseWKT() {
+                //var element = document.getElementById('wkt');
+                var features = wkt.read(scope.config.data);
+                var bounds;
+                if(features) {
+                  if(features.constructor != Array) {
+                    features = [features];
+                  }
+                  for(var i=0; i<features.length; ++i) {
+                    if (!bounds) {
+                      bounds = features[i].geometry.getBounds();
+                    } else {
+                      bounds.extend(features[i].geometry.getBounds());
+                    }
+
+                  }
+                  vectors.addFeatures(features);
+                  map.zoomToExtent(bounds);
+                  var plural = (features.length > 1) ? 's' : '';
+                  console.log('Added WKT-String. Feature' + plural + ' added');
+                } else {
+                  console.log('Bad WKT');
+                }
+              }
+
+              function toggleControl() {
+                console.log('toggleControl', scope.geometry);
+                var control = drawControls[scope.geometry];
+                for(key in drawControls) {
+                  var control = drawControls[key];
+                  if(scope.geometry == key && scope.chooseGeometry) {
+                    control.activate();
+                  } else {
+                    control.deactivate();
+                  }
+                }
+              }
+
+              function onModificationStart(feature) {
+                console.log(feature.id + " is ready to be modified");
+                drawControls[scope.geometry].deactivate();
+
+              }
+
+              function onModification(feature) {
+                console.log(feature.id + " has been modified");
+                var wktValue = generateWKT(feature);
+                scope.config.data = wktValue;
+                scope.$apply();
+              }
+
+              function onModificationEnd(feature) {
+                console.log(feature.id + " is finished to be modified");
+                drawControls[scope.geometry].activate();
+              }
+
+
+              // init openlayers
+              init();
+
+              // dummy test for parsing wkt string
+              parseWKT();
+
+              // set geometry
+              var control = drawControls[scope.geometry];
+              control.activate();
             }
-          }
+          };
+        })
+
+        .controller('AppCtrl', ['$scope', function($scope) {
+          var graph = new rdf.GraphImpl();
+
+          var s = rdf.NodeFactory.createUri('http://s');
+          var p1 = rdf.NodeFactory.createUri('http://p');
+          var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
+          var o1 = rdf.NodeFactory.createUri('http://o1');
+          var o2 = rdf.NodeFactory.createUri('http://o2');
+          var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
+
+          var t1 = new rdf.Triple(s, p1, o1);
+          var t2 = new rdf.Triple(s, p1, o2);
+          var t3 = new rdf.Triple(s, p2, o3);
+
+          graph.add(t1);
+          graph.add(t2);
+          graph.add(t3);
+
+          console.log('graph', graph);
+          //console.log(graph.contains(t1));
+
+          var ref = new ObjectRef(s, p1, 0);
+          var ref2 = new ObjectRef(s, p1, 1);
+          var ref3 = new ObjectRef(s, p2, 0);
+
+          console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
+          console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
+
+          $scope.lang = 'en';
 
 
-          // init openlayers
-          init();
-
-          // dummy test for parsing wkt string
-          parseWKT();
-
-          // set geometry
-          var control = drawControls[scope.geometry];
-          control.activate();
-        }
-      };
-    })
-    
-    .controller('AppCtrl', ['$scope', function($scope) {
-        var graph = new rdf.GraphImpl();
-        
-        var s = rdf.NodeFactory.createUri('http://s');
-        var p1 = rdf.NodeFactory.createUri('http://p');
-        var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
-        var o1 = rdf.NodeFactory.createUri('http://o1');
-        var o2 = rdf.NodeFactory.createUri('http://o2');
-        var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
-        
-        var t1 = new rdf.Triple(s, p1, o1);
-        var t2 = new rdf.Triple(s, p1, o2);
-        var t3 = new rdf.Triple(s, p2, o3);
-
-        graph.add(t1);
-        graph.add(t2);
-        graph.add(t3);
-        
-        console.log('graph', graph);
-        //console.log(graph.contains(t1));
-        
-        var ref = new ObjectRef(s, p1, 0);
-        var ref2 = new ObjectRef(s, p1, 1);
-        var ref3 = new ObjectRef(s, p2, 0);
-        
-        console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
-        console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
-
-        $scope.lang = 'en';
+          var graphInserter = new GraphInserter(graph);
 
 
-        var graphInserter = new GraphInserter(graph);
+          $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);
+          $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
 
 
-        $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);        
-        $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
+          $scope.myModel = "hello world";
+
+          // Map Widget Configuration
+          $scope.myMapsModel = "Foo";
+          // OpenLayers Map
+          $scope.mapConfig = {
+            'zoom' : 8,
+            'data' : 'POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))'
+          };
+
+          $scope.geometryConfig = "polygon";
 
 
-        $scope.myModel = "hello world";
+          // generate graph
 
-        // Map Widget Configuration
-        $scope.myMapsModel = "Foo";
-        // OpenLayers Map
-        $scope.mapConfig = {
-          'zoom' : 8,
-          'data' : 'POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))'
-        };
+          $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
+          $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
 
-        $scope.geometryConfig = "polygon";
-
-
-        // generate graph
-
-        $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
-        $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
-
-        $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
-        $scope.graph = graph;
-        $scope.$watch('"" + graph', function() {
+          $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
+          $scope.graph = graph;
+          $scope.$watch('"" + graph', function() {
             console.log('Graph: ' + graph);
-        });
-    }]);
-	</script>
+          });
+        }]);
+</script>
 
 </head>
 
 <body ng-controller="AppCtrl">
 
-    <h1>Simple edit with input</h1>
-    <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
-    <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
-    <h1>Map widget</h1>
-    <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
-    <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
+<h1>Simple edit with input</h1>
+<jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
+<jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+<h1>Map widget</h1>
+<jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
+<jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
 
 </body>
 
 </html>
-
