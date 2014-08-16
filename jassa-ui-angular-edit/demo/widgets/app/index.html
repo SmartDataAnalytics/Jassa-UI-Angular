@@ -499,49 +499,39 @@
             var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
                     "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
 
-            var pointLayer = new OpenLayers.Layer.Vector("Point Layer");
-            var lineLayer = new OpenLayers.Layer.Vector("Line Layer");
-            polygonLayer = new OpenLayers.Layer.Vector("Polygon Layer");
-            var boxLayer = new OpenLayers.Layer.Vector("Box layer");
-            vectors = new OpenLayers.Layer.Vector("Vector Layer");
+            // allow testing of specific renderers via "?renderer=Canvas", etc
+            var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+            renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 
-            map.addLayers([wmsLayer, pointLayer, lineLayer, polygonLayer, boxLayer]);
+            vectors = new OpenLayers.Layer.Vector("Vector Layer", {
+              renderers: renderer
+            });
+
+            map.addLayers([wmsLayer, vectors]);
             map.addControl(new OpenLayers.Control.LayerSwitcher());
             map.addControl(new OpenLayers.Control.MousePosition());
 
-            polygonLayer.events.on({
-              sketchcomplete : GeometryWasDrawn
-            });
-
-            boxLayer.events.on({
-              sketchcomplete: GeometryWasDrawn
-            });
-
-            pointLayer.events.on({
-              sketchcomplete: GeometryWasDrawn
-            });
-
-            lineLayer.events.on({
+            vectors.events.on({
               sketchcomplete: GeometryWasDrawn
             });
 
             wkt = new OpenLayers.Format.WKT();
 
             drawControls = {
-              point: new OpenLayers.Control.DrawFeature(pointLayer,
+              point: new OpenLayers.Control.DrawFeature(vectors,
                       OpenLayers.Handler.Point),
-              line: new OpenLayers.Control.DrawFeature(lineLayer,
+              line: new OpenLayers.Control.DrawFeature(vectors,
                       OpenLayers.Handler.Path),
-              polygon: new OpenLayers.Control.DrawFeature(polygonLayer,
+              polygon: new OpenLayers.Control.DrawFeature(vectors,
                       OpenLayers.Handler.Polygon),
-              box: new OpenLayers.Control.DrawFeature(boxLayer,
+              box: new OpenLayers.Control.DrawFeature(vectors,
                       OpenLayers.Handler.RegularPolygon, {
                         handlerOptions: {
                           sides: 4,
                           irregular: true
                         }
-                      }
-              )
+                      }),
+              modify: new OpenLayers.Control.ModifyFeature(vectors)
             };
 
             for (var key in drawControls) {
@@ -551,13 +541,13 @@
             map.setCenter(new OpenLayers.LonLat(0, 0), 4);
           }
 
-          function GeometryWasDrawn(polygonObject) {
+          function GeometryWasDrawn(drawnGeometry) {
             /*var ft = polygonLayer.features;
             for(var i=0; i< ft.length; i++){
               console.log(polygonLayer.features[i].geometry.getBounds());
               displayWKT(polygonLayer.features[i]);
             };*/
-            var wktValue = generateWKT(polygonObject.feature);
+            var wktValue = generateWKT(drawnGeometry.feature);
             scope.config.data = wktValue;
             scope.$apply();
           }
@@ -584,7 +574,7 @@
                 }
 
               }
-              polygonLayer.addFeatures(features);
+              vectors.addFeatures(features);
               map.zoomToExtent(bounds);
               var plural = (features.length > 1) ? 's' : '';
               console.log('Added WKT-String. Feature' + plural + ' added');
