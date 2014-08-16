@@ -4,6 +4,6 @@
   "dependencies": {
     "jassa-ui-angular": "0.0.4-SNAPSHOT",
     "bootstrap": "3.1.0",
-    "openlayers": "2.13.1"
+    "openlayers": "release-2.13.1"
   }
 }
