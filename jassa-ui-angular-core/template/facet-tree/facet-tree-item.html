@@ -1,6 +1,7 @@
 <div ng-class="{'frame': facet.isExpanded}">
 
-	<div class="facet-row" ng-class="{'highlite': facet.isExpanded}" ng-mouseover="setFacetHover(facet, true)" ng-mouseleave="setFacetHover(facet, false)">
+<!--	<div class="facet-row" ng-class="{'highlite': facet.isExpanded}" ng-mouseover="setFacetHover(facet, true)" ng-mouseleave="setFacetHover(facet, false)"> -->
+	<div class="facet-row" ng-class="{'highlite': facet.isExpanded}">
 		<a ng-show="facet.isExpanded" href="" ng-click="toggleCollapsed(facet.item.getPath())"><span class="glyphicon glyphicon-chevron-down"></span></a>
 		<a ng-show="!facet.isExpanded" href="" ng-click="toggleCollapsed(facet.item.getPath())"><span class="glyphicon glyphicon-chevron-right"></span></a>
 
