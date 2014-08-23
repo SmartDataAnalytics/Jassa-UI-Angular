@@ -439,6 +439,175 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           };
         })
 
+        .directive('jassaEditPlain', function() {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<div class="input-group">\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">Plain</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu" role="menu">\
+                  <li><a href="#">URI</a></li>\
+          <li><a href="#">Typed</a></li>\
+          <li><a href="#">Plain</a></li>\
+          </ul>\
+          </div>\
+          <input type="text" class="form-control" >\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">No Language</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
+                  <li><a href="#"></a></li>\
+          <li><a href="#">none</a></li>\
+          <li class="divider"></li>\
+          <li><a href="#">de</a></li>\
+          <li><a href="#">en</a></li>\
+          </ul>\
+          </div>\
+          </div>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
+            }
+          };
+        })
+
+        .directive('jassaEditTyped', function() {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<div class="input-group">\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">Typed</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu" role="menu">\
+                  <li><a href="#">URI</a></li>\
+          <li><a href="#">Typed</a></li>\
+          <li><a href="#">Plain</a></li>\
+          </ul>\
+          </div>\
+          <input type="text" class="form-control" >\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">No Datatype</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
+                  <li><a href="#"></a></li>\
+          <li><a href="#">none</a></li>\
+          <li class="divider"></li>\
+          <li><a href="#">xsd:string</a></li>\
+          <li><a href="#">xsd:int</a></li>\
+          </ul>\
+          </div>\
+          </div>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
+            }
+          };
+        })
+
+        .directive('jassaEditUri', function() {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<div class="input-group">\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">URI</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu" role="menu">\
+                  <li><a href="#">URI</a></li>\
+          <li><a href="#">Typed</a></li>\
+          <li><a href="#">Plain</a></li>\
+          </ul>\
+          </div>\
+          <input type="text" class="form-control" >\
+          </div>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
+            }
+          };
+        })
+
         .directive('jassaEditMap', function() {
           return {
             restrict: 'E',
@@ -705,12 +874,12 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
           $scope.geometryConfig = "polygon";
 
-
-          // generate graph
-
           $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
           $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
 
+
+          $scope.myValueStoreMeta = new foo.ValueStoreLex(graphInserter, ref);
+          // generate graph
           $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
           $scope.graph = graph;
           $scope.$watch('"" + graph', function() {
@@ -726,9 +895,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 <h1>Simple edit with input</h1>
 <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
 <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+<h1>Meta | Plain | Typed | URI Widget</h1>
+<jassa-edit-plain ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-plain>
+<jassa-edit-typed ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-typed>
+<jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
 <h1>Map widget</h1>
 <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
 <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
+
 
 </body>
 
