@@ -454,6 +454,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             },
             //controller: 'JassaEditMapCtrl',
             link: function(scope, element, attrs, ngModel) {
+              var map, drawControls, polygonLayer, panel, wkt, vectors;
+
               console.log('link function map');
               //console.log('geometry', scope.geometry);
               //console.log('mapConfig', scope.config);
@@ -465,6 +467,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 return scope.wkt;
               }, function(newValue) {
                 console.log('new value of input', newValue);
+                // clear layer
+                vectors.destroyFeatures();
                 parseWKT();
               });
 
@@ -491,7 +495,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               });
 
 
-              var map, drawControls, polygonLayer, panel, wkt, vectors;
+
 
               function init() {
                 map = new OpenLayers.Map('jassa-edit-map');
@@ -639,9 +643,6 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
               // init openlayers
               init();
-
-              // dummy test for parsing wkt string
-              parseWKT();
 
               // set geometry
               var control = drawControls[scope.geometry];
