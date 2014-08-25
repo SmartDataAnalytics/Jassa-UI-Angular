@@ -261,6 +261,14 @@ ns.ValueStoreLex = Class.create({
 
   setData: function(data) {
     this.graphInserter.set(this.objectRef, {lexicalForm: data});
+  },
+
+  getGraphInserter: function() {
+    return this.graphInserter;
+  },
+
+  getObjectRef: function() {
+    return this.objectRef;
   }
 });
 
@@ -279,6 +287,14 @@ ns.ValueStoreLang = Class.create({
 
   setData: function(data) {
     this.graphInserter.set(this.objectRef, {lang: data});
+  },
+
+  getGraphInserter: function() {
+    return this.graphInserter;
+  },
+
+  getObjectRef: function() {
+    return this.objectRef;
   }
 });
 
@@ -296,6 +312,14 @@ ns.ValueStoreDatatype = Class.create({
 
   setData: function(data) {
     this.graphInserter.set(this.objectRef, {datatype: data});
+  },
+
+  getGraphInserter: function() {
+    return this.graphInserter;
+  },
+
+  getObjectRef: function() {
+    return this.objectRef;
   }
 });
 
@@ -444,31 +468,21 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<button type="button" class="btn btn-primary" btn-checkbox>SPARQL Update</button>',
+            template: '<button type="button" class="btn btn-primary" ng-click="sparqlUpdateQuery()">SPARQL Update</button>',
             transclude: false,
             //require: 'constraintList',
-            require: 'ngModel',
+            //require: 'ngModel',
             scope: {
               'graph': '=',
-              'config': '='
+              'endpoint': '='
               //model: '=ngModel'
               //'ngModel': '='
             },
             //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
-              scope.$watch(function () {
-                return ngModel.$modelValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.setData(newValue);
-              });
+            link: function(scope, element, attrs) {
 
-              scope.$watch(function() {
-                return scope.valueStore.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
-              });
+
+
             }
           };
         })
@@ -481,7 +495,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             template: '',
             transclude: false,
             //require: 'constraintList',
-            require: 'ngModel',
+            //require: 'ngModel',
             scope: {
               'valueStore': '='
               //model: '=ngModel'
@@ -509,19 +523,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 });
               }
 
-              scope.$watch(function () {
-                return ngModel.$modelValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.setData(newValue);
-              });
 
-              scope.$watch(function() {
-                return scope.valueStore.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
-              });
             }
           };
         })
@@ -544,40 +546,48 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li><a href="#">Plain</a></li>\
           </ul>\
           </div>\
-          <input type="text" class="form-control"></input>\
+          <input type="text" class="form-control" ng-model="plainValue"></input>\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">{{language === "none" ? "No Language" : language}}</button>\
+                  <button type="button" class="btn btn-default" tabindex="-1">{{language.length === 0 ? "No Language" : language}}</button>\
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
           <ul class="dropdown-menu dropdown-menu-right" role="menu">\
-                  <li><a href="#"></a></li>\
+                  <li><a ng-click="setLanguage()" href="#">none</a></li>\
           <li ng-repeat="tag in languageTags"><a ng-click="setLanguage(tag)" href="#">{{tag}}</a></li>\
           </ul>\
           </div>\
           </div>',
             transclude: false,
             //require: 'constraintList',
-            require: 'ngModel',
+            //require: 'ngModel',
             scope: {
               'valueStore': '='
               //model: '=ngModel'
               //'ngModel': '='
             },
             //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
+            link: function(scope, element, attrs) {
 
-              scope.languageTags = ['none', 'de', 'en'];
+              console.log('PLAIN WIDGET valuestore', scope.valueStore.getObjectRef());
 
-              scope.language = "none";
+              var valueStoreLang = new foo.ValueStoreLang(scope.valueStore.getGraphInserter(), scope.valueStore.getObjectRef());
+
+              console.log('PLAIN WIDGET lang', valueStoreLang.getData());
+
+              scope.languageTags = ['de', 'en'];
+
+              scope.language = valueStoreLang.getData();
+
+              scope.plainValue = scope.valueStore.getData();
 
               scope.setLanguage = function(tag) {
-                scope.language = tag;
+                scope.language = tag ? tag : '';
               }
 
               scope.$watch(function () {
-                return ngModel.$modelValue;
+                return scope.plainValue;
               }, function(newValue) {
                 console.log('model changed: ', newValue);
                 scope.valueStore.setData(newValue);
@@ -587,8 +597,21 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 return scope.valueStore.getData();
               }, function(newValue) {
                 console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
+                scope.plainValue = newValue;
               });
+
+              scope.$watch(function() {
+                return scope.language;
+              }, function(newValue) {
+                console.log('PLAIN WIDGET new lang', newValue);
+                if(newValue === 'none') {
+                  valueStoreLang.setData('');
+                } else {
+                  valueStoreLang.setData(newValue);
+                }
+
+              });
+
             }
           };
         })
@@ -611,40 +634,53 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li><a href="#">Plain</a></li>\
           </ul>\
           </div>\
-          <input type="text" class="form-control" >\
+          <input type="text" class="form-control" ng-model="typedValue">\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype === "none" ? "No Datatype" : datatype}}</button>\
+                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
           <ul class="dropdown-menu dropdown-menu-right" role="menu">\
-                  <li><a href="#"></a></li>\
-          <li ng-repeat="type in datatypeTags"><a ng-click="setDatatype(type)" href="#">{{type}}</a></li>\
+                  <li><a ng-click="setDatatype()" href="#">none</a></li>\
+          <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
           </ul>\
           </div>\
           </div>',
             transclude: false,
             //require: 'constraintList',
-            require: 'ngModel',
+            //require: 'ngModel',
             scope: {
               'valueStore': '='
               //model: '=ngModel'
               //'ngModel': '='
             },
             //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
+            link: function(scope, element, attrs) {
 
-              scope.datatypeTags = ['none', 'xsd:string', 'xsd:int'];
+              console.log('TYPED WIDGET valuestore', scope.valueStore.getObjectRef());
 
-              scope.datatype = "none";
+              var valueStoreDatatype = new foo.ValueStoreDatatype(scope.valueStore.getGraphInserter(), scope.valueStore.getObjectRef());
 
-              scope.setDatatype = function(datatype) {
-                scope.datatype = datatype;
+              console.log('Typed WIDGET type', valueStoreDatatype.getData());
+
+              //scope.datatypeTags = ['none', 'xsd:int', 'xsd:string'];
+
+              scope.datatypeTags = {
+                'http://www.w3.org/2001/XMLSchema#int' : 'xsd:int',
+                'http://www.w3.org/2001/XMLSchema#string' : 'xsd:string'
+              }
+
+              scope.datatype = valueStoreDatatype.getData().uri;
+
+              scope.typedValue = scope.valueStore.getData();
+
+              scope.setDatatype = function(tag) {
+                scope.datatype = tag ? tag : '';
               }
 
               scope.$watch(function () {
-                return ngModel.$modelValue;
+                return scope.typedValue;
               }, function(newValue) {
                 console.log('model changed: ', newValue);
                 scope.valueStore.setData(newValue);
@@ -654,8 +690,27 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 return scope.valueStore.getData();
               }, function(newValue) {
                 console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
+                scope.typedValue = newValue;
               });
+
+              scope.$watch(function() {
+                return scope.datatype;
+              }, function(newValue) {
+                console.log('TYPED WIDGET new type', newValue);
+                if(newValue === 'none') {
+                  valueStoreDatatype.setData('');
+                } else {
+                  valueStoreDatatype.setData(newValue);
+                }
+
+              });
+
+              /*
+              scope.$watch(function() {
+                return scope.valueStoreDatatype.getData();
+              }, function(newValue) {
+                scope.datatype = newValue;
+              });*/
             }
           };
         })
@@ -929,17 +984,25 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           var s = rdf.NodeFactory.createUri('http://s');
           var p1 = rdf.NodeFactory.createUri('http://p');
           var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
+          var p3 = rdf.NodeFactory.createUri('http://p3plaintest');
+          var p4 = rdf.NodeFactory.createUri('http://p3typedtest');
           var o1 = rdf.NodeFactory.createUri('http://o1');
           var o2 = rdf.NodeFactory.createUri('http://o2');
           var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
+          var o4 = rdf.NodeFactory.createPlainLiteral("Plain Literal with Language Tag", "en");
+          var o5 = rdf.NodeFactory.createTypedLiteralFromValue("123", "http://www.w3.org/2001/XMLSchema#int");
 
           var t1 = new rdf.Triple(s, p1, o1);
           var t2 = new rdf.Triple(s, p1, o2);
           var t3 = new rdf.Triple(s, p2, o3);
+          var t4 = new rdf.Triple(s, p3, o4);
+          var t5 = new rdf.Triple(s, p4, o5);
 
           graph.add(t1);
           graph.add(t2);
           graph.add(t3);
+          graph.add(t4);
+          graph.add(t5);
 
           console.log('graph', graph);
           //console.log(graph.contains(t1));
@@ -947,9 +1010,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           var ref = new ObjectRef(s, p1, 0);
           var ref2 = new ObjectRef(s, p1, 1);
           var ref3 = new ObjectRef(s, p2, 0);
+          var ref4 = new ObjectRef(s, p3, 0);
+          var ref5 = new ObjectRef(s, p4, 0);
 
           console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
+          console.log('Object for ref ' + ref2 + ': ' + ObjectRefUtils.getObject(graph, ref2));
           console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
+          console.log('Object for ref4 ' + ref4 + ': ' + ObjectRefUtils.getObject(graph, ref4));
+          console.log('Object for ref4 ' + ref5 + ': ' + ObjectRefUtils.getObject(graph, ref5));
 
           $scope.lang = 'en';
 
@@ -959,6 +1027,11 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
           $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);
           $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
+
+          $scope.myValueStore2 = new foo.ValueStoreLex(graphInserter, ref2);
+
+          $scope.myValueStorePlain = new foo.ValueStoreLex(graphInserter, ref4);
+          $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
 
 
           $scope.myModel = "hello world";
@@ -984,6 +1057,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           $scope.$watch('"" + graph', function() {
             console.log('Graph: ' + graph);
           });
+
+          $scope.graphImpl = graph;
+          $scope.sparqlEndpoint = 'http://localhost/sparql';
         }]);
 </script>
 
@@ -996,10 +1072,10 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
 <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
 <h1>Meta | Plain | Typed | URI Widget</h1>
-<jassa-edit-plain ng-model="myModel" value-store="myValueStore"></jassa-edit-plain>
-<jassa-edit-typed ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-typed>
+<jassa-edit-plain value-store="myValueStorePlain"></jassa-edit-plain>
+<jassa-edit-typed value-store="myValueStoreTyped"></jassa-edit-typed>
 <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
-<jassa-edit-meta typed ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-meta>
+<jassa-edit-meta typed value-store="myValueStoreTyped"></jassa-edit-meta>
 <h1>Map widget</h1>
 <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
 <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
