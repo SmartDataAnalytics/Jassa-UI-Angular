@@ -439,6 +439,93 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           };
         })
 
+        .directive('jassaEditSparqlUpdate', function() {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<button type="button" class="btn btn-primary" btn-checkbox>SPARQL Update</button>',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'graph': '=',
+              'config': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
+            }
+          };
+        })
+
+        .directive('jassaEditMeta', function($compile) {
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '',
+            transclude: false,
+            //require: 'constraintList',
+            require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs, ngModel) {
+              console.log('Meta Widget Attribute', _.has(attrs, 'plain'));
+
+              if(_.has(attrs, 'plain')) {
+                $compile('<jassa-edit-plain ng-model="ngModel" value-store="valueStore"></jassa-edit-plain>')(scope, function(cloned, scope){
+                  element.append(cloned);
+                });
+              }
+
+              if(_.has(attrs, 'typed')) {
+                $compile('<jassa-edit-typed ng-model="ngModel" value-store="valueStore"></jassa-edit-typed>')(scope, function(cloned, scope){
+                  element.append(cloned);
+                });
+              }
+
+              if(_.has(attrs, 'uri')) {
+                $compile('<jassa-edit-uri ng-model="ngModel" value-store="valueStore"></jassa-edit-uri>')(scope, function(cloned, scope){
+                  element.append(cloned);
+                });
+              }
+
+              scope.$watch(function () {
+                return ngModel.$modelValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                ngModel.$modelValue = newValue;
+              });
+            }
+          };
+        })
+
         .directive('jassaEditPlain', function() {
           return {
             restrict: 'EA',
@@ -457,19 +544,16 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li><a href="#">Plain</a></li>\
           </ul>\
           </div>\
-          <input type="text" class="form-control" >\
+          <input type="text" class="form-control"></input>\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">No Language</button>\
+                  <button type="button" class="btn btn-default" tabindex="-1">{{language === "none" ? "No Language" : language}}</button>\
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
           <ul class="dropdown-menu dropdown-menu-right" role="menu">\
                   <li><a href="#"></a></li>\
-          <li><a href="#">none</a></li>\
-          <li class="divider"></li>\
-          <li><a href="#">de</a></li>\
-          <li><a href="#">en</a></li>\
+          <li ng-repeat="tag in languageTags"><a ng-click="setLanguage(tag)" href="#">{{tag}}</a></li>\
           </ul>\
           </div>\
           </div>',
@@ -483,6 +567,15 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             },
             //controller: 'JassaEditTextCtrl',
             link: function(scope, element, attrs, ngModel) {
+
+              scope.languageTags = ['none', 'de', 'en'];
+
+              scope.language = "none";
+
+              scope.setLanguage = function(tag) {
+                scope.language = tag;
+              }
+
               scope.$watch(function () {
                 return ngModel.$modelValue;
               }, function(newValue) {
@@ -520,17 +613,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           </div>\
           <input type="text" class="form-control" >\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">No Datatype</button>\
+                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype === "none" ? "No Datatype" : datatype}}</button>\
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
           <ul class="dropdown-menu dropdown-menu-right" role="menu">\
                   <li><a href="#"></a></li>\
-          <li><a href="#">none</a></li>\
-          <li class="divider"></li>\
-          <li><a href="#">xsd:string</a></li>\
-          <li><a href="#">xsd:int</a></li>\
+          <li ng-repeat="type in datatypeTags"><a ng-click="setDatatype(type)" href="#">{{type}}</a></li>\
           </ul>\
           </div>\
           </div>',
@@ -544,6 +634,15 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             },
             //controller: 'JassaEditTextCtrl',
             link: function(scope, element, attrs, ngModel) {
+
+              scope.datatypeTags = ['none', 'xsd:string', 'xsd:int'];
+
+              scope.datatype = "none";
+
+              scope.setDatatype = function(datatype) {
+                scope.datatype = datatype;
+              }
+
               scope.$watch(function () {
                 return ngModel.$modelValue;
               }, function(newValue) {
@@ -891,14 +990,16 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 </head>
 
 <body ng-controller="AppCtrl">
-
+<h1>SPARQL Update</h1>
+<jassa-edit-sparql-update graph="graphImpl" endpoint="sparqlEndpoint"></jassa-edit-sparql-update>
 <h1>Simple edit with input</h1>
 <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
 <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
 <h1>Meta | Plain | Typed | URI Widget</h1>
-<jassa-edit-plain ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-plain>
+<jassa-edit-plain ng-model="myModel" value-store="myValueStore"></jassa-edit-plain>
 <jassa-edit-typed ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-typed>
 <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
+<jassa-edit-meta typed ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-meta>
 <h1>Map widget</h1>
 <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
 <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
