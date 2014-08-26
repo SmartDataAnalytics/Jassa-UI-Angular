@@ -123,8 +123,6 @@ var NodeStateUtils = {
       return null;
     }
 
-    console.log('NODE STATE', nodeState);
-
     if(nodeState.hasOwnProperty('datatype')) {
       var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
       return result;
@@ -282,7 +280,6 @@ ns.ValueStoreLang = Class.create({
 
   getData: function() {
     var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-    console.log('o',o);
     var result = o == null ? null : o.getLiteralLanguage();
     return result;
   },
@@ -572,21 +569,15 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //controller: 'JassaEditTextCtrl',
             link: function(scope, element, attrs) {
 
-              console.log('PLAIN WIDGET valuestore', scope.valueStore.lex.getObjectRef());
-
-              var valueStoreLang = new foo.ValueStoreLang(scope.valueStore.lex.getGraphInserter(), scope.valueStore.lex.getObjectRef());
-
-              console.log('PLAIN WIDGET lang', valueStoreLang.getData());
-
               scope.languageTags = ['de', 'en'];
 
-              scope.language = valueStoreLang.getData();
+              scope.language = scope.valueStore.lang.getData();
 
               scope.plainValue = scope.valueStore.lex.getData();
 
               scope.setLanguage = function(tag) {
                 scope.language = tag ? tag : '';
-              }
+              };
 
               scope.$watch(function () {
                 return scope.plainValue;
@@ -605,7 +596,6 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               scope.$watch(function() {
                 return scope.language;
               }, function(newValue) {
-                console.log('PLAIN WIDGET new lang', newValue);
                 if(newValue === 'none') {
                   scope.valueStore.lang.setData('');
                 } else {
@@ -666,15 +656,6 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //controller: 'JassaEditTextCtrl',
             link: function(scope, element, attrs) {
 
-              console.log('TYPED WIDGET ');
-
-              console.log('TYPED WIDGET valuestore', scope.valueStore.lex.getData());
-
-
-              console.log('Typed WIDGET type', scope.valueStore.dtype);
-
-              //scope.datatypeTags = ['none', 'xsd:int', 'xsd:string'];
-
               scope.datatypeTags = {
                 'http://www.w3.org/2001/XMLSchema#int' : 'xsd:int',
                 'http://www.w3.org/2001/XMLSchema#string' : 'xsd:string'
@@ -685,10 +666,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               scope.typedValue = scope.valueStore.lex.getData();
 
               scope.setDatatype = function(tag) {
-                console.log('TYPED WIDGET tag', tag ? tag : 'leerer String');
-
                 scope.datatype = tag ? tag : '';
-                console.log('TYPED WIDGET tag length', scope.datatype);
               }
 
               scope.$watch(function () {
@@ -724,13 +702,6 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 console.log('data reset: ', newValue.uri);
                 scope.datatype = newValue.uri;
               });
-
-              /*
-              scope.$watch(function() {
-                return scope.valueStoreDatatype.getData();
-              }, function(newValue) {
-                scope.datatype = newValue;
-              });*/
             }
           };
         })
@@ -1041,9 +1012,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
           $scope.lang = 'en';
 
-
           var graphInserter = new GraphInserter(graph);
-
 
           $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);
           $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
@@ -1055,14 +1024,12 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             lang: new foo.ValueStoreLang(graphInserter, ref4)
           };
 
-
           $scope.myValueStoreTypedConfig = {
             lex: new foo.ValueStoreLex(graphInserter, ref5),
             dtype: new foo.ValueStoreDatatype(graphInserter, ref5)
           };
 
           $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
-
 
           $scope.myModel = "hello world";
 
