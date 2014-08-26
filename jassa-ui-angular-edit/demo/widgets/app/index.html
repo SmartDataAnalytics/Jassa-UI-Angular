@@ -570,9 +570,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //controller: 'JassaEditTextCtrl',
             link: function(scope, element, attrs) {
 
-              console.log('PLAIN WIDGET valuestore', scope.valueStore.getObjectRef());
+              console.log('PLAIN WIDGET valuestore', scope.valueStore.lex.getObjectRef());
 
-              var valueStoreLang = new foo.ValueStoreLang(scope.valueStore.getGraphInserter(), scope.valueStore.getObjectRef());
+              var valueStoreLang = new foo.ValueStoreLang(scope.valueStore.lex.getGraphInserter(), scope.valueStore.lex.getObjectRef());
 
               console.log('PLAIN WIDGET lang', valueStoreLang.getData());
 
@@ -580,7 +580,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
               scope.language = valueStoreLang.getData();
 
-              scope.plainValue = scope.valueStore.getData();
+              scope.plainValue = scope.valueStore.lex.getData();
 
               scope.setLanguage = function(tag) {
                 scope.language = tag ? tag : '';
@@ -590,11 +590,11 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 return scope.plainValue;
               }, function(newValue) {
                 console.log('model changed: ', newValue);
-                scope.valueStore.setData(newValue);
+                scope.valueStore.lex.setData(newValue);
               });
 
               scope.$watch(function() {
-                return scope.valueStore.getData();
+                return scope.valueStore.lex.getData();
               }, function(newValue) {
                 console.log('data reset: ', newValue);
                 scope.plainValue = newValue;
@@ -605,11 +605,17 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               }, function(newValue) {
                 console.log('PLAIN WIDGET new lang', newValue);
                 if(newValue === 'none') {
-                  valueStoreLang.setData('');
+                  scope.valueStore.lang.setData('');
                 } else {
-                  valueStoreLang.setData(newValue);
+                  scope.valueStore.lang.setData(newValue);
                 }
+              });
 
+              scope.$watch(function() {
+                return scope.valueStore.lang.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                scope.language = newValue;
               });
 
             }
@@ -1030,7 +1036,11 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
           $scope.myValueStore2 = new foo.ValueStoreLex(graphInserter, ref2);
 
-          $scope.myValueStorePlain = new foo.ValueStoreLex(graphInserter, ref4);
+          $scope.myValueStorePlainConfig = {
+            lex: new foo.ValueStoreLex(graphInserter, ref4),
+            lang: new foo.ValueStoreLang(graphInserter, ref4)
+          };
+
           $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
 
 
@@ -1072,10 +1082,10 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
 <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
 <h1>Meta | Plain | Typed | URI Widget</h1>
-<jassa-edit-plain value-store="myValueStorePlain"></jassa-edit-plain>
+<jassa-edit-plain value-store="myValueStorePlainConfig"></jassa-edit-plain>
 <jassa-edit-typed value-store="myValueStoreTyped"></jassa-edit-typed>
 <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
-<jassa-edit-meta typed value-store="myValueStoreTyped"></jassa-edit-meta>
+<jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta>
 <h1>Map widget</h1>
 <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
 <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
