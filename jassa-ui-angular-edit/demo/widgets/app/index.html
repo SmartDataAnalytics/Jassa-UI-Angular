@@ -14,9 +14,11 @@
 <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
 <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+<link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.css" />
 <!-- endbower -->
 
 <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+<link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
 
 <!-- endbuild -->
 
@@ -35,13 +37,13 @@
 <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
 <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
 <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
-<script src="bower_components/jsdiff/diff.js"></script>
 <!-- endbower -->
 
 <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
 <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
 
 <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+<script src="bower_components/jqueryui-timepicker-addon/src/jquery-ui-timepicker-addon.js"></script>
 
 <!-- endbuild -->
 
@@ -527,6 +529,168 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           };
         })
 
+        .directive('jassaEditDatetime', function($compile) {
+
+          var uniqueId = 1;
+          var registeredObjectRefs = [];
+
+          function loadSuitableWidget(fnCurrDtype, fnDatepickerId) {
+            for (var i in registeredObjectRefs) {
+              var currObjectElement = registeredObjectRefs[i];
+
+              if (currObjectElement.find('input').hasClass(fnDatepickerId)) {
+                // reset input
+                currObjectElement.find('.' + fnDatepickerId).datepicker('destroy');
+                currObjectElement.find('.' + fnDatepickerId).removeClass('hasDatepicker');
+
+                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#date") {
+                  currObjectElement.find('.' + fnDatepickerId).datepicker({
+                    dateFormat: $.datepicker.ISO_8601,
+                    // showOn: 'both',
+                    firstDay: 1,
+                    beforeShow: function() {
+                      setTimeout(function(){
+                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
+                      }, 0);
+                    }
+                  });
+                  currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
+                }
+
+                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#dateTime") {
+                  currObjectElement.find('.' + fnDatepickerId).datetimepicker({
+                    separator: 'T',
+                    dateFormat: $.datepicker.ISO_8601,
+                    showSecond: true,
+                    timeFormat: 'HH:mm:ssZ',
+                    showTimezone: true,
+                    timezone: "+00:00",
+                    firstDay: 1,
+                    beforeShow: function() {
+                      setTimeout(function(){
+                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
+                      }, 0);
+                    }
+                  });
+                  currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
+                }
+
+                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#time") {
+                  currObjectElement.find('.' + fnDatepickerId).timepicker({
+                    showSecond: true,
+                    timeFormat: 'HH:mm:ssZ',
+                    showTimezone: true,
+                    timezone: "+00:00",
+                    beforeShow: function() {
+                      setTimeout(function(){
+                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
+                      }, 0);
+                    }
+                  });
+                  currObjectElement.find('.icon').addClass('fa-clock-o').removeClass('fa-calendar');
+                }
+              }
+            }
+          }
+
+
+          return {
+            restrict: 'EA',
+            replace: true,
+            //templateUrl: 'template/constraint-list/constraint-list.html',
+            template: '<div class="input-group">\
+          <!--div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">Date</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu" role="menu">\
+                  <li><a href="#">Date</a></li>\
+          <li><a href="#">Time</a></li>\
+          <li><a href="#">Date & Time</a></li>\
+          </ul>\
+          </div-->\
+          <span class="input-group-addon"><i class="icon fa"></i></span>\
+          <input type="text" class="form-control" ng-model="typedValue"></input>\
+          <div class="input-group-btn">\
+                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <span class="caret"></span>\
+          <span class="sr-only">Toggle Dropdown</span>\
+          </button>\
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
+                  <!--li><a ng-click="setDatatype()" href="#">none</a></li-->\
+          <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
+          </ul>\
+          </div>\
+          </div>',
+            transclude: false,
+            //require: 'constraintList',
+            //require: 'ngModel',
+            scope: {
+              'valueStore': '='
+              //model: '=ngModel'
+              //'ngModel': '='
+            },
+            //controller: 'JassaEditTextCtrl',
+            link: function(scope, element, attrs) {
+              //var datepickerId = 'datepicker-' + uniqueId++;
+              var datepickerId = 'datepicker-' + scope.valueStore.lex.getObjectRef().toString().replace(/[^\w\s]|http|\s/gi, '');
+              element.find('input').addClass(datepickerId);
+
+              registeredObjectRefs.push(element);
+
+              scope.datatypeTags = {
+                'http://www.w3.org/2001/XMLSchema#date': 'xsd:date',
+                'http://www.w3.org/2001/XMLSchema#dateTime': 'xsd:dateTime',
+                'http://www.w3.org/2001/XMLSchema#time': 'xsd:time'
+              };
+
+              scope.datatype = scope.valueStore.dtype.getData().getUri();
+              scope.typedValue = scope.valueStore.lex.getData();
+
+
+              scope.setDatatype = function(tag) {
+                scope.datatype = tag ? tag : '';
+              };
+
+              scope.$watch(function () {
+                return scope.typedValue;
+              }, function(newValue) {
+                console.log('model changed: ', newValue);
+                scope.valueStore.lex.setData(newValue);
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.lex.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue);
+                scope.typedValue = newValue;
+              });
+
+              scope.$watch(function() {
+                return scope.datatype;
+              }, function(newValue) {
+                if(newValue === 'none' || newValue === undefined) {
+                  scope.valueStore.dtype.setData('');
+                } else {
+                  scope.valueStore.dtype.setData(newValue);
+                }
+
+              });
+
+              scope.$watch(function() {
+                return scope.valueStore.dtype.getData();
+              }, function(newValue) {
+                console.log('data reset: ', newValue.getUri());
+                scope.datatype = newValue.getUri();
+                loadSuitableWidget(scope.datatype, datepickerId);
+              });
+            }
+          };
+        })
+
         .directive('jassaEditPlain', function() {
           return {
             restrict: 'EA',
@@ -596,7 +760,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               scope.$watch(function() {
                 return scope.language;
               }, function(newValue) {
-                if(newValue === 'none') {
+                if(newValue === 'none'  || newValue === undefined) {
                   scope.valueStore.lang.setData('');
                 } else {
                   scope.valueStore.lang.setData(newValue);
@@ -661,7 +825,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
                 'http://www.w3.org/2001/XMLSchema#string' : 'xsd:string'
               }
 
-              scope.datatype = scope.valueStore.dtype.getData().uri;
+              scope.datatype = scope.valueStore.dtype.getData().getUri();
 
               scope.typedValue = scope.valueStore.lex.getData();
 
@@ -686,10 +850,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               scope.$watch(function() {
                 return scope.datatype;
               }, function(newValue) {
-                console.log('TYPED WIDGET new type', newValue);
                 if(newValue === 'none' || newValue === undefined) {
                   scope.valueStore.dtype.setData('');
-                  scope.datatype = '';
                 } else {
                   scope.valueStore.dtype.setData(newValue);
                 }
@@ -699,8 +861,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               scope.$watch(function() {
                 return scope.valueStore.dtype.getData();
               }, function(newValue) {
-                console.log('data reset: ', newValue.uri);
-                scope.datatype = newValue.uri;
+                console.log('data reset: ', newValue.getUri());
+                scope.datatype = newValue.getUri();
               });
             }
           };
@@ -770,8 +932,6 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //controller: 'JassaEditMapCtrl',
             link: function(scope, element, attrs, ngModel) {
               var map, drawControls, polygonLayer, panel, wkt, vectors;
-
-              console.log('link function map');
               //console.log('geometry', scope.geometry);
               //console.log('mapConfig', scope.config);
               //console.log('valueStoreMap', scope.valueStore);
@@ -976,24 +1136,32 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           var p1 = rdf.NodeFactory.createUri('http://p');
           var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
           var p3 = rdf.NodeFactory.createUri('http://p3plaintest');
-          var p4 = rdf.NodeFactory.createUri('http://p3typedtest');
+          var p4 = rdf.NodeFactory.createUri('http://p4typedtest');
+          var p5 = rdf.NodeFactory.createUri('http://p5datetimetest');
+          var p6 = rdf.NodeFactory.createUri('http://p5timetest');
           var o1 = rdf.NodeFactory.createUri('http://o1');
           var o2 = rdf.NodeFactory.createUri('http://o2');
           var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
           var o4 = rdf.NodeFactory.createPlainLiteral("Plain Literal with Language Tag", "en");
           var o5 = rdf.NodeFactory.createTypedLiteralFromValue("123", "http://www.w3.org/2001/XMLSchema#int");
+          var o6 = rdf.NodeFactory.createTypedLiteralFromValue("2002-09-24", "http://www.w3.org/2001/XMLSchema#date");
+          var o7 = rdf.NodeFactory.createTypedLiteralFromValue("21:55:16Z", "http://www.w3.org/2001/XMLSchema#time");
 
           var t1 = new rdf.Triple(s, p1, o1);
           var t2 = new rdf.Triple(s, p1, o2);
           var t3 = new rdf.Triple(s, p2, o3);
           var t4 = new rdf.Triple(s, p3, o4);
           var t5 = new rdf.Triple(s, p4, o5);
+          var t6 = new rdf.Triple(s, p5, o6);
+          var t7 = new rdf.Triple(s, p6, o7);
 
           graph.add(t1);
           graph.add(t2);
           graph.add(t3);
           graph.add(t4);
           graph.add(t5);
+          graph.add(t6);
+          graph.add(t7);
 
           console.log('graph', graph);
           //console.log(graph.contains(t1));
@@ -1003,12 +1171,16 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           var ref3 = new ObjectRef(s, p2, 0);
           var ref4 = new ObjectRef(s, p3, 0);
           var ref5 = new ObjectRef(s, p4, 0);
+          var ref6 = new ObjectRef(s, p5, 0);
+          var ref7 = new ObjectRef(s, p6, 0);
 
           console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
           console.log('Object for ref ' + ref2 + ': ' + ObjectRefUtils.getObject(graph, ref2));
           console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
           console.log('Object for ref4 ' + ref4 + ': ' + ObjectRefUtils.getObject(graph, ref4));
-          console.log('Object for ref4 ' + ref5 + ': ' + ObjectRefUtils.getObject(graph, ref5));
+          console.log('Object for ref5 ' + ref5 + ': ' + ObjectRefUtils.getObject(graph, ref5));
+          console.log('Object for ref6 ' + ref6 + ': ' + ObjectRefUtils.getObject(graph, ref6));
+          console.log('Object for ref7 ' + ref7 + ': ' + ObjectRefUtils.getObject(graph, ref7));
 
           $scope.lang = 'en';
 
@@ -1030,6 +1202,16 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           };
 
           $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
+
+          $scope.myValueStoreDateTimeConfig = {
+            lex: new foo.ValueStoreLex(graphInserter, ref6),
+            dtype: new foo.ValueStoreDatatype(graphInserter, ref6)
+          };
+
+          $scope.myValueStoreDateTimeConfig2 = {
+            lex: new foo.ValueStoreLex(graphInserter, ref7),
+            dtype: new foo.ValueStoreDatatype(graphInserter, ref7)
+          };
 
           $scope.myModel = "hello world";
 
@@ -1074,6 +1256,10 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
 <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
 <jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta>
+<h1>DateTime Widget</h1>
+<jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
+<jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
+<jassa-edit-datetime value-store="myValueStoreDateTimeConfig2"></jassa-edit-datetime>
 <h1>Map widget</h1>
 <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
 <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
