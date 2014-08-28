@@ -22,6 +22,15 @@
 
 <!-- endbuild -->
 
+<style>
+  button.no-border-radius {
+    border-radius: 0px !important;
+  }
+
+  input.margin-left-1 {
+    margin-left: -1px;
+  }
+</style>
 
 <!-- build:js scripts/scripts.js -->
 
@@ -612,10 +621,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           </ul>\
           </div-->\
           <span class="input-group-addon"><i class="icon fa"></i></span>\
-          <input type="text" class="form-control" ng-model="typedValue"></input>\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
+          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
@@ -624,6 +632,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
           </ul>\
           </div>\
+          <input type="text" class="form-control margin-left-1" ng-model="typedValue"></input>\
           </div>',
             transclude: false,
             //require: 'constraintList',
@@ -698,8 +707,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //templateUrl: 'template/constraint-list/constraint-list.html',
             template: '<div class="input-group">\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">Plain</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">Plain</button>\
+          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
@@ -709,10 +718,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li><a href="#">Plain</a></li>\
           </ul>\
           </div>\
-          <input type="text" class="form-control" ng-model="plainValue"></input>\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">{{language.length === 0 ? "No Language" : language}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{language.length === 0 ? "No Language" : language}}</button>\
+          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
@@ -721,6 +729,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li ng-repeat="tag in languageTags"><a ng-click="setLanguage(tag)" href="#">{{tag}}</a></li>\
           </ul>\
           </div>\
+          <input type="text" class="form-control margin-left-1" ng-model="plainValue"></input>\
           </div>',
             transclude: false,
             //require: 'constraintList',
@@ -785,8 +794,8 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             //templateUrl: 'template/constraint-list/constraint-list.html',
             template: '<div class="input-group">\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">Typed</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">Typed</button>\
+          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
@@ -796,10 +805,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li><a href="#">Plain</a></li>\
           </ul>\
           </div>\
-          <input type="text" class="form-control" ng-model="typedValue">\
           <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
+                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
+          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
                   <span class="caret"></span>\
           <span class="sr-only">Toggle Dropdown</span>\
           </button>\
@@ -808,6 +816,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
           </ul>\
           </div>\
+          <input type="text" class="form-control margin-left-1" ng-model="typedValue">\
           </div>',
             transclude: false,
             //require: 'constraintList',
