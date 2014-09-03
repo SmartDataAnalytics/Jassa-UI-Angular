@@ -425,27 +425,16 @@ var ObjectRefUtils = {
   }
 };
 
+var app = angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa']);
 
-angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
-  /*
-   .controller('JassaEditTextCtrl', ['$scope', '$q', function($scope, $q) {
-   $scope.$watch('valueStore.getData()', function(val) {
-   $scope.ngModel = val;
-   });
 
-   $scope.$watch('ngModel', function() {
-
-   });
-   }])
-   */
-
-        .directive('jassaEditText', function() {
+        app.directive('jassaEditText', function() {
           return {
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<input type="text" class="form-control" placeholder="Foo"></input>',
+            templateUrl: 'components/jassa-edit-text.html',
             transclude: false,
             //require: 'constraintList',
             require: 'ngModel',
@@ -471,14 +460,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               });
             }
           };
-        })
+        });
 
-        .directive('jassaEditSparqlUpdate', function() {
+        app.directive('jassaEditSparqlUpdate', function() {
           return {
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<button type="button" class="btn btn-primary" ng-click="sparqlUpdateQuery()">SPARQL Update</button>',
+            templateUrl: 'components/jassa-edit-sparql-update.html',
             transclude: false,
             //require: 'constraintList',
             //require: 'ngModel',
@@ -495,9 +484,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
             }
           };
-        })
+        });
 
-        .directive('jassaEditMeta', function($compile) {
+        app.directive('jassaEditMeta', function($compile) {
           return {
             restrict: 'EA',
             replace: true,
@@ -536,9 +525,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
 
             }
           };
-        })
+        });
 
-        .directive('jassaEditDatetime', function($compile) {
+        app.directive('jassaEditDatetime', function($compile) {
 
           var uniqueId = 1;
           var registeredObjectRefs = [];
@@ -607,33 +596,7 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<div class="input-group">\
-          <!--div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">Date</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu" role="menu">\
-                  <li><a href="#">Date</a></li>\
-          <li><a href="#">Time</a></li>\
-          <li><a href="#">Date & Time</a></li>\
-          </ul>\
-          </div-->\
-          <span class="input-group-addon"><i class="icon fa"></i></span>\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
-                  <!--li><a ng-click="setDatatype()" href="#">none</a></li-->\
-          <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
-          </ul>\
-          </div>\
-          <input type="text" class="form-control margin-left-1" ng-model="typedValue"></input>\
-          </div>',
+            templateUrl: 'components/jassa-edit-datetime.html',
             transclude: false,
             //require: 'constraintList',
             //require: 'ngModel',
@@ -698,39 +661,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               });
             }
           };
-        })
+        });
 
-        .directive('jassaEditPlain', function() {
+        app.directive('jassaEditPlain', function() {
           return {
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<div class="input-group">\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">Plain</button>\
-          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu" role="menu">\
-                  <li><a href="#">URI</a></li>\
-          <li><a href="#">Typed</a></li>\
-          <li><a href="#">Plain</a></li>\
-          </ul>\
-          </div>\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{language.length === 0 ? "No Language" : language}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
-                  <li><a ng-click="setLanguage()" href="#">none</a></li>\
-          <li ng-repeat="tag in languageTags"><a ng-click="setLanguage(tag)" href="#">{{tag}}</a></li>\
-          </ul>\
-          </div>\
-          <input type="text" class="form-control margin-left-1" ng-model="plainValue"></input>\
-          </div>',
+            templateUrl: 'components/jassa-edit-plain.html',
             transclude: false,
             //require: 'constraintList',
             //require: 'ngModel',
@@ -787,37 +725,12 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
           };
         })
 
-        .directive('jassaEditTyped', function() {
+        app.directive('jassaEditTyped', function() {
           return {
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<div class="input-group">\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">Typed</button>\
-          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu" role="menu">\
-                  <li><a href="#">URI</a></li>\
-          <li><a href="#">Typed</a></li>\
-          <li><a href="#">Plain</a></li>\
-          </ul>\
-          </div>\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>\
-          <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu dropdown-menu-right" role="menu">\
-                  <li><a ng-click="setDatatype()" href="#">none</a></li>\
-          <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>\
-          </ul>\
-          </div>\
-          <input type="text" class="form-control margin-left-1" ng-model="typedValue">\
-          </div>',
+            templateUrl: 'components/jassa-edit-typed.html',
             transclude: false,
             //require: 'constraintList',
             //require: 'ngModel',
@@ -875,28 +788,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               });
             }
           };
-        })
+        });
 
-        .directive('jassaEditUri', function() {
+        app.directive('jassaEditUri', function() {
           return {
             restrict: 'EA',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<div class="input-group">\
-          <div class="input-group-btn">\
-                  <button type="button" class="btn btn-default" tabindex="-1">URI</button>\
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" tabindex="-1">\
-                  <span class="caret"></span>\
-          <span class="sr-only">Toggle Dropdown</span>\
-          </button>\
-          <ul class="dropdown-menu" role="menu">\
-                  <li><a href="#">URI</a></li>\
-          <li><a href="#">Typed</a></li>\
-          <li><a href="#">Plain</a></li>\
-          </ul>\
-          </div>\
-          <input type="text" class="form-control" >\
-          </div>',
+            templateUrl: 'components/jassa-edit-uri.html',
             transclude: false,
             //require: 'constraintList',
             require: 'ngModel',
@@ -922,14 +821,14 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               });
             }
           };
-        })
+        });
 
-        .directive('jassaEditMap', function() {
+        app.directive('jassaEditMap', function() {
           return {
             restrict: 'E',
             replace: true,
             //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '<div id="jassa-edit-map" style="width: 100%; height: 300px;"><input type="radio" value="point" name="geometry" ng-model="chooseGeometry" /><label>Point</label><input type="radio" value="line" name="geometry" ng-model="chooseGeometry" /><label>Line</label><input type="radio" value="polygon" name="geometry" ng-model="chooseGeometry" /><label>Polygon</label><input type="radio" value="box" name="geometry" ng-model="chooseGeometry" /><label>Box</label><input type="text" class="form-control" ng-model="wkt" /></div>',
+            templateUrl: 'components/jassa-edit-map.html',
             transclude: false,
             //require: 'constraintList',
             require: 'ngModel',
@@ -1136,9 +1035,9 @@ angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa'])
               control.activate();
             }
           };
-        })
+        });
 
-        .controller('AppCtrl', ['$scope', function($scope) {
+        app.controller('AppCtrl', ['$scope', function($scope) {
           var graph = new rdf.GraphImpl();
 
           var s = rdf.NodeFactory.createUri('http://s');
