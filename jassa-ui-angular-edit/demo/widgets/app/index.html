@@ -1,1178 +1,549 @@
 <!DOCTYPE html>
 <html ng-app="jassa.ui.edit.demo.widgets">
 
-<head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-<title>RDF Edit Demo</title>
+    <title>RDF Edit Demo</title>
 
-<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-<!-- build:css(.tmp) styles/main.css -->
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.tmp) styles/main.css -->
 
-<!-- bower:css -->
-<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-<link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
-<link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
-<link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.css" />
-<!-- endbower -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.css" />
+    <!-- endbower -->
 
-<link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
-<link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
 
-<!-- endbuild -->
+    <!-- endbuild -->
 
-<style>
-  button.no-border-radius {
-    border-radius: 0px !important;
-  }
-
-  input.margin-left-1 {
-    margin-left: -1px;
-  }
-</style>
-
-<!-- build:js scripts/scripts.js -->
-
-<script src="bower_components/jscache/cache.js"></script>
-
-<!-- bower:js -->
-<script src="bower_components/jquery/jquery.js"></script>
-<script src="bower_components/underscore/underscore.js"></script>
-<script src="bower_components/jassa/jassa.js"></script>
-<script src="bower_components/angular/angular.js"></script>
-<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-<script src="bower_components/ng-grid/build/ng-grid.js"></script>
-<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-<script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
-<script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
-<!-- endbower -->
-
-<script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
-<script src="bower_components/underscore.string/lib/underscore.string.js"></script>
-
-<script src="bower_components/openlayers/lib/OpenLayers.js"></script>
-<script src="bower_components/jqueryui-timepicker-addon/src/jquery-ui-timepicker-addon.js"></script>
-
-<!-- endbuild -->
-
-
-<script type="text/javascript">
-_.mixin(_.str.exports());
-
-var rdf = jassa.rdf;
-var sparql = jassa.sparql;
-var service = jassa.service;
-var sponate = jassa.sponate;
-var facete = jassa.facete;
-var util = jassa.util;
-
-var geo = jassa.geo;
-
-var vocab = jassa.vocab;
-
-
-var ObjectRef = Class.create({
-  initialize: function(subject, predicate, objectIndex) {
-    this.subject = subject;
-    this.predicate = predicate;
-    this.objectIndex = objectIndex;
-  },
-
-  getSubject: function() {
-    return this.subject;
-  },
-
-  getPredicate: function() {
-    return this.predicate;
-  },
-
-  getObjectIndex: function() {
-    return this.objectIndex;
-  },
-
-  toString: function() {
-    return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
-  }
-});
-
-
-//this.map = new util.HashMap();
-
-
-/*
- var NodeState = Class.create({
- initialize: function() {
- this.termType = null;
- this.lexicalForm = null;
- this.datatype = null;
- this.lang = null;
- },
-
- getLexicalForm: function() {
- return this.lexicalForm;
- },
-
- getLang: function() {
- return this.lang;
- },
-
- setLexicalForm: function(lexicalForm) {
- this.lexicalForm = lexicalForm;
- },
-
- setLang: function(lang) {
- this.lang = lang;
- }
- });
- */
-
-var NodeStateUtils = {
-  createNode: function(nodeState) {
-    // TODO Implement properly
-    if(nodeState.lexicalForm == null) {
-      return null;
-    }
-
-    if(nodeState.hasOwnProperty('datatype')) {
-      var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
-      return result;
-    }
-
-    if(nodeState.hasOwnProperty('lang')) {
-      var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
-      return result;
-    }
-
-    var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
-
-    return result;
-  }
-};
-
-
-var TripleBuilder = Class.create({
-  initialize: function() {
-    //this.map = new util.HashMap();
-    this.map = {};
-  },
-  getSafe: function(objectRef) {
-    var key = '' + objectRef;
-    var result = this.map[key];
-
-    if(result == null) {
-      result = {};
-      this.map[key] = result;
-    }
-
-    return result;
-  },
-  remove: function(objectRef) {
-    var key = '' + objectRef;
-    delete this.map[key];
-  }
-});
-
-
-var GraphInserter = Class.create({
-  initialize: function(graph) {
-    this.graph = graph;
-    this.tripleBuilder = new TripleBuilder();
-  },
-
-  get: function(objectRef) {
-    // TODO Maybe we need to check if the reference has been overridden in the triple builder
-    var result = ObjectRefUtils.getTriple(this.graph, objectRef);
-    return result;
-  },
-
-  set: function(objectRef, data) {
-    var val = this.tripleBuilder.getSafe(objectRef);
-
-    _(val).extend(data);
-
-    var node = NodeStateUtils.createNode(val);
-    if(node != null) {
-      var t = ObjectRefUtils.getTriple(this.graph, objectRef);
-
-      if(t != null) {
-        this.graph.remove(t);
+    <style>
+      button.no-border-radius {
+        border-radius: 0px !important;
       }
 
-      var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
-      this.graph.add(nt);
-    }
-  }
-});
-
-var GraphInserterUtils = {
-  getObject: function(graphInserter, objectRef) {
-    var t = graphInserter.get(objectRef);
-    var result = t == null ? null : t.getObject();
-    return result;
-  }
-};
-
-var ns = {};
-
-
-ns.NodeMapper = Class.create({
-  toNode: function(obj) {
-    console.log('Implement me');
-  },
-  toObject: function(node) {
-    console.log('Implement me');
-  }
-});
-
-
-ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
-  /**
-   * @param fnLang function returning a language tag
-   */
-  initialize: function(lang) {
-    this.lang = lang;
-  },
-
-  // obj is expected to be a string
-  toNode: function(obj) {
-    //var lang = this.fnLang();
-    var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
-    return result;
-  },
-
-  toObject: function(node) {
-    var result = node.getLiteralValue();
-    return result;
-  }
-});
-
-
-
-ns.ValueStore = Class.create({
-  getData: function() {
-    console.log('Implement me');
-  },
-  setData: function(data) {
-    console.log('Implement me');
-  }
-});
-
-ns.ValueStoreLex = Class.create({
-  initialize: function(graphInserter, objectRef) {
-    this.graphInserter = graphInserter;
-    this.objectRef = objectRef;
-  },
-
-  getData: function() {
-    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-    var result = o == null ? null : o.getLiteralLexicalForm();
-    return result;
-  },
-
-  setData: function(data) {
-    this.graphInserter.set(this.objectRef, {lexicalForm: data});
-  },
-
-  getGraphInserter: function() {
-    return this.graphInserter;
-  },
-
-  getObjectRef: function() {
-    return this.objectRef;
-  }
-});
-
-ns.ValueStoreLang = Class.create({
-  initialize: function(graphInserter, objectRef) {
-    this.graphInserter = graphInserter;
-    this.objectRef = objectRef;
-  },
-
-  getData: function() {
-    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-    var result = o == null ? null : o.getLiteralLanguage();
-    return result;
-  },
-
-  setData: function(data) {
-    this.graphInserter.set(this.objectRef, {lang: data});
-  },
-
-  getGraphInserter: function() {
-    return this.graphInserter;
-  },
-
-  getObjectRef: function() {
-    return this.objectRef;
-  }
-});
-
-ns.ValueStoreDatatype = Class.create({
-  initialize: function(graphInserter, objectRef) {
-    this.graphInserter = graphInserter;
-    this.objectRef = objectRef;
-  },
-
-  getData: function() {
-    var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-    var result = o == null ? null : o.getLiteralDatatype();
-    return result;
-  },
-
-  setData: function(data) {
-    this.graphInserter.set(this.objectRef, {datatype: data});
-  },
-
-  getGraphInserter: function() {
-    return this.graphInserter;
-  },
-
-  getObjectRef: function() {
-    return this.objectRef;
-  }
-});
-
-/*
- ns.ValueStoreLang = Class.create({
- initialize: function(graph, objectRef) {
- this.graph = graph;
- this.objectRef = objectRef;
- },
-
- getData: function() {
- var node = ObjectRefUtils.getObject(this.graph, this.objectRef);
-
- var result = node == null ? null : node.getLiteralLanguage();
- return result;
- },
-
- setData: function(lang) {
- var t = ObjectRefUtils.getTriple(this.graph, this.objectRef);
- if(t != null) {
- this.graph.remove(t);
-
- var o = t.getObject();
- // TODO Add validation that we are dealing with literal nodes
-
- var str = o.getLiteralValue();
- var node = rdf.NodeFactory.createPlainLiteral(str, lang);
-
- var nt = new rdf.Triple(this.objectRef.getSubject(), this.objectRef.getPredicate(), node);
- this.graph.add(nt);
- }
- }
- });
- */
-
-var foo = ns;
-
-
-
-var ns = jassa.rdf;
-ns.GraphImpl = Class.create({
-  initialize: function() {
-    this.triples = new util.HashSet();
-  },
-
-  add: function(triple) {
-    this.triples.add(triple);
-  },
-
-  remove: function(triple) {
-    this.triples.remove(triple);
-  },
-
-  contains: function(triple) {
-    return this.triples.contains(triple);
-  },
-
-  toArray: function() {
-    return this.triples.entries();
-  },
-
-  toString: function() {
-    return '' + this.triples;
-  }
-});
-
-var ObjectRefUtils = {
-  getObject: function(graph, objectRef) {
-    var candidateTriple = this.getTriple(graph, objectRef);
-
-    var result = candidateTriple ? candidateTriple.getObject() : null;
-    return result;
-  },
-
-  getTriple: function(graph, objectRef) {
-    var ts = graph.toArray();
-    var i = 0;
-
-    var result = _(ts).find(function(t) {
-      var c = objectRef.getSubject().equals(t.getSubject()) &&
-              objectRef.getPredicate().equals(t.getPredicate());
-
-      if(c && objectRef.getObjectIndex() === i) {
-        return true;
+      input.margin-left-1 {
+        margin-left: -1px;
       }
+    </style>
 
-      if(c) {
-        ++i;
+    <!-- build:js scripts/scripts.js -->
+
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/jassa-edit-map/index.js"></script>
+    <script src="bower_components/jassa-edit-datetime/index.js"></script>
+    <script src="bower_components/jassa-edit-uri/index.js"></script>
+    <script src="bower_components/jassa-edit-typed/index.js"></script>
+    <script src="bower_components/jassa-edit-plain/index.js"></script>
+    <script src="bower_components/jassa-edit-text/index.js"></script>
+    <script src="bower_components/jassa-edit-sparql-update/index.js"></script>
+    <script src="bower_components/jassa-edit-sparql-meta/index.js"></script>
+    <!-- endbower -->
+
+    <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+    <script src="bower_components/jqueryui-timepicker-addon/src/jquery-ui-timepicker-addon.js"></script>
+
+    <!-- endbuild -->
+
+
+    <script type="text/javascript">
+    _.mixin(_.str.exports());
+
+    var rdf = jassa.rdf;
+    var sparql = jassa.sparql;
+    var service = jassa.service;
+    var sponate = jassa.sponate;
+    var facete = jassa.facete;
+    var util = jassa.util;
+
+    var geo = jassa.geo;
+
+    var vocab = jassa.vocab;
+
+
+    var ObjectRef = Class.create({
+      initialize: function(subject, predicate, objectIndex) {
+        this.subject = subject;
+        this.predicate = predicate;
+        this.objectIndex = objectIndex;
+      },
+
+      getSubject: function() {
+        return this.subject;
+      },
+
+      getPredicate: function() {
+        return this.predicate;
+      },
+
+      getObjectIndex: function() {
+        return this.objectIndex;
+      },
+
+      toString: function() {
+        return this.subject + ' ' + this.predicate + ' ' + this.objectIndex;
       }
     });
 
-    return result;
-  }
-};
 
-var app = angular.module('jassa.ui.edit.demo.widgets', ['ui.bootstrap', 'ui.jassa']);
+    //this.map = new util.HashMap();
 
 
+    /*
+     var NodeState = Class.create({
+     initialize: function() {
+     this.termType = null;
+     this.lexicalForm = null;
+     this.datatype = null;
+     this.lang = null;
+     },
 
-        app.directive('jassaEditText', function() {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-text.html',
-            transclude: false,
-            //require: 'constraintList',
-            require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
-              scope.$watch(function () {
-                return ngModel.$modelValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.setData(newValue);
-              });
+     getLexicalForm: function() {
+     return this.lexicalForm;
+     },
 
-              scope.$watch(function() {
-                return scope.valueStore.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
-              });
-            }
-          };
-        });
+     getLang: function() {
+     return this.lang;
+     },
 
-        app.directive('jassaEditSparqlUpdate', function() {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-sparql-update.html',
-            transclude: false,
-            //require: 'constraintList',
-            //require: 'ngModel',
-            scope: {
-              'graph': '=',
-              'endpoint': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs) {
+     setLexicalForm: function(lexicalForm) {
+     this.lexicalForm = lexicalForm;
+     },
+
+     setLang: function(lang) {
+     this.lang = lang;
+     }
+     });
+     */
+
+    var NodeStateUtils = {
+      createNode: function(nodeState) {
+        // TODO Implement properly
+        if(nodeState.lexicalForm == null) {
+          return null;
+        }
+
+        if(nodeState.hasOwnProperty('datatype')) {
+          var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+          return result;
+        }
+
+        if(nodeState.hasOwnProperty('lang')) {
+          var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+          return result;
+        }
+
+        var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+
+        return result;
+      }
+    };
 
 
+    var TripleBuilder = Class.create({
+      initialize: function() {
+        //this.map = new util.HashMap();
+        this.map = {};
+      },
+      getSafe: function(objectRef) {
+        var key = '' + objectRef;
+        var result = this.map[key];
 
-            }
-          };
-        });
+        if(result == null) {
+          result = {};
+          this.map[key] = result;
+        }
 
-        app.directive('jassaEditMeta', function($compile) {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            template: '',
-            transclude: false,
-            //require: 'constraintList',
-            //require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
-              console.log('Meta Widget Attribute', _.has(attrs, 'plain'));
-
-              if(_.has(attrs, 'plain')) {
-                $compile('<jassa-edit-plain value-store="valueStore"></jassa-edit-plain>')(scope, function(cloned, scope){
-                  element.append(cloned);
-                });
-              }
-
-              if(_.has(attrs, 'typed')) {
-                $compile('<jassa-edit-typed value-store="valueStore"></jassa-edit-typed>')(scope, function(cloned, scope){
-                  element.append(cloned);
-                });
-              }
-
-              if(_.has(attrs, 'uri')) {
-                $compile('<jassa-edit-uri value-store="valueStore"></jassa-edit-uri>')(scope, function(cloned, scope){
-                  element.append(cloned);
-                });
-              }
+        return result;
+      },
+      remove: function(objectRef) {
+        var key = '' + objectRef;
+        delete this.map[key];
+      }
+    });
 
 
-            }
-          };
-        });
+    var GraphInserter = Class.create({
+      initialize: function(graph) {
+        this.graph = graph;
+        this.tripleBuilder = new TripleBuilder();
+      },
 
-        app.directive('jassaEditDatetime', function($compile) {
+      get: function(objectRef) {
+        // TODO Maybe we need to check if the reference has been overridden in the triple builder
+        var result = ObjectRefUtils.getTriple(this.graph, objectRef);
+        return result;
+      },
 
-          var uniqueId = 1;
-          var registeredObjectRefs = [];
+      set: function(objectRef, data) {
+        var val = this.tripleBuilder.getSafe(objectRef);
 
-          function loadSuitableWidget(fnCurrDtype, fnDatepickerId) {
-            for (var i in registeredObjectRefs) {
-              var currObjectElement = registeredObjectRefs[i];
+        _(val).extend(data);
 
-              if (currObjectElement.find('input').hasClass(fnDatepickerId)) {
-                // reset input
-                currObjectElement.find('.' + fnDatepickerId).datepicker('destroy');
-                currObjectElement.find('.' + fnDatepickerId).removeClass('hasDatepicker');
+        var node = NodeStateUtils.createNode(val);
+        if(node != null) {
+          var t = ObjectRefUtils.getTriple(this.graph, objectRef);
 
-                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#date") {
-                  currObjectElement.find('.' + fnDatepickerId).datepicker({
-                    dateFormat: $.datepicker.ISO_8601,
-                    // showOn: 'both',
-                    firstDay: 1,
-                    beforeShow: function() {
-                      setTimeout(function(){
-                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
-                      }, 0);
-                    }
-                  });
-                  currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
-                }
-
-                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#dateTime") {
-                  currObjectElement.find('.' + fnDatepickerId).datetimepicker({
-                    separator: 'T',
-                    dateFormat: $.datepicker.ISO_8601,
-                    showSecond: true,
-                    timeFormat: 'HH:mm:ssZ',
-                    showTimezone: true,
-                    timezone: "+00:00",
-                    firstDay: 1,
-                    beforeShow: function() {
-                      setTimeout(function(){
-                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
-                      }, 0);
-                    }
-                  });
-                  currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
-                }
-
-                if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#time") {
-                  currObjectElement.find('.' + fnDatepickerId).timepicker({
-                    showSecond: true,
-                    timeFormat: 'HH:mm:ssZ',
-                    showTimezone: true,
-                    timezone: "+00:00",
-                    beforeShow: function() {
-                      setTimeout(function(){
-                        jQuery('.ui-datepicker').css('z-index', 99999999999999);
-                      }, 0);
-                    }
-                  });
-                  currObjectElement.find('.icon').addClass('fa-clock-o').removeClass('fa-calendar');
-                }
-              }
-            }
+          if(t != null) {
+            this.graph.remove(t);
           }
 
+          var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
+          this.graph.add(nt);
+        }
+      }
+    });
 
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-datetime.html',
-            transclude: false,
-            //require: 'constraintList',
-            //require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs) {
-              //var datepickerId = 'datepicker-' + uniqueId++;
-              var datepickerId = 'datepicker-' + scope.valueStore.lex.getObjectRef().toString().replace(/[^\w\s]|http|\s/gi, '');
-              element.find('input').addClass(datepickerId);
+    var GraphInserterUtils = {
+      getObject: function(graphInserter, objectRef) {
+        var t = graphInserter.get(objectRef);
+        var result = t == null ? null : t.getObject();
+        return result;
+      }
+    };
 
-              registeredObjectRefs.push(element);
-
-              scope.datatypeTags = {
-                'http://www.w3.org/2001/XMLSchema#date': 'xsd:date',
-                'http://www.w3.org/2001/XMLSchema#dateTime': 'xsd:dateTime',
-                'http://www.w3.org/2001/XMLSchema#time': 'xsd:time'
-              };
-
-              scope.datatype = scope.valueStore.dtype.getData().getUri();
-              scope.typedValue = scope.valueStore.lex.getData();
+    var ns = {};
 
 
-              scope.setDatatype = function(tag) {
-                scope.datatype = tag ? tag : '';
-              };
+    ns.NodeMapper = Class.create({
+      toNode: function(obj) {
+        console.log('Implement me');
+      },
+      toObject: function(node) {
+        console.log('Implement me');
+      }
+    });
 
-              scope.$watch(function () {
-                return scope.typedValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.lex.setData(newValue);
-              });
 
-              scope.$watch(function() {
-                return scope.valueStore.lex.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                scope.typedValue = newValue;
-              });
+    ns.NodeMapperPlainLiteral = Class.create(ns.NodeMapper, {
+      /**
+       * @param fnLang function returning a language tag
+       */
+      initialize: function(lang) {
+        this.lang = lang;
+      },
 
-              scope.$watch(function() {
-                return scope.datatype;
-              }, function(newValue) {
-                if(newValue === 'none' || newValue === undefined) {
-                  scope.valueStore.dtype.setData('');
-                } else {
-                  scope.valueStore.dtype.setData(newValue);
-                }
+      // obj is expected to be a string
+      toNode: function(obj) {
+        //var lang = this.fnLang();
+        var result = rdf.NodeFactory.createPlainLiteral(obj, this.lang);
+        return result;
+      },
 
-              });
+      toObject: function(node) {
+        var result = node.getLiteralValue();
+        return result;
+      }
+    });
 
-              scope.$watch(function() {
-                return scope.valueStore.dtype.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue.getUri());
-                scope.datatype = newValue.getUri();
-                loadSuitableWidget(scope.datatype, datepickerId);
-              });
-            }
-          };
+
+
+    ns.ValueStore = Class.create({
+      getData: function() {
+        console.log('Implement me');
+      },
+      setData: function(data) {
+        console.log('Implement me');
+      }
+    });
+
+    ns.ValueStoreLex = Class.create({
+      initialize: function(graphInserter, objectRef) {
+        this.graphInserter = graphInserter;
+        this.objectRef = objectRef;
+      },
+
+      getData: function() {
+        var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+        var result = o == null ? null : o.getLiteralLexicalForm();
+        return result;
+      },
+
+      setData: function(data) {
+        this.graphInserter.set(this.objectRef, {lexicalForm: data});
+      },
+
+      getGraphInserter: function() {
+        return this.graphInserter;
+      },
+
+      getObjectRef: function() {
+        return this.objectRef;
+      }
+    });
+
+    ns.ValueStoreLang = Class.create({
+      initialize: function(graphInserter, objectRef) {
+        this.graphInserter = graphInserter;
+        this.objectRef = objectRef;
+      },
+
+      getData: function() {
+        var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+        var result = o == null ? null : o.getLiteralLanguage();
+        return result;
+      },
+
+      setData: function(data) {
+        this.graphInserter.set(this.objectRef, {lang: data});
+      },
+
+      getGraphInserter: function() {
+        return this.graphInserter;
+      },
+
+      getObjectRef: function() {
+        return this.objectRef;
+      }
+    });
+
+    ns.ValueStoreDatatype = Class.create({
+      initialize: function(graphInserter, objectRef) {
+        this.graphInserter = graphInserter;
+        this.objectRef = objectRef;
+      },
+
+      getData: function() {
+        var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
+        var result = o == null ? null : o.getLiteralDatatype();
+        return result;
+      },
+
+      setData: function(data) {
+        this.graphInserter.set(this.objectRef, {datatype: data});
+      },
+
+      getGraphInserter: function() {
+        return this.graphInserter;
+      },
+
+      getObjectRef: function() {
+        return this.objectRef;
+      }
+    });
+
+    var foo = ns;
+    var ns = jassa.rdf;
+    ns.GraphImpl = Class.create({
+      initialize: function() {
+        this.triples = new util.HashSet();
+      },
+
+      add: function(triple) {
+        this.triples.add(triple);
+      },
+
+      remove: function(triple) {
+        this.triples.remove(triple);
+      },
+
+      contains: function(triple) {
+        return this.triples.contains(triple);
+      },
+
+      toArray: function() {
+        return this.triples.entries();
+      },
+
+      toString: function() {
+        return '' + this.triples;
+      }
+    });
+
+    var ObjectRefUtils = {
+      getObject: function(graph, objectRef) {
+        var candidateTriple = this.getTriple(graph, objectRef);
+
+        var result = candidateTriple ? candidateTriple.getObject() : null;
+        return result;
+      },
+
+      getTriple: function(graph, objectRef) {
+        var ts = graph.toArray();
+        var i = 0;
+
+        var result = _(ts).find(function(t) {
+          var c = objectRef.getSubject().equals(t.getSubject()) &&
+                  objectRef.getPredicate().equals(t.getPredicate());
+
+          if(c && objectRef.getObjectIndex() === i) {
+            return true;
+          }
+
+          if(c) {
+            ++i;
+          }
         });
 
-        app.directive('jassaEditPlain', function() {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-plain.html',
-            transclude: false,
-            //require: 'constraintList',
-            //require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs) {
-
-              scope.languageTags = ['de', 'en'];
-
-              scope.language = scope.valueStore.lang.getData();
-
-              scope.plainValue = scope.valueStore.lex.getData();
-
-              scope.setLanguage = function(tag) {
-                scope.language = tag ? tag : '';
-              };
-
-              scope.$watch(function () {
-                return scope.plainValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.lex.setData(newValue);
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.lex.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                scope.plainValue = newValue;
-              });
-
-              scope.$watch(function() {
-                return scope.language;
-              }, function(newValue) {
-                if(newValue === 'none'  || newValue === undefined) {
-                  scope.valueStore.lang.setData('');
-                } else {
-                  scope.valueStore.lang.setData(newValue);
-                }
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.lang.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                scope.language = newValue;
-              });
-
-            }
-          };
-        })
-
-        app.directive('jassaEditTyped', function() {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-typed.html',
-            transclude: false,
-            //require: 'constraintList',
-            //require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs) {
-
-              scope.datatypeTags = {
-                'http://www.w3.org/2001/XMLSchema#int' : 'xsd:int',
-                'http://www.w3.org/2001/XMLSchema#string' : 'xsd:string'
-              }
-
-              scope.datatype = scope.valueStore.dtype.getData().getUri();
-
-              scope.typedValue = scope.valueStore.lex.getData();
-
-              scope.setDatatype = function(tag) {
-                scope.datatype = tag ? tag : '';
-              }
-
-              scope.$watch(function () {
-                return scope.typedValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.lex.setData(newValue);
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.lex.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                scope.typedValue = newValue;
-              });
-
-              scope.$watch(function() {
-                return scope.datatype;
-              }, function(newValue) {
-                if(newValue === 'none' || newValue === undefined) {
-                  scope.valueStore.dtype.setData('');
-                } else {
-                  scope.valueStore.dtype.setData(newValue);
-                }
-
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.dtype.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue.getUri());
-                scope.datatype = newValue.getUri();
-              });
-            }
-          };
-        });
-
-        app.directive('jassaEditUri', function() {
-          return {
-            restrict: 'EA',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-uri.html',
-            transclude: false,
-            //require: 'constraintList',
-            require: 'ngModel',
-            scope: {
-              'valueStore': '='
-              //model: '=ngModel'
-              //'ngModel': '='
-            },
-            //controller: 'JassaEditTextCtrl',
-            link: function(scope, element, attrs, ngModel) {
-              scope.$watch(function () {
-                return ngModel.$modelValue;
-              }, function(newValue) {
-                console.log('model changed: ', newValue);
-                scope.valueStore.setData(newValue);
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.getData();
-              }, function(newValue) {
-                console.log('data reset: ', newValue);
-                ngModel.$modelValue = newValue;
-              });
-            }
-          };
-        });
-
-        app.directive('jassaEditMap', function() {
-          return {
-            restrict: 'E',
-            replace: true,
-            //templateUrl: 'template/constraint-list/constraint-list.html',
-            templateUrl: 'components/jassa-edit-map.html',
-            transclude: false,
-            //require: 'constraintList',
-            require: 'ngModel',
-            scope: {
-              'config': '=',
-              'geometry': '=',
-              'valueStore': '='
-            },
-            //controller: 'JassaEditMapCtrl',
-            link: function(scope, element, attrs, ngModel) {
-              var map, drawControls, polygonLayer, panel, wkt, vectors;
-              //console.log('geometry', scope.geometry);
-              //console.log('mapConfig', scope.config);
-              //console.log('valueStoreMap', scope.valueStore);
-              scope.wkt = scope.config.data;
-              scope.chooseGeometry = scope.geometry;
-
-              scope.$watch(function() {
-                return scope.wkt;
-              }, function(newValue, oldValue) {
-                console.log('old value of input', oldValue);
-                // clear layer
-                vectors.destroyFeatures();
-                // set config data with changed input value ...
-                scope.config.data = scope.wkt;
-                // ... then call parseWKT to redraw the feature
-                parseWKT();
-              });
-
-              scope.$watch(function() {
-                return scope.config.data;
-              }, function(newValue) {
-                console.log('map data changed: ', newValue);
-                scope.valueStore.setData(newValue);
-              });
-
-              scope.$watch(function() {
-                return scope.valueStore.getData();
-              }, function(newValue) {
-                console.log('data reset for map value: ', newValue);
-                scope.wkt = scope.config.data;
-              });
-
-              scope.$watch(function() {
-                return scope.chooseGeometry;
-              }, function(newValue) {
-                console.log('radio', scope.chooseGeometry);
-                scope.geometry = newValue;
-                toggleControl();
-              });
-
-
-
-
-              function init() {
-                map = new OpenLayers.Map('jassa-edit-map');
-
-                var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
-                        "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
-
-                panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
-
-                var snapVertex = {methods: ['vertex', 'edge'], layers: [vectors]};
-
-
-
-                // allow testing of specific renderers via "?renderer=Canvas", etc
-                var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
-                renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
-
-                vectors = new OpenLayers.Layer.Vector("Vector Layer", {
-                  renderers: renderer
-                });
-
-                map.addLayers([wmsLayer, vectors]);
-                map.addControl(new OpenLayers.Control.LayerSwitcher());
-                map.addControl(new OpenLayers.Control.MousePosition());
-
-                vectors.events.on({
-                  sketchcomplete: GeometryWasDrawn
-                });
-
-                wkt = new OpenLayers.Format.WKT();
-
-                drawControls = {
-                  point: new OpenLayers.Control.DrawFeature(vectors,
-                          OpenLayers.Handler.Point, {
-                            displayClass: 'olControlDrawFeaturePoint',
-                            handlerOptions: snapVertex}),
-                  line: new OpenLayers.Control.DrawFeature(vectors,
-                          OpenLayers.Handler.Path, {
-                            displayClass: 'olControlDrawFeaturePath',
-                            handlerOptions: snapVertex}),
-                  polygon: new OpenLayers.Control.DrawFeature(vectors,
-                          OpenLayers.Handler.Polygon, {
-                            displayClass: 'olControlDrawFeaturePolygon',
-                            handlerOptions: snapVertex}),
-                  box: new OpenLayers.Control.DrawFeature(vectors,
-                          OpenLayers.Handler.RegularPolygon, {
-                            displayClass: 'olControlDrawFeatureBox',
-                            handlerOptions: _.extend({
-                              sides: 4,
-                              irregular: true
-                            }, snapVertex)
-                          }),
-                  modify: new OpenLayers.Control.ModifyFeature(vectors, {
-                    snappingOptions: snapVertex,
-                    onModificationStart: onModificationStart,
-                    onModification: onModification,
-                    onModificationEnd: onModificationEnd
-                  })
-                };
-
-                panel.addControls(drawControls['modify']);
-                map.addControl(panel);
-                panel.activateControl(drawControls.modify);
-
-                for (var key in drawControls) {
-                  map.addControl(drawControls[key]);
-                }
-
-                map.setCenter(new OpenLayers.LonLat(0, 0), 4);
-              }
-
-              function GeometryWasDrawn(drawnGeometry) {
-                /*var ft = polygonLayer.features;
-                 for(var i=0; i< ft.length; i++){
-                 console.log(polygonLayer.features[i].geometry.getBounds());
-                 displayWKT(polygonLayer.features[i]);
-                 };*/
-                var wktValue = generateWKT(drawnGeometry.feature);
-                scope.config.data = wktValue;
-                scope.$apply();
-              }
-
-              function generateWKT(feature) {
-                var str = wkt.write(feature);
-                str = str.replace(/,/g, ', ');
-                return str;
-              }
-
-              function parseWKT() {
-                //var element = document.getElementById('wkt');
-                var features = wkt.read(scope.config.data);
-                var bounds;
-                if(features) {
-                  if(features.constructor != Array) {
-                    features = [features];
-                  }
-                  for(var i=0; i<features.length; ++i) {
-                    if (!bounds) {
-                      bounds = features[i].geometry.getBounds();
-                    } else {
-                      bounds.extend(features[i].geometry.getBounds());
-                    }
-
-                  }
-                  vectors.addFeatures(features);
-                  map.zoomToExtent(bounds);
-                  var plural = (features.length > 1) ? 's' : '';
-                  console.log('Added WKT-String. Feature' + plural + ' added');
-                } else {
-                  console.log('Bad WKT');
-                }
-              }
-
-              function toggleControl() {
-                console.log('toggleControl', scope.geometry);
-                var control = drawControls[scope.geometry];
-                for(key in drawControls) {
-                  var control = drawControls[key];
-                  if(scope.geometry == key && scope.chooseGeometry) {
-                    control.activate();
-                  } else {
-                    control.deactivate();
-                  }
-                }
-              }
-
-              function onModificationStart(feature) {
-                console.log(feature.id + " is ready to be modified");
-                drawControls[scope.geometry].deactivate();
-
-              }
-
-              function onModification(feature) {
-                console.log(feature.id + " has been modified");
-                var wktValue = generateWKT(feature);
-                scope.config.data = wktValue;
-                scope.$apply();
-              }
-
-              function onModificationEnd(feature) {
-                console.log(feature.id + " is finished to be modified");
-                drawControls[scope.geometry].activate();
-              }
-
-
-              // init openlayers
-              init();
-
-              // set geometry
-              var control = drawControls[scope.geometry];
-              control.activate();
-            }
-          };
-        });
-
-        app.controller('AppCtrl', ['$scope', function($scope) {
-          var graph = new rdf.GraphImpl();
-
-          var s = rdf.NodeFactory.createUri('http://s');
-          var p1 = rdf.NodeFactory.createUri('http://p');
-          var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
-          var p3 = rdf.NodeFactory.createUri('http://p3plaintest');
-          var p4 = rdf.NodeFactory.createUri('http://p4typedtest');
-          var p5 = rdf.NodeFactory.createUri('http://p5datetimetest');
-          var p6 = rdf.NodeFactory.createUri('http://p5timetest');
-          var o1 = rdf.NodeFactory.createUri('http://o1');
-          var o2 = rdf.NodeFactory.createUri('http://o2');
-          var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
-          var o4 = rdf.NodeFactory.createPlainLiteral("Plain Literal with Language Tag", "en");
-          var o5 = rdf.NodeFactory.createTypedLiteralFromValue("123", "http://www.w3.org/2001/XMLSchema#int");
-          var o6 = rdf.NodeFactory.createTypedLiteralFromValue("2002-09-24", "http://www.w3.org/2001/XMLSchema#date");
-          var o7 = rdf.NodeFactory.createTypedLiteralFromValue("21:55:16Z", "http://www.w3.org/2001/XMLSchema#time");
-
-          var t1 = new rdf.Triple(s, p1, o1);
-          var t2 = new rdf.Triple(s, p1, o2);
-          var t3 = new rdf.Triple(s, p2, o3);
-          var t4 = new rdf.Triple(s, p3, o4);
-          var t5 = new rdf.Triple(s, p4, o5);
-          var t6 = new rdf.Triple(s, p5, o6);
-          var t7 = new rdf.Triple(s, p6, o7);
-
-          graph.add(t1);
-          graph.add(t2);
-          graph.add(t3);
-          graph.add(t4);
-          graph.add(t5);
-          graph.add(t6);
-          graph.add(t7);
-
-          console.log('graph', graph);
-          //console.log(graph.contains(t1));
-
-          var ref = new ObjectRef(s, p1, 0);
-          var ref2 = new ObjectRef(s, p1, 1);
-          var ref3 = new ObjectRef(s, p2, 0);
-          var ref4 = new ObjectRef(s, p3, 0);
-          var ref5 = new ObjectRef(s, p4, 0);
-          var ref6 = new ObjectRef(s, p5, 0);
-          var ref7 = new ObjectRef(s, p6, 0);
-
-          console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
-          console.log('Object for ref ' + ref2 + ': ' + ObjectRefUtils.getObject(graph, ref2));
-          console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
-          console.log('Object for ref4 ' + ref4 + ': ' + ObjectRefUtils.getObject(graph, ref4));
-          console.log('Object for ref5 ' + ref5 + ': ' + ObjectRefUtils.getObject(graph, ref5));
-          console.log('Object for ref6 ' + ref6 + ': ' + ObjectRefUtils.getObject(graph, ref6));
-          console.log('Object for ref7 ' + ref7 + ': ' + ObjectRefUtils.getObject(graph, ref7));
-
-          $scope.lang = 'en';
-
-          var graphInserter = new GraphInserter(graph);
-
-          $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);
-          $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
-
-          $scope.myValueStore2 = new foo.ValueStoreLex(graphInserter, ref2);
-
-          $scope.myValueStorePlainConfig = {
-            lex: new foo.ValueStoreLex(graphInserter, ref4),
-            lang: new foo.ValueStoreLang(graphInserter, ref4)
-          };
-
-          $scope.myValueStoreTypedConfig = {
-            lex: new foo.ValueStoreLex(graphInserter, ref5),
-            dtype: new foo.ValueStoreDatatype(graphInserter, ref5)
-          };
-
-          $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
-
-          $scope.myValueStoreDateTimeConfig = {
-            lex: new foo.ValueStoreLex(graphInserter, ref6),
-            dtype: new foo.ValueStoreDatatype(graphInserter, ref6)
-          };
-
-          $scope.myValueStoreDateTimeConfig2 = {
-            lex: new foo.ValueStoreLex(graphInserter, ref7),
-            dtype: new foo.ValueStoreDatatype(graphInserter, ref7)
-          };
-
-          $scope.myModel = "hello world";
-
-          // Map Widget Configuration
-          $scope.myMapsModel = "Foo";
-          // OpenLayers Map
-          $scope.mapConfig = {
-            'zoom' : 8,
-            'data' : 'POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))'
-          };
-
-          $scope.geometryConfig = "polygon";
-
-          $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
-          $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
-
-
-          $scope.myValueStoreMeta = new foo.ValueStoreLex(graphInserter, ref);
-          // generate graph
-          $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
-          $scope.graph = graph;
-          $scope.$watch('"" + graph', function() {
-            console.log('Graph: ' + graph);
-          });
-
-          $scope.graphImpl = graph;
-          $scope.sparqlEndpoint = 'http://localhost/sparql';
-        }]);
-</script>
-
-</head>
-
-<body ng-controller="AppCtrl">
-<h1>SPARQL Update</h1>
-<jassa-edit-sparql-update graph="graphImpl" endpoint="sparqlEndpoint"></jassa-edit-sparql-update>
-<h1>Simple edit with input</h1>
-<jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
-<jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
-<h1>Meta | Plain | Typed | URI Widget</h1>
-<jassa-edit-plain value-store="myValueStorePlainConfig"></jassa-edit-plain>
-<jassa-edit-typed value-store="myValueStoreTypedConfig"></jassa-edit-typed>
-<jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
-<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
-<jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta>
-<h1>DateTime Widget</h1>
-<jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
-<jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
-<jassa-edit-datetime value-store="myValueStoreDateTimeConfig2"></jassa-edit-datetime>
-<h1>Map widget</h1>
-<jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
-<jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
-
-
-</body>
+        return result;
+      }
+    };
+
+    var app = angular.module('jassa.ui.edit.demo.widgets', [
+      'jassa.ui.edit.demo.widgets.sparqlupdate',
+      'jassa.ui.edit.demo.widgets.meta',
+      'jassa.ui.edit.demo.widgets.plain',
+      'jassa.ui.edit.demo.widgets.typed',
+      'jassa.ui.edit.demo.widgets.uri',
+      'jassa.ui.edit.demo.widgets.text',
+      'jassa.ui.edit.demo.widgets.map',
+      'jassa.ui.edit.demo.widgets.datetime',
+      'ui.bootstrap',
+      'ui.jassa']);
+
+    app.controller('AppCtrl', ['$scope', function($scope) {
+      var graph = new rdf.GraphImpl();
+
+      var s = rdf.NodeFactory.createUri('http://s');
+      var p1 = rdf.NodeFactory.createUri('http://p');
+      var p2 = rdf.NodeFactory.createUri('http://www.opengis.net/ont/geosparql#asWKT');
+      var p3 = rdf.NodeFactory.createUri('http://p3plaintest');
+      var p4 = rdf.NodeFactory.createUri('http://p4typedtest');
+      var p5 = rdf.NodeFactory.createUri('http://p5datetimetest');
+      var p6 = rdf.NodeFactory.createUri('http://p5timetest');
+      var o1 = rdf.NodeFactory.createUri('http://o1');
+      var o2 = rdf.NodeFactory.createUri('http://o2');
+      var o3 = rdf.NodeFactory.createTypedLiteralFromValue("POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))", "http://www.opengis.net/ont/geosparql#wktLiteral");
+      var o4 = rdf.NodeFactory.createPlainLiteral("Plain Literal with Language Tag", "en");
+      var o5 = rdf.NodeFactory.createTypedLiteralFromValue("123", "http://www.w3.org/2001/XMLSchema#int");
+      var o6 = rdf.NodeFactory.createTypedLiteralFromValue("2002-09-24", "http://www.w3.org/2001/XMLSchema#date");
+      var o7 = rdf.NodeFactory.createTypedLiteralFromValue("21:55:16Z", "http://www.w3.org/2001/XMLSchema#time");
+
+      var t1 = new rdf.Triple(s, p1, o1);
+      var t2 = new rdf.Triple(s, p1, o2);
+      var t3 = new rdf.Triple(s, p2, o3);
+      var t4 = new rdf.Triple(s, p3, o4);
+      var t5 = new rdf.Triple(s, p4, o5);
+      var t6 = new rdf.Triple(s, p5, o6);
+      var t7 = new rdf.Triple(s, p6, o7);
+
+      graph.add(t1);
+      graph.add(t2);
+      graph.add(t3);
+      graph.add(t4);
+      graph.add(t5);
+      graph.add(t6);
+      graph.add(t7);
+
+      console.log('graph', graph);
+      //console.log(graph.contains(t1));
+
+      var ref = new ObjectRef(s, p1, 0);
+      var ref2 = new ObjectRef(s, p1, 1);
+      var ref3 = new ObjectRef(s, p2, 0);
+      var ref4 = new ObjectRef(s, p3, 0);
+      var ref5 = new ObjectRef(s, p4, 0);
+      var ref6 = new ObjectRef(s, p5, 0);
+      var ref7 = new ObjectRef(s, p6, 0);
+
+      console.log('Object for ref ' + ref + ': ' + ObjectRefUtils.getObject(graph, ref));
+      console.log('Object for ref ' + ref2 + ': ' + ObjectRefUtils.getObject(graph, ref2));
+      console.log('Object for ref3 ' + ref3 + ': ' + ObjectRefUtils.getObject(graph, ref3));
+      console.log('Object for ref4 ' + ref4 + ': ' + ObjectRefUtils.getObject(graph, ref4));
+      console.log('Object for ref5 ' + ref5 + ': ' + ObjectRefUtils.getObject(graph, ref5));
+      console.log('Object for ref6 ' + ref6 + ': ' + ObjectRefUtils.getObject(graph, ref6));
+      console.log('Object for ref7 ' + ref7 + ': ' + ObjectRefUtils.getObject(graph, ref7));
+
+      $scope.lang = 'en';
+
+      var graphInserter = new GraphInserter(graph);
+
+      $scope.myValueStore = new foo.ValueStoreLex(graphInserter, ref);
+      $scope.myValueStoreLang = new foo.ValueStoreLang(graphInserter, ref);
+
+      $scope.myValueStore2 = new foo.ValueStoreLex(graphInserter, ref2);
+
+      $scope.myValueStorePlainConfig = {
+        lex: new foo.ValueStoreLex(graphInserter, ref4),
+        lang: new foo.ValueStoreLang(graphInserter, ref4)
+      };
+
+      $scope.myValueStoreTypedConfig = {
+        lex: new foo.ValueStoreLex(graphInserter, ref5),
+        dtype: new foo.ValueStoreDatatype(graphInserter, ref5)
+      };
+
+      $scope.myValueStoreTyped = new foo.ValueStoreLex(graphInserter, ref5);
+
+      $scope.myValueStoreDateTimeConfig = {
+        lex: new foo.ValueStoreLex(graphInserter, ref6),
+        dtype: new foo.ValueStoreDatatype(graphInserter, ref6)
+      };
+
+      $scope.myValueStoreDateTimeConfig2 = {
+        lex: new foo.ValueStoreLex(graphInserter, ref7),
+        dtype: new foo.ValueStoreDatatype(graphInserter, ref7)
+      };
+
+      $scope.myModel = "hello world";
+
+      // Map Widget Configuration
+      $scope.myMapsModel = "Foo";
+      // OpenLayers Map
+      $scope.mapConfig = {
+        'zoom' : 8,
+        'data' : 'POLYGON((-15.8203125 2.4609375, -15.8203125 -10.546875, 6.85546875 -11.25, 8.26171875 -3.33984375, -15.8203125 2.4609375))'
+      };
+
+      $scope.geometryConfig = "polygon";
+
+      $scope.myValueStoreMap = new foo.ValueStoreLex(graphInserter, ref3);
+      $scope.myValueStoreMapDatatype = new foo.ValueStoreDatatype(graphInserter, ref3);
+
+
+      $scope.myValueStoreMeta = new foo.ValueStoreLex(graphInserter, ref);
+      // generate graph
+      $scope.datatype = "http://www.opengis.net/ont/geosparql#wktLiteral";
+      $scope.graph = graph;
+      $scope.$watch('"" + graph', function() {
+        console.log('Graph: ' + graph);
+      });
+
+      $scope.graphImpl = graph;
+      $scope.sparqlEndpoint = 'http://localhost/sparql';
+    }]);
+    </script>
+
+  </head>
+
+  <body ng-controller="AppCtrl">
+    <h1>SPARQL Update</h1>
+    <jassa-edit-sparql-update graph="graphImpl" endpoint="sparqlEndpoint"></jassa-edit-sparql-update>
+    <h1>Simple edit with input</h1>
+    <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
+    <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+    <h1>Meta | Plain | Typed | URI Widget</h1>
+    <jassa-edit-plain value-store="myValueStorePlainConfig"></jassa-edit-plain>
+    <jassa-edit-typed value-store="myValueStoreTypedConfig"></jassa-edit-typed>
+    <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
+    <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
+    <jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta>
+    <h1>DateTime Widget</h1>
+    <jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
+    <jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
+    <jassa-edit-datetime value-store="myValueStoreDateTimeConfig2"></jassa-edit-datetime>
+    <h1>Map widget</h1>
+    <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
+    <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
+  </body>
 
 </html>
