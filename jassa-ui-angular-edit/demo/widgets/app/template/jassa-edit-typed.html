@@ -1,0 +1,26 @@
+<div class="input-group">
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default no-border-radius" tabindex="-1">Typed</button>
+    <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+      <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#">URI</a></li>
+      <li><a href="#">Typed</a></li>
+      <li><a href="#">Plain</a></li>
+    </ul>
+  </div>
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button>
+    <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+      <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+      <li><a ng-click="setDatatype()" href="#">none</a></li>
+      <li ng-repeat="(key,value) in datatypeTags"><a ng-click="setDatatype(key)" href="#">{{value}}</a></li>
+    </ul>
+  </div>
+  <input type="text" class="form-control margin-left-1" ng-model="typedValue">
+</div>

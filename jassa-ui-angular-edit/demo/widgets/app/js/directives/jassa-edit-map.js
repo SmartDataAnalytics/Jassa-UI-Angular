@@ -4,7 +4,7 @@ angular.module('jassa.ui.edit.demo.widgets.map', ['ui.bootstrap', 'ui.jassa'])
       restrict: 'E',
       replace: true,
       //templateUrl: 'template/constraint-list/constraint-list.html',
-      templateUrl: 'components/jassa-edit-map.html',
+      templateUrl: 'template/jassa-edit-map.html',
       transclude: false,
       //require: 'constraintList',
       require: 'ngModel',

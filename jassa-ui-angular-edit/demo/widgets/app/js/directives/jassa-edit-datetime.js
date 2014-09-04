@@ -68,7 +68,7 @@ angular.module('jassa.ui.edit.demo.widgets.datetime', ['ui.bootstrap', 'ui.jassa
       restrict: 'EA',
       replace: true,
       //templateUrl: 'template/constraint-list/constraint-list.html',
-      templateUrl: 'components/jassa-edit-datetime.html',
+      templateUrl: 'template/jassa-edit-datetime.html',
       transclude: false,
       //require: 'constraintList',
       //require: 'ngModel',

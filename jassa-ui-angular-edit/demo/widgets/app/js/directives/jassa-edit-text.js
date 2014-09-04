@@ -4,7 +4,7 @@ angular.module('jassa.ui.edit.demo.widgets.text', ['ui.bootstrap', 'ui.jassa'])
       restrict: 'EA',
       replace: true,
       //templateUrl: 'template/constraint-list/constraint-list.html',
-      templateUrl: 'components/jassa-edit-text.html',
+      templateUrl: 'template/jassa-edit-text.html',
       transclude: false,
       //require: 'constraintList',
       require: 'ngModel',
