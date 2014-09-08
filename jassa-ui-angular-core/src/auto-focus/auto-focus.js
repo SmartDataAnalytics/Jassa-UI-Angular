@@ -15,8 +15,9 @@ angular.module('ui.jassa.auto-focus', [])
             // to address @blesh's comment, set attribute value to 'false'
             // on blur event:
             element.bind('blur', function() {
-                console.log('blur');
-                scope.$apply(model.assign(scope, false));
+                if(model.assign) {
+                    scope.$apply(model.assign(scope, false));
+                }
             });
         }
     };
