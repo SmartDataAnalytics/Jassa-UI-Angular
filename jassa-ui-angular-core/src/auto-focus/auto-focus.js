@@ -4,9 +4,8 @@ angular.module('ui.jassa.auto-focus', [])
 .directive('autoFocus', function($timeout, $parse) {
     return {
         link: function(scope, element, attrs) {
-            var model = $parse(attrs.focusMe);
+            var model = $parse(attrs.autoFocus);
             scope.$watch(model, function(value) {
-                console.log('value=',value);
                 if(value === true) {
                     $timeout(function() {
                          element[0].focus();
