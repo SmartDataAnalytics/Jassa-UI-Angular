@@ -1,15 +1,15 @@
 angular.module('ui.jassa.auto-focus', [])
 
 // Source: http://stackoverflow.com/questions/14833326/how-to-set-focus-on-input-field
-app.directive('autoFocus', function($timeout, $parse) {
+.directive('autoFocus', function($timeout, $parse) {
     return {
         link: function(scope, element, attrs) {
             var model = $parse(attrs.focusMe);
             scope.$watch(model, function(value) {
                 console.log('value=',value);
-                if(value === true) { 
+                if(value === true) {
                     $timeout(function() {
-                         element[0].focus(); 
+                         element[0].focus();
                     });
                 }
             });
