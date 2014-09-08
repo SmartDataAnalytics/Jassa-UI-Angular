@@ -2,7 +2,8 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
   $templateCache.put("template/facet-tree/facet-tree-item.html",
     "<div ng-class=\"{'frame': facet.isExpanded}\">\n" +
     "\n" +
-    "	<div class=\"facet-row\" ng-class=\"{'highlite': facet.isExpanded}\" ng-mouseover=\"setFacetHover(facet, true)\" ng-mouseleave=\"setFacetHover(facet, false)\">\n" +
+    "<!--	<div class=\"facet-row\" ng-class=\"{'highlite': facet.isExpanded}\" ng-mouseover=\"setFacetHover(facet, true)\" ng-mouseleave=\"setFacetHover(facet, false)\"> -->\n" +
+    "	<div class=\"facet-row\" ng-class=\"{'highlite': facet.isExpanded}\">\n" +
     "		<a ng-show=\"facet.isExpanded\" href=\"\" ng-click=\"toggleCollapsed(facet.item.getPath())\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a>\n" +
     "		<a ng-show=\"!facet.isExpanded\" href=\"\" ng-click=\"toggleCollapsed(facet.item.getPath())\"><span class=\"glyphicon glyphicon-chevron-right\"></span></a>\n" +
     "\n" +

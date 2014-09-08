@@ -85,7 +85,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
     };
       
     $scope.selectIncoming = function(path) {
-        console.log('Incoming selected at path ' + path);
+        //console.log('Incoming selected at path ' + path);
         if($scope.facetTreeConfig) {
             var val = $scope.facetTreeConfig.getExpansionMap().get(path);
             if(val != 2) {
@@ -96,7 +96,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
     };
       
     $scope.selectOutgoing = function(path) {
-        console.log('Outgoing selected at path ' + path);
+        //console.log('Outgoing selected at path ' + path);
         if($scope.facetTreeConfig) {
             var val = $scope.facetTreeConfig.getExpansionMap().get(path);
             if(val != 1) {
