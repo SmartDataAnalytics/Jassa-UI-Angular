@@ -20,7 +20,7 @@ angular.module('ui.jassa.blurify', [])
 
                 if(labelFn) {
                     var val = labelFn(modelVal);
-                    if(val.then) {
+                    if(val && val.then) {
                         val.then(function(label) {
                             element.val(label);
                         });
