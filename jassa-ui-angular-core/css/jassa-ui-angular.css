@@ -1,3 +1,28 @@
+.lang-item {
+	cursor: move;
+	min-width: 20px;
+	min-height: 1em;
+}
+
+.lang-sortable-placeholder {
+	width: 25px;
+	height: 0.9em;
+	border: 2px dotted #aaaaaa;
+}
+
+.lang-borderless,
+.lang-boderless:active,
+.lang-borderless:focus {
+	border: none;
+	outline: none;
+	outline-offset: 0;
+	border-color: transparent;
+}
+
+.preserve-whitespace {
+	white-space: pre;
+}
+
 
 .pagination {
     margin-top: 5px;
