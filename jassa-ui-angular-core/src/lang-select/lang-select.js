@@ -32,7 +32,6 @@ angular.module('ui.jassa.lang-select', ['ui.sortable', 'ui.keypress', 'ngSanitiz
     $scope.getLangSuggestions = function() {
         var obj = $scope.availableLangs;
 
-        console.log(obj);
         var result;
         if(!obj) {
             result = [];
