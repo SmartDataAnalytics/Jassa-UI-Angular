@@ -65,7 +65,7 @@ angular.module('ui.jassa.lang-select', ['ui.sortable', 'ui.keypress', 'ngSanitiz
     return {
         restrict: 'EA',
         replace: true,
-        templateUrl: 'lang-select.html',
+        templateUrl: 'template/lang-select/lang-select.html',
         scope: {
             langs: '=',
             availableLangs: '='
