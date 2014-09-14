@@ -221,7 +221,8 @@ $.widget('custom.ssbMap', {
             visibility: true,
             displayInLayerSwitcher: true,
             styleMap: new OpenLayers.StyleMap({'default': new OpenLayers.Style(this.styles.markerStyle)}),
-            renderers: renderer
+            renderers: renderer,
+			strategies: [new OpenLayers.Strategy.Cluster()]
         });
 
         // TODO Make it easy to exchange the URL pattern
