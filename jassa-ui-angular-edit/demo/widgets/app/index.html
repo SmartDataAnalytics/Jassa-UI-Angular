@@ -56,6 +56,25 @@
     <!-- endbuild -->
 
 
+    <script type="text/ng-template" id="template/property-edit-list/property-edit-list.html">
+    <div>
+        <ul style="list-style-type: none;">
+            <li ng-repeat="config in configs">
+                <div class="alert alert-warning" role="alert" style="width: 500px;">
+                    <span bind-html-unsafe="config.label"></span>
+                    <span bind-html-unsafe="config.propertyUri"></span>
+                    <div dynamic="config.template"></div>
+                </div>
+            </li>
+        </ul>
+        <button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Add Property</button>
+    </div>
+    </script>
+
+    <script type="text/ng-template" id="foobar.html">
+        <span>Yaaaaay</span>
+    </script>
+
     <script type="text/javascript">
     _.mixin(_.str.exports());
 
@@ -401,6 +420,36 @@
       'ui.bootstrap',
       'ui.jassa']);
 
+
+    app.directive('propertyEditList', function() {
+       return {
+           restrict: 'EA',
+           /*
+           scope: {
+               configs: '='
+           },
+           */
+           templateUrl: 'template/property-edit-list/property-edit-list.html'
+       };
+    });
+
+
+    app.directive('dynamic', ['$compile', function($compile) {
+        return {
+            restrict: 'A',
+            replace: true,
+            link: function(scope, ele, attrs) {
+                scope.$watch(attrs.dynamic, function(html) {
+                    ele.html(html);
+                    $compile(ele.contents())(scope);
+                });
+            }
+        };
+    }]);
+
+
+
+
     app.controller('AppCtrl', ['$scope', function($scope) {
       var graph = new rdf.GraphImpl();
 
@@ -511,12 +560,74 @@
 
       $scope.graphImpl = graph;
       $scope.sparqlEndpoint = 'http://localhost/sparql';
+
+      $scope.configs = [{
+          label: '<strong>foo</strong>',
+          propertyUri: 'rdfs:label',
+          template: '<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>'
+      }, {
+          label: '<strong>bar</strong>',
+          propertyUri: 'rdf:type',
+          template: '<span>yay</span>'
+          //template: 'foobar.html' //'<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>'
+      }];
+
+      $scope.addPropertyConfig = function() {
+          $scope.configs.push({
+              label: '<strong>foo</strong>',
+              propertyUri: 'rdfs:label',
+              template: '<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>'
+          });
+      };
+
+
     }]);
+
     </script>
 
   </head>
 
+<!--
+
+    Terminologie:
+
+    rdfTermSwitcher: Nur RdfTermType, Languague und DatatypeSwitcher
+    rdfTermWidget: rdfTermSwitcher + InputElement + InputEditorSupport (Popup beim Input Element)
+
+
+    defaultMetaWidget:
+    <div class="input-group">
+        <rdf-term-switcher icon="?"> value-store="rdfTerm"</rdf-term-switcher> // .termType .lang .dataType
+        <input ng-model="rdfTermX.lex" rdf-value="valueStore"></input>
+    </div>
+
+
+    groupMetaWidget:
+    <div>
+        <meta-widget valueStore="valueStore" inputEditorSupport="someFn(inputElement, valueStore)"></meta-widget>
+        <div widgetFactory="someFunctionReturningAWidgetBasedOnTheRdfTerm(valueStore)">
+
+        <jassa-edit-map></jassa-edit-map>
+    </div>
+
+
+    -->
+<!--
+    <rdf-term-switcher icon="?"> value-store="valueStore2"</rdf-term-switcher>
+    <jassa-edit-map ng-if="valueStore1.lex.getDatatype() == 'foo' && valueStore2.lex.getDataype() === 'bar'> value-store="valueStore2"></jassa-edit-map>
+ -->
+
+
   <body ng-controller="AppCtrl">
+
+<property-edit-list configs="configs"></property-edit-list>
+
+<div class="alert alert-warning" role="alert" style="width: 500px;">
+    <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
+    <textarea style="width: 100%" rows="7"></textarea>
+</div>
+
+
     <h1>SPARQL Update</h1>
     <jassa-edit-sparql-update graph="graphImpl" endpoint="sparqlEndpoint"></jassa-edit-sparql-update>
     <h1>Simple edit with input</h1>
@@ -535,6 +646,7 @@
     <h1>Map widget</h1>
     <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
     <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
+
   </body>
 
 </html>
