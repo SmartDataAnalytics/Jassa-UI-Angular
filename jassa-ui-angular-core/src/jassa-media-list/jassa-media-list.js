@@ -25,7 +25,7 @@ angular.module('ui.jassa.jassa-media-list', [])
     });
 
 
-    $scope.$watch('[filter, limit, offest, refresh]', $scope.doRefresh, true);
+    $scope.$watch('[filter, limit, offset, refresh]', $scope.doRefresh, true);
     $scope.$watch('listService', $scope.doRefresh);
 }])
 
