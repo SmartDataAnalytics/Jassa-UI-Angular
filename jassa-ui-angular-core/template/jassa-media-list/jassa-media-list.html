@@ -1,0 +1,36 @@
+<div style="width: 100%">
+
+    <div style="width: 100%; text-align: center">
+        <pagination
+            ng-show="items.length"
+            class="pagination" max-size="7"
+            total-items="totalItems"
+            page="currentPage"
+            boundary-links="true"
+            rotate="false"
+            first-text="&lt;&lt;"
+            previous-text="&lt;"
+            next-text="&gt;"
+            last-text="&gt;&gt;">
+        </pagination>
+    </div>
+
+    <ul class="media-list" style="width: 100%;">
+        <ng-transclude></ng-transclude>
+    </ul>
+
+    <div style="width: 100%; text-align: center">
+        <pagination
+            ng-show="items.length"
+            class="pagination" max-size="7"
+            total-items="totalItems"
+            page="currentPage"
+            boundary-links="true"
+            rotate="false"
+            first-text="&lt;&lt;"
+            previous-text="&lt;"
+            next-text="&gt;"
+            last-text="&gt;&gt;">
+        </pagination>
+    </div>
+</div>
