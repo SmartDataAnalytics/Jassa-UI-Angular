@@ -15,15 +15,17 @@ angular.module('ui.jassa.jassa-media-list', [])
         });
     };
 
-//    $scope.$watch('currentPage', function() {
-//        $scope.offset = ($scope.currentPage - 1) * $scope.limit;
-//    });
 
     $scope.$watch('offset', function() {
         $scope.currentPage = Math.floor($scope.offset / $scope.limit) + 1;
     });
 
-    $scope.$watch('[filter, limit, currentPage, refresh]', $scope.doRefresh, true);
+    $scope.$watch('currentPage', function() {
+        $scope.offset = ($scope.currentPage - 1) * $scope.limit;
+    });
+
+
+    $scope.$watch('[filter, limit, offest, refresh]', $scope.doRefresh, true);
     $scope.$watch('listService', $scope.doRefresh);
 }])
 
