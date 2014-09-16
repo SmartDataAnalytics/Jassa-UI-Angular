@@ -13,8 +13,12 @@ angular.module('ui.jassa.jassa-media-list', [])
         });
     };
 
-    $scope.$watch('currentPage', function() {
-        $scope.offset = ($scope.currentPage - 1) * $scope.limit;
+//    $scope.$watch('currentPage', function() {
+//        $scope.offset = ($scope.currentPage - 1) * $scope.limit;
+//    });
+
+    $scope.$watch('offset', function() {
+        $scope.currentPage = Math.floor($scope.offset / $scope.limit) + 1;
     });
 
     $scope.$watch('[filter, limit, offset, refresh]', $scope.doRefresh, true);
@@ -33,7 +37,7 @@ angular.module('ui.jassa.jassa-media-list', [])
             limit: '=',
             offset: '=',
             totalItems: '=',
-            currentPage: '=',
+            //currentPage: '=',
             items: '=',
             maxSize: '=',
             refresh: '=' // Extra attribute that is deep watched on changes for triggering refreshs
