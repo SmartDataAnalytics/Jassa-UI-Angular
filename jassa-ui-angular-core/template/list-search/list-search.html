@@ -7,7 +7,7 @@
                 class="form-control"
                 placeholder="Find ...">
 
-            <div class="input-group-btn">
+            <div class="input-group-btn no-border-radius margin-left-1">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{activeSearchMode.label}} <span class="caret"></span></button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li ng-repeat="searchMode in searchModes"><a ng-click="setActiveSearchMode(searchMode)" href="#"><span bind-html-unsafe="searchMode.label"></span></a></li>
