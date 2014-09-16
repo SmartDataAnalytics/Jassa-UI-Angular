@@ -1,6 +1,8 @@
 angular.module('ui.jassa.jassa-media-list', [])
 
 .controller('JassaMediaListCtrl', ['$scope', '$q', function($scope, $q) {
+    $scope.currentPage = 1;
+
     $scope.doRefresh = function() {
         $q.when($scope.listService.fetchCount($scope.filter)).then(function(countInfo) {
             $scope.totalItems = countInfo.count;
