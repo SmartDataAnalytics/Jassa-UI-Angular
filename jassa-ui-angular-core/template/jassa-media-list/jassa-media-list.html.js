@@ -5,15 +5,18 @@ angular.module("template/jassa-media-list/jassa-media-list.html", []).run(["$tem
     "    <div style=\"width: 100%; text-align: center\">\n" +
     "        <pagination\n" +
     "            ng-show=\"items.length\"\n" +
-    "            class=\"pagination\" max-size=\"7\"\n" +
+    "            class=\"pagination\"\n" +
+    "            ng-model=\"currentPage\"\n" +
+    "            items-per-page=\"limit\"\n" +
     "            total-items=\"totalItems\"\n" +
-    "            page=\"currentPage\"\n" +
+    "            max-size=\"maxSize\"\n" +
     "            boundary-links=\"true\"\n" +
     "            rotate=\"false\"\n" +
     "            first-text=\"&lt;&lt;\"\n" +
     "            previous-text=\"&lt;\"\n" +
     "            next-text=\"&gt;\"\n" +
-    "            last-text=\"&gt;&gt;\">\n" +
+    "            last-text=\"&gt;&gt;\"\n" +
+    "        >\n" +
     "        </pagination>\n" +
     "    </div>\n" +
     "\n" +
@@ -24,15 +27,18 @@ angular.module("template/jassa-media-list/jassa-media-list.html", []).run(["$tem
     "    <div style=\"width: 100%; text-align: center\">\n" +
     "        <pagination\n" +
     "            ng-show=\"items.length\"\n" +
-    "            class=\"pagination\" max-size=\"7\"\n" +
+    "            class=\"pagination\"\n" +
+    "            ng-model=\"currentPage\"\n" +
+    "            items-per-page=\"limit\"\n" +
     "            total-items=\"totalItems\"\n" +
-    "            page=\"currentPage\"\n" +
+    "            max-size=\"maxSize\"\n" +
     "            boundary-links=\"true\"\n" +
     "            rotate=\"false\"\n" +
     "            first-text=\"&lt;&lt;\"\n" +
     "            previous-text=\"&lt;\"\n" +
     "            next-text=\"&gt;\"\n" +
-    "            last-text=\"&gt;&gt;\">\n" +
+    "            last-text=\"&gt;&gt;\"\n" +
+    "        >\n" +
     "        </pagination>\n" +
     "    </div>\n" +
     "</div>\n" +
