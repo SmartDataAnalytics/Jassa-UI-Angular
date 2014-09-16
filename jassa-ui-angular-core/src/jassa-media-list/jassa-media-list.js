@@ -1,16 +1,22 @@
 angular.module('ui.jassa.jassa-media-list', [])
 
-.controller('JassaMediaListCtrl', ['$scope', '$q', function($scope, $q) {
+.controller('JassaMediaListCtrl', ['$scope', '$q', '$timeout', function($scope, $q, $timeout) {
     $scope.currentPage = 1;
+
+    // TODO Get rid of the $timeouts
 
     $scope.doRefresh = function() {
         $q.when($scope.listService.fetchCount($scope.filter)).then(function(countInfo) {
-            $scope.totalItems = countInfo.count;
+            $timeout(function() {
+                $scope.totalItems = countInfo.count;
+            });
         });
 
         $q.when($scope.listService.fetchItems($scope.filter, $scope.limit, $scope.offset)).then(function(items) {
-            $scope.items = items.map(function(item) {
-                return item.val;
+            $timeout(function() {
+                $scope.items = items.map(function(item) {
+                    return item.val;
+                });
             });
         });
     };
