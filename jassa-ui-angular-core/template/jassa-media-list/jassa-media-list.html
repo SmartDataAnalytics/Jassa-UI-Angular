@@ -3,15 +3,18 @@
     <div style="width: 100%; text-align: center">
         <pagination
             ng-show="items.length"
-            class="pagination" max-size="7"
+            class="pagination"
+            ng-model="currentPage"
+            items-per-page="limit"
             total-items="totalItems"
-            page="currentPage"
+            max-size="maxSize"
             boundary-links="true"
             rotate="false"
             first-text="&lt;&lt;"
             previous-text="&lt;"
             next-text="&gt;"
-            last-text="&gt;&gt;">
+            last-text="&gt;&gt;"
+        >
         </pagination>
     </div>
 
@@ -22,15 +25,18 @@
     <div style="width: 100%; text-align: center">
         <pagination
             ng-show="items.length"
-            class="pagination" max-size="7"
+            class="pagination"
+            ng-model="currentPage"
+            items-per-page="limit"
             total-items="totalItems"
-            page="currentPage"
+            max-size="maxSize"
             boundary-links="true"
             rotate="false"
             first-text="&lt;&lt;"
             previous-text="&lt;"
             next-text="&gt;"
-            last-text="&gt;&gt;">
+            last-text="&gt;&gt;"
+        >
         </pagination>
     </div>
 </div>
