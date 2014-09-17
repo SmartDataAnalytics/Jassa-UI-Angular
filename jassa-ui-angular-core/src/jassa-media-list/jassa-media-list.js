@@ -3,7 +3,7 @@ angular.module('ui.jassa.jassa-media-list', [])
 .controller('JassaMediaListCtrl', ['$scope', '$q', '$timeout', function($scope, $q, $timeout) {
     $scope.currentPage = 1;
 
-    // TODO Get rid of the $timeouts
+    // TODO Get rid of the $timeouts - not sure why $q.when alone breaks when we return results from cache
 
     $scope.doRefresh = function() {
         $q.when($scope.listService.fetchCount($scope.filter)).then(function(countInfo) {
@@ -50,7 +50,8 @@ angular.module('ui.jassa.jassa-media-list', [])
             //currentPage: '=',
             items: '=',
             maxSize: '=',
-            refresh: '=' // Extra attribute that is deep watched on changes for triggering refreshs
+            refresh: '=', // Extra attribute that is deep watched on changes for triggering refreshs
+            context: '=' // Extra data that can be passed in // TODO I would prefer access to the parent scope
         },
         controller: 'JassaMediaListCtrl',
         link: function(scope, element, attrs, ctrl, transcludeFn) {
