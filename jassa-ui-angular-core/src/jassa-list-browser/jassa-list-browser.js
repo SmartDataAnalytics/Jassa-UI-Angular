@@ -19,6 +19,8 @@ angular.module('ui.jassa.jassa-list-browser', [])
             langs: '=', // Extra attribute that is deep watched on changes for triggering refreshs
             availableLangs: '=',
             doFilter: '=',
+            searchModes: '=',
+            activeSearchMode: '=',
             context: '=' // Extra data that can be passed in // TODO I would prefer access to the parent scope
         },
         templateUrl: 'template/jassa-list-browser/jassa-list-browser.html',
