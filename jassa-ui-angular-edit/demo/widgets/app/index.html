@@ -36,16 +36,19 @@
     <script src="bower_components/ng-grid/build/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/angular-ui-sortable/sortable.js"></script>
+    <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
-    <script src="bower_components/jassa-edit-map/index.js"></script>
-    <script src="bower_components/jassa-edit-datetime/index.js"></script>
-    <script src="bower_components/jassa-edit-uri/index.js"></script>
-    <script src="bower_components/jassa-edit-typed/index.js"></script>
-    <script src="bower_components/jassa-edit-plain/index.js"></script>
-    <script src="bower_components/jassa-edit-text/index.js"></script>
-    <script src="bower_components/jassa-edit-sparql-update/index.js"></script>
-    <script src="bower_components/jassa-edit-sparql-meta/index.js"></script>
     <!-- endbower -->
+
+    <script src="js/directives/jassa-edit-datetime.js"></script>
+    <script src="js/directives/jassa-edit-map.js"></script>
+    <script src="js/directives/jassa-edit-meta.js"></script>
+    <script src="js/directives/jassa-edit-plain.js"></script>
+    <script src="js/directives/jassa-edit-sparql-update.js"></script>
+    <script src="js/directives/jassa-edit-text.js"></script>
+    <script src="js/directives/jassa-edit-typed.js"></script>
+    <script src="js/directives/jassa-edit-uri.js"></script>
 
     <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
@@ -73,6 +76,42 @@
 
     <script type="text/ng-template" id="foobar.html">
         <span>Yaaaaay</span>
+    </script>
+
+    <script type="text/ng-template" id="template/rdf-switcher.html">
+      <span class="input-group-addon"><i class="icon fa fa-globe"></i></span><div class="input-group-btn">
+        <!--button type="button" class="btn btn-default no-border-radius" tabindex="-1">Plain</button-->
+        <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+          <span>Plain</span>
+          <span class="caret"></span>
+          <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">URI</a></li>
+          <li><a href="#">Typed</a></li>
+          <li><a href="#">Plain</a></li>
+        </ul>
+      </div>
+      <div class="input-group-btn">
+        <!--button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{datatype.length === 0 ? "No Datatype" : datatype}}</button-->
+        <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+          <span class="ng-binding">http://www.w3.org/2001/XMLSchema#int</span>
+          <span class="caret"></span>
+          <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-left" role="menu">
+        </ul>
+      </div>
+      <div class="input-group-btn">
+        <!--button type="button" class="btn btn-default no-border-radius" tabindex="-1">{{language.length === 0 ? "No Language" : language}}</button-->
+        <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+          <span class="ng-binding">en</span>
+          <span class="caret"></span>
+          <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-left" role="menu">
+        </ul>
+      </div>
     </script>
 
     <script type="text/javascript">
@@ -147,14 +186,42 @@
 
     var NodeStateUtils = {
       createNode: function(nodeState) {
+        console.log('NODESATEUTILS', nodeState, nodeState.hasOwnProperty('lang'));
+
+
+        /*for (var key in nodeState) {
+          if(val[key].length === 0) { delete val[key]; }
+        }*/
+
         // TODO Implement properly
         if(nodeState.lexicalForm == null) {
           return null;
         }
 
         if(nodeState.hasOwnProperty('datatype')) {
-          var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+          console.log('hasownprop dtype');
+          //if (nodeState.datatype.length > 0) {
+            var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+            return result;
+          //}
+        }
+
+        if(nodeState.hasOwnProperty('lang')) {
+          console.log('hasownprop lang');
+          var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
           return result;
+        }
+
+        var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+
+        return result;
+      },
+
+      createNodeLanguage: function(nodeState) {
+
+        // TODO Implement properly
+        if(nodeState.lexicalForm == null) {
+          return null;
         }
 
         if(nodeState.hasOwnProperty('lang')) {
@@ -165,7 +232,24 @@
         var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
 
         return result;
-      }
+      },
+
+      createNodeDatatype: function(nodeState) {
+
+        // TODO Implement properly
+        if(nodeState.lexicalForm == null) {
+          return null;
+        }
+
+        if(nodeState.hasOwnProperty('datatype')) {
+          var result = rdf.NodeFactory.createTypedLiteralFromValue(nodeState.lexicalForm, nodeState.datatype);
+          return result;
+        }
+
+        var result = rdf.NodeFactory.createPlainLiteral(nodeState.lexicalForm, nodeState.lang);
+
+        return result;
+      },
     };
 
 
@@ -205,11 +289,21 @@
       },
 
       set: function(objectRef, data) {
+
         var val = this.tripleBuilder.getSafe(objectRef);
 
         _(val).extend(data);
 
         var node = NodeStateUtils.createNode(val);
+        if(data.hasOwnProperty('lang')) {
+          var node = NodeStateUtils.createNodeLanguage(val);
+        }
+
+        if(data.hasOwnProperty('datatype')) {
+          var node = NodeStateUtils.createNodeDatatype(val);
+        }
+
+        //var node = NodeStateUtils.createNode(val);
         if(node != null) {
           var t = ObjectRefUtils.getTriple(this.graph, objectRef);
 
@@ -218,8 +312,13 @@
           }
 
           var nt = new rdf.Triple(objectRef.getSubject(), objectRef.getPredicate(), node);
+          console.log('nt', nt, data, val, node, t);
           this.graph.add(nt);
         }
+      },
+
+      remove: function(objectRef, rdfTermTag) {
+
       }
     });
 
@@ -314,6 +413,7 @@
       },
 
       setData: function(data) {
+        console.log('lang data', data, this.objectRef);
         this.graphInserter.set(this.objectRef, {lang: data});
       },
 
@@ -333,8 +433,15 @@
       },
 
       getData: function() {
+        // if no datatype is defined, return object with getUri function
+        var noDatatype = {
+          getUri: function () {
+            return '';
+          }
+        };
+
         var o = GraphInserterUtils.getObject(this.graphInserter, this.objectRef);
-        var result = o == null ? null : o.getLiteralDatatype();
+        var result = o == null || o.literalLabel.dtype == undefined ? noDatatype : o.getLiteralDatatype();
         return result;
       },
 
@@ -415,11 +522,9 @@
       'jassa.ui.edit.demo.widgets.typed',
       'jassa.ui.edit.demo.widgets.uri',
       'jassa.ui.edit.demo.widgets.text',
-      'jassa.ui.edit.demo.widgets.map',
       'jassa.ui.edit.demo.widgets.datetime',
       'ui.bootstrap',
       'ui.jassa']);
-
 
     app.directive('propertyEditList', function() {
        return {
@@ -446,6 +551,269 @@
             }
         };
     }]);
+
+    app.directive('rdfTermSwitcher', function() {
+      return {
+        restrict: 'EA',
+        replace: true,
+        templateUrl: 'template/rdf-switcher.html',
+        link: function(scope, element, attrs) {
+
+        }
+      }
+    });
+
+    app.directive('rdfTermWidgetIcon', function() {
+      return {
+        restrict: 'EA',
+        replace: true,
+        template: '<span class="input-group-addon"><i class="icon fa {{icon}}"></i></span>',
+        scope: {
+          'valueStore': '='
+        },
+        link: function(scope, element, attrs) {
+          scope.icon = 'fa-globe';
+        }
+      }
+    });
+
+    app.directive('rdfTermWidget', function() {
+      return {
+        restrict: 'EA',
+        replace: true,
+        template: '<div><rdf-term-switcher></rdf-term-switcher>\
+        <input type="text" class="form-control margin-left-1" ng-model="plainValue">\
+          </div>',
+        link: function(scope, element, attrs) {
+
+        }
+      }
+    });
+
+    app.directive('jassaEditMap', function() {
+
+      var mapId = 1;
+
+        return {
+          restrict: 'E',
+          replace: true,
+          //templateUrl: 'template/constraint-list/constraint-list.html',
+          templateUrl: 'template/jassa-edit-map.html',
+          transclude: false,
+          //require: 'constraintList',
+          require: 'ngModel',
+          scope: {
+            'config': '=',
+            'geometry': '=',
+            'valueStore': '='
+          },
+          //controller: 'JassaEditMapCtrl',
+          link: function(scope, element, attrs, ngModel) {
+
+            mapId = mapId++;
+
+            scope.mapId = mapId;
+
+            var map, drawControls, polygonLayer, panel, wkt, vectors;
+            //console.log('geometry', scope.geometry);
+            //console.log('mapConfig', scope.config);
+            //console.log('valueStoreMap', scope.valueStore);
+            scope.wkt = scope.config.data;
+            scope.chooseGeometry = scope.geometry;
+
+            scope.$watch(function() {
+              return scope.wkt;
+            }, function(newValue, oldValue) {
+              console.log('old value of input', oldValue);
+              // clear layer
+              vectors.destroyFeatures();
+              // set config data with changed input value ...
+              scope.config.data = scope.wkt;
+              // ... then call parseWKT to redraw the feature
+              parseWKT();
+            });
+
+            scope.$watch(function() {
+              return scope.config.data;
+            }, function(newValue) {
+              console.log('map data changed: ', newValue);
+              scope.valueStore.setData(newValue);
+            });
+
+            scope.$watch(function() {
+              return scope.valueStore.getData();
+            }, function(newValue) {
+              console.log('data reset for map value: ', newValue);
+              scope.wkt = scope.config.data;
+            });
+
+            scope.$watch(function() {
+              return scope.chooseGeometry;
+            }, function(newValue) {
+              console.log('radio', scope.chooseGeometry);
+              scope.geometry = newValue;
+              toggleControl();
+            });
+
+
+
+
+            function init() {
+
+              var mapDomId = 'openlayers-map';
+
+              map = new OpenLayers.Map(mapDomId);
+
+              var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
+                "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
+
+              panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
+
+              var snapVertex = {methods: ['vertex', 'edge'], layers: [vectors]};
+
+
+
+              // allow testing of specific renderers via "?renderer=Canvas", etc
+              var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+              renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+
+              vectors = new OpenLayers.Layer.Vector("Vector Layer", {
+                renderers: renderer
+              });
+
+              map.addLayers([wmsLayer, vectors]);
+              map.addControl(new OpenLayers.Control.LayerSwitcher());
+              map.addControl(new OpenLayers.Control.MousePosition());
+
+              vectors.events.on({
+                sketchcomplete: GeometryWasDrawn
+              });
+
+              wkt = new OpenLayers.Format.WKT();
+
+              drawControls = {
+                point: new OpenLayers.Control.DrawFeature(vectors,
+                  OpenLayers.Handler.Point, {
+                    displayClass: 'olControlDrawFeaturePoint',
+                    handlerOptions: snapVertex}),
+                line: new OpenLayers.Control.DrawFeature(vectors,
+                  OpenLayers.Handler.Path, {
+                    displayClass: 'olControlDrawFeaturePath',
+                    handlerOptions: snapVertex}),
+                polygon: new OpenLayers.Control.DrawFeature(vectors,
+                  OpenLayers.Handler.Polygon, {
+                    displayClass: 'olControlDrawFeaturePolygon',
+                    handlerOptions: snapVertex}),
+                box: new OpenLayers.Control.DrawFeature(vectors,
+                  OpenLayers.Handler.RegularPolygon, {
+                    displayClass: 'olControlDrawFeatureBox',
+                    handlerOptions: _.extend({
+                      sides: 4,
+                      irregular: true
+                    }, snapVertex)
+                  }),
+                modify: new OpenLayers.Control.ModifyFeature(vectors, {
+                  snappingOptions: snapVertex,
+                  onModificationStart: onModificationStart,
+                  onModification: onModification,
+                  onModificationEnd: onModificationEnd
+                })
+              };
+
+              panel.addControls(drawControls['modify']);
+              map.addControl(panel);
+              panel.activateControl(drawControls.modify);
+
+              for (var key in drawControls) {
+                map.addControl(drawControls[key]);
+              }
+
+              map.setCenter(new OpenLayers.LonLat(0, 0), 4);
+            }
+
+            function GeometryWasDrawn(drawnGeometry) {
+              /*var ft = polygonLayer.features;
+               for(var i=0; i< ft.length; i++){
+               console.log(polygonLayer.features[i].geometry.getBounds());
+               displayWKT(polygonLayer.features[i]);
+               };*/
+              var wktValue = generateWKT(drawnGeometry.feature);
+              scope.config.data = wktValue;
+              scope.$apply();
+            }
+
+            function generateWKT(feature) {
+              var str = wkt.write(feature);
+              str = str.replace(/,/g, ', ');
+              return str;
+            }
+
+            function parseWKT() {
+              //var element = document.getElementById('wkt');
+              var features = wkt.read(scope.config.data);
+              var bounds;
+              if(features) {
+                if(features.constructor != Array) {
+                  features = [features];
+                }
+                for(var i=0; i<features.length; ++i) {
+                  if (!bounds) {
+                    bounds = features[i].geometry.getBounds();
+                  } else {
+                    bounds.extend(features[i].geometry.getBounds());
+                  }
+
+                }
+                vectors.addFeatures(features);
+                map.zoomToExtent(bounds);
+                var plural = (features.length > 1) ? 's' : '';
+                console.log('Added WKT-String. Feature' + plural + ' added');
+              } else {
+                console.log('Bad WKT');
+              }
+            }
+
+            function toggleControl() {
+              console.log('toggleControl', scope.geometry);
+              var control = drawControls[scope.geometry];
+              for(key in drawControls) {
+                var control = drawControls[key];
+                if(scope.geometry == key && scope.chooseGeometry) {
+                  control.activate();
+                } else {
+                  control.deactivate();
+                }
+              }
+            }
+
+            function onModificationStart(feature) {
+              console.log(feature.id + " is ready to be modified");
+              drawControls[scope.geometry].deactivate();
+
+            }
+
+            function onModification(feature) {
+              console.log(feature.id + " has been modified");
+              var wktValue = generateWKT(feature);
+              scope.config.data = wktValue;
+              scope.$apply();
+            }
+
+            function onModificationEnd(feature) {
+              console.log(feature.id + " is finished to be modified");
+              drawControls[scope.geometry].activate();
+            }
+
+
+            // init openlayers
+            init();
+
+            // set geometry
+            var control = drawControls[scope.geometry];
+            control.activate();
+          }
+        };
+      });
 
 
 
@@ -512,9 +880,22 @@
 
       $scope.myValueStore2 = new foo.ValueStoreLex(graphInserter, ref2);
 
+      $scope.myValueStoreGeneralConfig = {
+        lex: new foo.ValueStoreLex(graphInserter, ref4),
+        lang: new foo.ValueStoreLang(graphInserter, ref4),
+        dtype: new foo.ValueStoreDatatype(graphInserter, ref4)
+      };
+
+      $scope.myValueStoreGeneral2Config = {
+        lex: new foo.ValueStoreLex(graphInserter, ref5),
+        lang: new foo.ValueStoreLang(graphInserter, ref5),
+        dtype: new foo.ValueStoreDatatype(graphInserter, ref5)
+      };
+
       $scope.myValueStorePlainConfig = {
         lex: new foo.ValueStoreLex(graphInserter, ref4),
-        lang: new foo.ValueStoreLang(graphInserter, ref4)
+        lang: new foo.ValueStoreLang(graphInserter, ref4),
+        icon: 'fa-globe'
       };
 
       $scope.myValueStoreTypedConfig = {
@@ -619,26 +1000,38 @@
 
 
   <body ng-controller="AppCtrl">
-
-<property-edit-list configs="configs"></property-edit-list>
-
-<div class="alert alert-warning" role="alert" style="width: 500px;">
-    <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
-    <textarea style="width: 100%" rows="7"></textarea>
-</div>
-
-
+<!--
+    <h1>PropertyEditList</h1>
+    <property-edit-list configs="configs"></property-edit-list>
+    <h1>Templating</h1>
+    <div class="alert alert-warning" role="alert" style="width: 500px;">
+      <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
+      <textarea style="width: 100%" rows="7"></textarea>
+    </div>
+    <h1>RDFTermSwitcher</h1>
+    <div class="input-group">
+      <rdf-term-widget-icon type="plain" value-store="myValueStorePlainConfig"></rdf-term-widget>
+      <rdf-term-switcher value-store="myValueStorePlainConfig"></rdf-term-switcher>
+      <input class="form-control margin-left-1" ng-model="test" value-store="myValueStorePlainConfig" />
+    </div>
     <h1>SPARQL Update</h1>
     <jassa-edit-sparql-update graph="graphImpl" endpoint="sparqlEndpoint"></jassa-edit-sparql-update>
     <h1>Simple edit with input</h1>
     <jassa-edit-text ng-model="myModel" value-store="myValueStore"></jassa-edit-text>
     <jassa-edit-text ng-model="lang" value-store="myValueStoreLang"></jassa-edit-text>
+
+-->
     <h1>Meta | Plain | Typed | URI Widget</h1>
+<!--
     <jassa-edit-plain value-store="myValueStorePlainConfig"></jassa-edit-plain>
     <jassa-edit-typed value-store="myValueStoreTypedConfig"></jassa-edit-typed>
     <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
-    <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
-    <jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta>
+    <!--jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta-->
+    <!--jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta-->
+    <jassa-edit-meta rdf-term-type="plain" value-store="myValueStoreGeneralConfig"></jassa-edit-meta>
+    <jassa-edit-meta rdf-term-type="typed" value-store="myValueStoreGeneral2Config"></jassa-edit-meta>
+    <jassa-edit-meta rdf-term-type="typed" value-store="myValueStoreGeneral2Config"></jassa-edit-meta>
+<!--
     <h1>DateTime Widget</h1>
     <jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
     <jassa-edit-datetime value-store="myValueStoreDateTimeConfig"></jassa-edit-datetime>
@@ -647,6 +1040,7 @@
     <jassa-edit-text ng-model="datatype" value-store="myValueStoreMapDatatype"></jassa-edit-text>
     <jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map>
 
+    <!--jassa-edit-map ng-model="myMapsModel" config="mapConfig" geometry="geometryConfig" value-store="myValueStoreMap"></jassa-edit-map-->
   </body>
 
 </html>

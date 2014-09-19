@@ -60,7 +60,7 @@ angular.module('jassa.ui.edit.demo.widgets.map', ['ui.bootstrap', 'ui.jassa'])
 
 
         function init() {
-          map = new OpenLayers.Map('jassa-edit-map');
+          map = new OpenLayers.Map('openlayers-map');
 
           var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
             "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
