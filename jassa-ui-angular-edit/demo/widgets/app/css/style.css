@@ -5,3 +5,11 @@ button.no-border-radius {
 input.margin-left-1 {
     margin-left: -1px;
 }
+
+button.margin-left-1 {
+  margin-left: -1px;
+}
+
+.icon {
+  width: 15px;
+}
