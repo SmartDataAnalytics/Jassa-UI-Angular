@@ -1,0 +1,34 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="alert alert-success" role="alert">
+
+                <list-search ng-model="searchString" submit="doFilter(searchString)" search-modes="searchModes" active-search-mode="activeSearchMode"></list-search>
+                <div>
+                    <ul class="list-inline">
+                        <li><span>Language Settings: </span></li>
+                        <li><lang-select langs="langs" available-langs="availableLangs"></lang-select></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <strong>Found <span class="badge">{{totalItems}}</span> items</strong>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <jassa-media-list list-service="listService" offset="offset" limit="limit" filter="filter" total-items="totalItems" items="items" refresh="langs" context="context">
+                <ng-include src="context.itemTemplate"></ng-include>
+            </jassa-media-list>
+
+        </div>
+    </div>
+
+</div>
