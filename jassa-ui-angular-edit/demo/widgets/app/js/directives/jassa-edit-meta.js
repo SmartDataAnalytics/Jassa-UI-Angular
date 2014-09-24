@@ -146,6 +146,10 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
             scopeCache[uniqueId] = [scope];
             scope.rdfTermId = uniqueId;
             console.log('Length', _.size(scopeCache));
+            scope.rdfTermType = scope.initTermType;
+          } else {
+            // use the current rdfTermType state
+            scope.rdfTermType = scopeCache[scope.rdfTermId][0].rdfTermType;
           }
         }
 
@@ -153,6 +157,8 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
         function resetPlainTypedValues() {
           scope.valueStore.lang.setData('');
           scope.valueStore.dtype.setData('');
+          scope.lang = '';
+          scope.type = '';
         }
 
         initMeta();
@@ -163,7 +169,7 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
           uri : 'URI'
         };
 
-        scope.rdfTermType = scope.initTermType;
+        scope.termValue = scope.valueStore.lex.getData();
 
         console.log('rdfTermType', scope.initTermType);
 
@@ -179,7 +185,10 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
           console.log('new rdfTermType', newVal);
           if (scope.rdfTermType === 'uri') {
             resetPlainTypedValues();
+            var uri = '<' + scope.termValue + '>';
+            scope.valueStore.lex.setData(uri);
           }
+          scope.termValue = valueStore.lex.getData();
         });
 
         console.log('type meta', scope.rdfTermType);
@@ -214,14 +223,23 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
           return scope.termValue;
         }, function(newValue) {
           console.log('model changed: ', newValue);
-          scope.valueStore.lex.setData(newValue);
+          if (scope.rdfTermType === 'uri') {
+            newValue = '<' + newValue + '>';
+            scope.valueStore.lex.setData(newValue);
+          } else {
+            scope.valueStore.lex.setData(newValue);
+          }
         });
 
         scope.$watch(function() {
           return scope.valueStore.lex.getData();
         }, function(newValue) {
           console.log('data reset: ', newValue);
-          scope.termValue = newValue;
+          if (scope.rdfTermType === 'uri') {
+            scope.termValue = newValue.replace(/<|>/gi,'');
+          } else {
+            scope.termValue = newValue;
+          }
         });
 
       }
