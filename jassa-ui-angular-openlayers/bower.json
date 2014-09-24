@@ -1,5 +1,6 @@
 {
   "name": "jassa-ui-angular-openlayers",
+  "version": "0.8.1",
   "homepage": "https://github.com/GeoKnow/Jassa-UI-Angular",
   "authors": [
     "Claus Stadler <cstadler@informatik.uni-leipzig.de>"
@@ -13,7 +14,7 @@
     "jquery-ui": "1.10.3",
     "openlayers": "release-2.13.1",
     "angular": "1.2.16-build.63+sha.8d4d437",
-    "jassa": "0.0.4-SNAPSHOT"
+    "jassa": "0.8.1"
   },
   "keywords": [
     "rdf",

@@ -1,5 +1,6 @@
 {
   "name": "jassa-ui-angular",
+  "version": "0.8.1",
   "homepage": "https://github.com/GeoKnow/Jassa-UI-Angular",
   "authors": [
     "Claus Stadler <cstadler@informatik.uni-leipzig.de>"
@@ -10,7 +11,7 @@
     "jassa-ui-angular.css"
   ],
   "dependencies": {
-    "jassa": "0.0.4-SNAPSHOT",
+    "jassa": "0.8.1",
     "angular": "1.2.16-build.63+sha.8d4d437",
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap": "",
