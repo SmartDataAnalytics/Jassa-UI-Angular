@@ -63,7 +63,7 @@
     <div>
         <ul style="list-style-type: none;">
             <li ng-repeat="config in configs">
-                <div class="alert alert-warning" role="alert" style="width: 500px;">
+                <div class="alert alert-warning" role="alert" style="width: 600px;">
                     <span bind-html-unsafe="config.label"></span>
                     <span bind-html-unsafe="config.propertyUri"></span>
                     <div dynamic="config.template"></div>
@@ -518,9 +518,6 @@
     var app = angular.module('jassa.ui.edit.demo.widgets', [
       'jassa.ui.edit.demo.widgets.sparqlupdate',
       'jassa.ui.edit.demo.widgets.meta',
-      'jassa.ui.edit.demo.widgets.plain',
-      'jassa.ui.edit.demo.widgets.typed',
-      'jassa.ui.edit.demo.widgets.uri',
       'jassa.ui.edit.demo.widgets.text',
       'jassa.ui.edit.demo.widgets.datetime',
       'ui.bootstrap',
@@ -945,7 +942,7 @@
       $scope.configs = [{
           label: '<strong>foo</strong>',
           propertyUri: 'rdfs:label',
-          template: '<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>'
+          template: '<jassa-edit-meta rdf-term-type="typed" value-store="myValueStoreGeneral2Config"></jassa-edit-meta>'
       }, {
           label: '<strong>bar</strong>',
           propertyUri: 'rdf:type',
@@ -957,7 +954,7 @@
           $scope.configs.push({
               label: '<strong>foo</strong>',
               propertyUri: 'rdfs:label',
-              template: '<jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>'
+              template: '<jassa-edit-meta rdf-term-type="plain" value-store="myValueStoreGeneralConfig"></jassa-edit-meta>'
           });
       };
 
@@ -1000,9 +997,10 @@
 
 
   <body ng-controller="AppCtrl">
-<!--
+
     <h1>PropertyEditList</h1>
     <property-edit-list configs="configs"></property-edit-list>
+<!--
     <h1>Templating</h1>
     <div class="alert alert-warning" role="alert" style="width: 500px;">
       <jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta>
@@ -1028,6 +1026,7 @@
     <jassa-edit-uri ng-model="myMetaModel" value-store="myValueStoreMeta"></jassa-edit-uri>
     <!--jassa-edit-meta typed value-store="myValueStoreTypedConfig"></jassa-edit-meta-->
     <!--jassa-edit-meta plain value-store="myValueStorePlainConfig"></jassa-edit-meta-->
+    <jassa-edit-meta rdf-term-type="plain" value-store="myValueStoreGeneralConfig"></jassa-edit-meta>
     <jassa-edit-meta rdf-term-type="plain" value-store="myValueStoreGeneralConfig"></jassa-edit-meta>
     <jassa-edit-meta rdf-term-type="typed" value-store="myValueStoreGeneral2Config"></jassa-edit-meta>
     <jassa-edit-meta rdf-term-type="typed" value-store="myValueStoreGeneral2Config"></jassa-edit-meta>

@@ -177,7 +177,9 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
           scope.rdfTermType = newVal;
           scope.rdfTermTypeValue = scope.rdfTermTypeTags[newVal];
           console.log('new rdfTermType', newVal);
-          resetPlainTypedValues();
+          if (scope.rdfTermType === 'uri') {
+            resetPlainTypedValues();
+          }
         });
 
         console.log('type meta', scope.rdfTermType);
