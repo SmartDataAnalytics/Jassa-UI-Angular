@@ -5,6 +5,13 @@ angular.module("template/facet-value-list/facet-value-list.html", []).run(["$tem
     "	    <input type=\"text\" ng-model=\"filterText\" />\n" +
     "		<input class=\"btn-primary\" type=\"submit\" value=\"Filter\" />\n" +
     "	</form>\n" +
+    "\n" +
+    "	<span ng-show=\"loading.data || loading.pageCount\">\n" +
+    "		Loading... \n" +
+    "	    <span ng-show=\"loading.data\">(data)</span>\n" +
+    "	    <span ng-show=\"loading.pageCount\">(page count)</span>\n" +
+    "	</span>\n" +
+    "\n" +
     "	<table>\n" +
     "              <tr><th>Value</th><th>Constrained</th></tr>\n" +
     "<!-- <th>Count</th> -->\n" +
