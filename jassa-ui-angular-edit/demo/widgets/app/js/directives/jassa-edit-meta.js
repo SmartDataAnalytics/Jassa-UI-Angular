@@ -188,7 +188,6 @@ angular.module('jassa.ui.edit.demo.widgets.meta', ['ui.bootstrap', 'ui.jassa'])
             var uri = '<' + scope.termValue + '>';
             scope.valueStore.lex.setData(uri);
           }
-          scope.termValue = valueStore.lex.getData();
         });
 
         console.log('type meta', scope.rdfTermType);
