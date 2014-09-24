@@ -8,7 +8,11 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 .controller('FacetTreeCtrl', ['$rootScope', '$scope', '$q', function($rootScope, $scope, $q) {
         
     var self = this;
-      
+
+    $scope.loading = {
+		data: false,
+	};
+    
       
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig;
@@ -61,11 +65,14 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
             var facetTreeTagger = Jassa.facete.FaceteUtils.createFacetTreeTagger($scope.facetTreeConfig.getPathToFilterString());
     
             //console.log('scopefacets', $scope.facet);             
+
+            $scope.loading.data = true;
             var promise = $scope.facetTreeService.fetchFacetTree(startPath);
               
             Jassa.sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(data) {
                 facetTreeTagger.applyTags(data);
                 $scope.facet = data;
+                $scope.loading.data = false;
             });
     
         } else {
@@ -159,7 +166,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
     return {
         restrict: 'EA',
         replace: true,
-        templateUrl: 'template/facet-tree/facet-tree-item.html',
+        templateUrl: 'template/facet-tree/facet-tree-root.html',
         transclude: false,
         require: 'facetTree',
         scope: {

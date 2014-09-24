@@ -14,6 +14,11 @@ angular.module('ui.jassa.facet-value-list', [])
         currentPage: 1,
         maxSize: 5
     };
+
+    $scope.loading = {
+		data: false,
+        pageCount: false
+	};
     
     //$scope.path = null;
     
@@ -76,12 +81,17 @@ angular.module('ui.jassa.facet-value-list', [])
         
         var dataPromise = fetcher.fetchData(offset, pageSize);
 
+        $scope.loading.pageCount = true;
+        $scope.loading.data = true;
+
         jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $scope.$root, function(countInfo) {
             $scope.pagination.totalItems = countInfo.count;
+            $scope.loading.pageCount = false;
         });
         
         jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $scope.$root, function(items) {
             $scope.facetValues = items;
+            $scope.loading.data = false;
         });
 
     };

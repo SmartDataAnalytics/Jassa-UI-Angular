@@ -3,6 +3,13 @@
 	    <input type="text" ng-model="filterText" />
 		<input class="btn-primary" type="submit" value="Filter" />
 	</form>
+
+	<span ng-show="loading.data || loading.pageCount">
+		Loading... 
+	    <span ng-show="loading.data">(data)</span>
+	    <span ng-show="loading.pageCount">(page count)</span>
+	</span>
+
 	<table>
               <tr><th>Value</th><th>Constrained</th></tr>
 <!-- <th>Count</th> -->
