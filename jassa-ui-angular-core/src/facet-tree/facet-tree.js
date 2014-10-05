@@ -9,22 +9,6 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
     var self = this;
 
-
-    /*
-    var getOrCreateState = function(path) {
-        path = path || null;
-        var pathToState = $scope.facetTreeConfig.getPathToState();
-        var result = pathToState.get(path);
-        if(!result) {
-            result = new jassa.facete.FacetNodeState();
-            pathToState.put(path, result);
-        }
-
-        return result;
-    };
-    */
-
-
     var updateFacetTreeService = function() {
         var isConfigured = $scope.sparqlService && $scope.facetTreeConfig;
         $scope.facetTreeService = isConfigured ? jassa.facete.FacetTreeServiceUtils.createFacetTreeService($scope.sparqlService, $scope.facetTreeConfig) : null;
@@ -35,17 +19,6 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
         self.refresh();
     };
 
-
-//    $scope.setFacetHover = function(facet, isHovered) {
-//        facet.isHovered = isHovered;
-//        if(facet.incoming) {
-//            facet.incoming.isHovered = isHovered;
-//        }
-//
-//        if(facet.outgoing) {
-//            facet.outgoing.isHovered = isHovered;
-//        }
-//    };
 
     $scope.ObjectUtils = jassa.util.ObjectUtils;
 
@@ -73,7 +46,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
         //getOrCreateState(path).getListFilter().setFilter(filterString);
 
         //$scope.facetTreeConfig.getPathToFilterString().put(path, filterString);
-        self.refresh();
+        //self.refresh();
     };
 
     self.refresh = function() {
@@ -90,6 +63,18 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
         }
     };
 
+    $scope.toggleControls = function(path) {
+        var pathToTags = $scope.facetTreeConfig.getPathToTags();
+        //tags.showControls = !tags.showControls;
+        var tags = pathToTags.get(path);
+        if(!tags) {
+            tags = {};
+            pathToTags.put(path, tags);
+        }
+
+        tags.showControls = !tags.showControls;
+    };
+
     $scope.toggleCollapsed = function(path) {
         var pathExpansions = $scope.facetTreeConfig.getFacetTreeState().getPathExpansions();
         jassa.util.CollectionUtils.toggleItem(pathExpansions, path);
@@ -100,7 +85,8 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
     $scope.selectIncoming = function(path) {
         if($scope.facetTreeConfig) {
-            $scope.facetTreeConfig.getFacetTreeState().getPathToDirection().put(path, 1);
+            var pathToDirection = $scope.facetTreeConfig.getFacetTreeState().getPathToDirection();
+            pathToDirection.put(path, -1);
 
             // No need to refresh here, as we are changing the config object
             //self.refresh();
@@ -109,7 +95,8 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
     $scope.selectOutgoing = function(path) {
         if($scope.facetTreeConfig) {
-            $scope.facetTreeConfig.getFacetTreeState().getPathToDirection().put(path, -1);
+            var pathToDirection = $scope.facetTreeConfig.getFacetTreeState().getPathToDirection();
+            pathToDirection.put(path, 1);
 
             // No need to refresh here, as we are changing the config object
             //self.refresh();
