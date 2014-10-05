@@ -32,9 +32,9 @@
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <!-- endbower -->
 
-	<script src="http://cdnjs.cloudflare.com/ajax/libs/bluebird/1.2.2/bluebird.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bluebird/1.2.2/bluebird.min.js"></script>
 
-	<script src="/home/raven/Projects/Eclipse/jassa-core-parent/dist/jassa.js"></script>
+    <script src="/home/raven/Projects/Eclipse/jassa-core-parent/dist/jassa.js"></script>
 
 
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
@@ -65,9 +65,12 @@
         });
 
 
-        var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
+        //var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
-        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
+        //$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
+        $scope.sparqlService = service.SparqlServiceBuilder
+            .http('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/'], {type: 'POST'}).
+            virtFix().cache().create(); //paginate(1000).pageExpand(100).create();
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
 
 
@@ -81,7 +84,7 @@
             $scope.path = path;
         };
 
-
+/*
 
         var facetConfig = $scope.facetTreeConfig.getFacetConfig();
 
@@ -107,7 +110,7 @@
         tableMod.addColumn('_o_');
 
 
-        /*
+        / *
 
         var facetTableConfig = new facete.FacetTableConfig($scope.facetTreeConfig.getFacetConfig());
         facetTableConfig.togglePath(facete.Path.parse(''));
@@ -115,13 +118,13 @@
         var qf = new facete.QueryFactoryFacetTable(facetTableConfig);
         var tableMod = facetTableConfig.getTableMod();
         var queryFactory = new facete.QueryFactoryFacetTable(facetTableConfig);
-        */
+        * /
 
         $scope.facetTableConfig = {
             queryFactory: queryFactory,
             tableMod: tableMod
         };
-
+*/
 
     }]);
     </script>
@@ -131,11 +134,13 @@
 <body ng-controller="MyCtrl">
    <h1>Facet Tree Demo</h1>
    <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
+<!--
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 
 
     <sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
+-->
 </body>
 
 </html>

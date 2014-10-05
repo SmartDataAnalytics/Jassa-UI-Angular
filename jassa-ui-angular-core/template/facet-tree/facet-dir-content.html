@@ -7,11 +7,11 @@
 <!--                 		</div> -->
 
 <span ng-show="dirset.children.length == 0"
-	style="color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}px">(no
-	entries)</span>
+    style="color: #aaaaaa; padding-left: 16px">(no
+    entries)</span>
 
-<div style="padding-left: {{16*(dirset.path.getLength()+1)}}px"
-	ng-repeat="facet in dirset.children"
-	ng-include="'template/facet-tree/facet-tree-item.html'" ></div>
+<div style="padding-left: 16px"
+    ng-repeat="facet in dirset.children"
+    ng-include="'template/facet-tree/facet-tree-item.html'" ></div>
 
 

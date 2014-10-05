@@ -1,37 +1,29 @@
 <div ng-class="{'frame': facet.isExpanded}">
 
-<!--	<div class="facet-row" ng-class="{'highlite': facet.isExpanded}" ng-mouseover="setFacetHover(facet, true)" ng-mouseleave="setFacetHover(facet, false)"> -->
-	<div class="facet-row" ng-class="{'highlite': facet.isExpanded}">
-		<a ng-show="facet.isExpanded" href="" ng-click="toggleCollapsed(facet.item.getPath())"><span class="glyphicon glyphicon-chevron-down"></span></a>
-		<a ng-show="!facet.isExpanded" href="" ng-click="toggleCollapsed(facet.item.getPath())"><span class="glyphicon glyphicon-chevron-right"></span></a>
+    <div class="facet-row visible-on-hover-parent" ng-class="{'highlite': facet.isExpanded}">
+        <a class="visible-on-hover-child" href="" ng-click="toggleCollapsed(facet.path)"><span class="glyphicon" ng-class="facet.isExpanded ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></span></a>
 
-		<a href="" title="Showing incoming facets. Click to show outgoing facets." ng-if="facet.isExpanded && facet.isIncomingActive === true" ng-click="selectOutgoing(facet.item.getPath())"><span class="glyphicon glyphicon-arrow-left"></span></a>
-		<a href="" title="Showing outgoing facets. Click to show incoming facets." ng-if="facet.isExpanded && facet.isOutgoingActive === true" ng-click="selectIncoming(facet.item.getPath())"><span class="glyphicon glyphicon-arrow-right"></span></a>
+        <a href="" title="Showing incoming facets. Click to show outgoing facets." ng-if="facet.isExpanded && facet.incoming" ng-click="selectOutgoing(facet.path)"><span class="glyphicon glyphicon-arrow-left"></span></a>
+        <a href="" title="Showing outgoing facets. Click to show incoming facets." ng-if="facet.isExpanded && facet.outgoing" ng-click="selectIncoming(facet.path)"><span class="glyphicon glyphicon-arrow-right"></span></a>
 
 
-		<a data-rdf-term="{{facet.item.getNode().toString()}}" title="{{facet.item.getNode().getUri()}}" href="" ng-click="toggleSelected(facet.item.getPath())">{{facet.item.getDoc().displayLabel}}</a>
+        <a title="{{facet.property.getUri()}}" href="" ng-click="toggleSelected(facet.path)">{{facet.labelInfo.displayLabel || facet.property.getUri()}}</a>
 
-		<template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list>
+        <a style="margin-left: 5px; margin-right: 5px;" ng-class="!facet.isExpanded ? 'hide' : { 'show-on-hover-child': !facet.tags.controls.isContained }" href="" ng-click="toggleControls(facet.path)"><span class="glyphicon glyphicon-cog"></span></a>
 
-		<span style="float: right" class="badge" ng-bind-html="(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())"></span>
-		
-		<div ng-if="facet.isExpanded && facet.item.getTags().controls.isContained && facet.isIncomingActive === true" style="width:100%" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
-		<div ng-if="facet.isExpanded && facet.item.getTags().controls.isContained && facet.isOutgoingActive === true" style="width:100%" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
-	</div>
-	<div ng-if="facet.isExpanded" style="width:100%"> 
+        <template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list>
 
+        <span style="float: right" class="badge" ng-bind-html="(facet.item.getDistinctValueCount() == null || facet.item.getDistinctValueCount() < 0) ? '&#8230;' : ('' + facet.item.getDistinctValueCount())"></span>
 
-			<div ng-if="facet.isExpanded && facet.isIncomingActive === true" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-content.html'"></div>
-			<div ng-if="facet.isExpanded && facet.isOutgoingActive === true" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-content.html'"></div>
+        <div ng-if="facet.isExpanded && facet.tags.controls.isContained && facet.incoming" style="width:100%" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+        <div ng-if="facet.isExpanded && facet.tags.controls.isContained && facet.outgoing" style="width:100%" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+    </div>
 
+    <div ng-if="facet.isExpanded" style="width:100%">
 
-<!-- 		<tabset class="tabset-small"> -->
-<!-- 			<tab heading="Incoming Facets" active="{{facet.isIncomingActive === true}}" select="selectIncoming(facet.item.getPath())"> -->
-<!-- 				<div ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-content.html'"></div> -->
-<!-- 			</tab> -->
-<!-- 			<tab heading="Outgoing Facets" active="{{facet.isOutgoingActive === true}}" select="selectOutgoing(facet.item.getPath())">					 -->
-<!-- 				<div ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-content.html'"></div> -->
-<!-- 			</tab> -->
-		</tabset>
-	</div>
+        <div ng-if="facet.isExpanded && facet.incoming" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-content.html'"></div>
+        <div ng-if="facet.isExpanded && facet.outgoing" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-content.html'"></div>
+
+    </div>
+
 </div>

@@ -8,12 +8,12 @@ angular.module("template/facet-tree/facet-dir-content.html", []).run(["$template
     "<!--                 		</div> -->\n" +
     "\n" +
     "<span ng-show=\"dirset.children.length == 0\"\n" +
-    "	style=\"color: #aaaaaa; padding-left: {{16*(dirset.path.getLength()+1)}}px\">(no\n" +
-    "	entries)</span>\n" +
+    "    style=\"color: #aaaaaa; padding-left: 16px\">(no\n" +
+    "    entries)</span>\n" +
     "\n" +
-    "<div style=\"padding-left: {{16*(dirset.path.getLength()+1)}}px\"\n" +
-    "	ng-repeat=\"facet in dirset.children\"\n" +
-    "	ng-include=\"'template/facet-tree/facet-tree-item.html'\" ></div>\n" +
+    "<div style=\"padding-left: 16px\"\n" +
+    "    ng-repeat=\"facet in dirset.children\"\n" +
+    "    ng-include=\"'template/facet-tree/facet-tree-item.html'\" ></div>\n" +
     "\n" +
     "\n" +
     "");

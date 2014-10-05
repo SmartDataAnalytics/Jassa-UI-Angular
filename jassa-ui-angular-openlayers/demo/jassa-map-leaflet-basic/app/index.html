@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html ng-app="jassa.demo.map.ol.basic">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Openlayers2Leaflet Demo</title>
+	
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
+	
+    <script src="bower_components/jscache/cache.js"></script>
+	
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <!-- endbower -->
+
+    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <!-- Relative path to the local release repo -->
+    <!-- <script src="../../../target/release/repo/jassa-ui-angular-openlayers-tpls.js"></script> -->
+	
+	<script type="text/javascript">
+    _.mixin(_.str.exports());
+
+	var rdf = jassa.rdf;
+	var sparql = jassa.sparql;
+    var service = jassa.service;
+	var sponate = jassa.sponate;
+    var facete = jassa.facete;
+
+    var geo = jassa.geo;
+
+	var vocab = jassa.vocab;
+	
+	
+	
+	
+    angular.module('jassa.demo.map.ol.basic', ['ui.bootstrap', 'ui.jassa.openlayers'])
+
+    .controller('AppCtrl', ['$scope', function($scope) {
+
+
+        var geoMapFactoryVirt = geo.GeoMapFactoryUtils.createWktMapFactory('http://www.w3.org/2003/01/geo/wgs84_pos#geometry', 'bif:st_intersects', 'bif:st_geomFromText');
+        var geoMapFactoryAsWktVirt = geo.GeoMapFactoryUtils.createWktMapFactory('http://www.opengis.net/ont/geosparql#asWKT', 'bif:st_intersects', 'bif:st_geomFromText');
+        var geoMapFactoryWgs =  geo.GeoMapFactoryUtils.wgs84MapFactory;       
+
+        var createSparqlService = function(url, graphUris) {
+            var result = new service.SparqlServiceHttp(url, graphUris);        
+            result = new service.SparqlServiceCache(result);
+            result = new service.SparqlServiceVirtFix(result);
+            result = new service.SparqlServicePaginate(result, 1000);
+            return result;
+        };
+        
+        var sparqlServiceA = createSparqlService('http://dbpedia.org/sparql', ['http://dbpedia.org']);        
+        var sparqlServiceB = createSparqlService('http://linkedgeodata.org/sparql', ['http://linkedgeodata.org']);        
+        var sparqlServiceC = createSparqlService('http://localhost/data/geolink/sparql', ['http://geolink.aksw.org/']);        
+        
+        var conceptA = facete.ConceptUtils.createTypeConcept('http://dbpedia.org/ontology/Airport');      
+        var conceptB = facete.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');      
+        var conceptC = facete.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
+                
+        var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
+            
+            var attrs = {
+		        fillColor: fillColor,
+		        fontColor: fillColor,
+		        strokeColor: fillColor,
+		
+		        stroke: true,
+		        strokeLinecap: 'round',
+		        strokeWidth: 100,
+		        pointRadius: 12,
+		        labelAlign: 'cm'
+            };
+            
+            var result = geo.GeoDataSourceUtils.createGeoDataSourceLabels(sparqlService, geoMapFactory, concept, attrs);
+            return result;
+        }
+        
+        var bounds = new geo.Bounds(7.0, 49.0, 9, 51.0);
+
+        $scope.dataSources = [
+            createMapDataSource(sparqlServiceA, geoMapFactoryVirt, conceptA, '#CC0020'),
+            createMapDataSource(sparqlServiceB, geoMapFactoryWgs, conceptB, '#2000CC')
+            //createMapDataSource(sparqlServiceC, geoMapFactoryAsWktVirt, conceptC, '#663300'),
+        ];
+        
+        $scope.selectGeom = function(data) {
+            alert(JSON.stringify(data));
+            //console.log('Status', data);
+        };
+        
+		$scope.mapConfig = {
+			center: { lon: 8, lat: 50 },
+			zoom: 8
+		};
+
+		$scope.setCenter = function() {
+			$scope.mapConfig.center = { lon: 20, lat: 20 };
+			$scope.mapConfig.zoom = 4;
+		};
+
+        $scope.$watch('mapConfig', function(v) {
+            console.log('Config changed: ' + JSON.stringify(v));
+        }, true);
+
+    }]);
+	</script>
+
+</head>
+
+<body ng-controller="AppCtrl">
+   <div jassa-map-ol="map" style="position: absolute; width: 100%; height: 100%" config="mapConfig" data-sources="dataSources" select="selectGeom(data)" id="map"></div>
+
+  <button ng-click="setCenter()" style="position: absolute; left: 10px; top: 10px;">Set center</button>
+</body>
+
+</html>
+

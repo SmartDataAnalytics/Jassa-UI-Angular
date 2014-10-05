@@ -154,12 +154,20 @@ a {
     vertical-align: top;
 }
 
-.visible-on-hover {
+.visible-on-hover-child {
     visibility: hidden;
 }
 
-.visible-on-hover:hover {
+.visible-on-hover-parent:hover .visible-on-hover-child {
     visibility: visible;
+}
+
+
+.show-on-hover-child {
+    display: none;
+}
+.show-on-hover-parent-inline:hover .show-on-hover-child {
+    display: inline;
 }
 
 

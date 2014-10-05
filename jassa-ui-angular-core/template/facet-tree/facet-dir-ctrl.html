@@ -1,26 +1,26 @@
 <div style="width: 100%; background-color: #eeeeff;">
-	<div style="padding-right: 16px; padding-left: {{16*(dirset.path.getLength()+1)}}px">
+    <div style="padding-right: 16px; padding-left: 16px">
 
-		<form class="form-inline" role="form" ng-submit="doFilter(dirset.path, dirset.filter.filterString)">
+        <form class="form-inline" role="form" ng-submit="doFilter(dirset.path, dirset.filter.filterString)">
 
-			<div class="form-group">
-				<input type="text" class="form-control input-sm" placeholder="Filter" ng-model="dirset.filter.filterString" value="{{dirset.filter.filterString}}" />
-			</div>
-			<div class="form-group">
-				<button type="submit" class="btn btn-default input-sm">Filter</button>
-			</div>
-			<div class="form-group" ng-if="dirset.pageCount > 1" style="background-color: #eeeeff">
-				<pagination
-					style="padding-left: {{16*(dirset.path.getLength()+1)}}px"
-					class="pagination-tiny" max-size="7"
-					total-items="dirset.childFacetCount" page="dirset.pageIndex"
-					boundary-links="true" rotate="false"
-					on-select-page="selectFacetPage(page, facet)" first-text="<<"
-					previous-text="<" next-text=">" last-text=">>">
-				</pagination>
-			</div>
+            <div class="form-group">
+                <input type="text" class="form-control input-sm" placeholder="Filter" ng-model="dirset.tags.state.getFilter().getConcept()" />
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-default input-sm">Filter</button>
+            </div>
+            <div class="form-group" ng-if="dirset.pageCount > 1" style="background-color: #eeeeff">
+                <pagination
+                    style="padding-left: 16px"
+                    class="pagination-tiny" max-size="7"
+                    total-items="dirset.childFacetCount" page="dirset.pageIndex"
+                    boundary-links="true" rotate="false"
+                    on-select-page="selectFacetPage(page, facet)" first-text="<<"
+                    previous-text="<" next-text=">" last-text=">>">
+                </pagination>
+            </div>
 
-		</form>
-	</div>
+        </form>
+    </div>
 </div>
 
