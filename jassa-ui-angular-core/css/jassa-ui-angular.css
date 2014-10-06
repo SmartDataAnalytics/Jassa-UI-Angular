@@ -1,3 +1,30 @@
+/**
+ * inline pagination
+ */
+/*
+.pagination-tiny > li > a, .pagination-tiny > li > span {
+       padding: 5px;
+}
+*/
+
+.pagination-inline > li > a, .pagination > li > span {
+    background-color: transparent;
+    border: 0px;
+}
+.pagination-inline > .disabled > span, .pagination > .disabled > span:hover, .pagination > .disabled > span:focus, .pagination > .disabled > a, .pagination > .disabled > a:hover, .pagination > .disabled > a:focus {
+    background-color: transparent;
+}
+.pagination-inline {
+    margin: 0px;
+}
+
+.pagination-inline > li > a {
+    font-size: 10px;
+    padding: 0px 3px;
+}
+
+
+
 /* Force pointer cursor on 'a' elements - even without href attribute */
 a {
     cursor: pointer
@@ -50,10 +77,10 @@ a {
 }
 
 
-.pagination {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
+/* .pagination { */
+/*     margin-top: 5px; */
+/*     margin-bottom: 5px; */
+/* } */
 
 .image {
         max-width: 144px;
@@ -189,8 +216,4 @@ a {
        position: relative;
 }
 
-.pagination-tiny > li > a, .pagination-tiny > li > span {
-       font-size: 10px;
-       padding: 5px;
-}
 

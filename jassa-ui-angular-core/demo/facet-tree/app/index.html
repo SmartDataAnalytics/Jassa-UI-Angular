@@ -44,6 +44,23 @@
     <script src="lib/ng-grid/ng-grid-2.0.7.debug.js"></script>
 <!--     <script src="https://rawgithub.com/angular-ui/ng-grid/master/plugins/ng-grid-flexible-height.js"></script> -->
 
+    <style>
+/*     .pagination > li > a, .pagination > li > span { */
+/*         background-color: transparent; */
+/*         border: 0px; */
+/*     } */
+/*     .pagination > .disabled > span, .pagination > .disabled > span:hover, .pagination > .disabled > span:focus, .pagination > .disabled > a, .pagination > .disabled > a:hover, .pagination > .disabled > a:focus { */
+/*         background-color: transparent; */
+/*     } */
+/*     .pagination { */
+/*         margin: 0px; */
+/*     } */
+
+/*     .pagination-tiny > li > a { */
+/*         padding: 0px 3px; */
+/*     } */
+
+    </style>
 
     <script type="text/javascript">
     _.mixin(_.str.exports());
@@ -69,8 +86,9 @@
 
         //$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
         $scope.sparqlService = service.SparqlServiceBuilder
-            .http('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/'], {type: 'POST'}).
-            virtFix().cache().create(); //paginate(1000).pageExpand(100).create();
+            //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
+            .http('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/'], {type: 'POST'})
+            .virtFix().cache().paginate(1000).pageExpand(100).create();
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
 
 
@@ -80,7 +98,7 @@
         $scope.path = null;
 
         $scope.selectFacet = function(path) {
-            alert('Selected Path: [' + path + ']');
+            //alert('Selected Path: [' + path + ']');
             $scope.path = path;
         };
 
@@ -134,8 +152,8 @@
 <body ng-controller="MyCtrl">
    <h1>Facet Tree Demo</h1>
    <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
-<!--
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
+<!--
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 
 
