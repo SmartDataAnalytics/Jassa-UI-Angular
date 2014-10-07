@@ -4,36 +4,43 @@ angular.module('ui.jassa.constraint-list', [])
 
     var self = this;
 
-    //var constraintManager;
-
-    var updateConfig = function() {
-        var isConfigured = $scope.facetTreeConfig;
-        //debugger;
-        $scope.constraintManager = isConfigured ? $scope.facetTreeConfig.getFacetConfig().getConstraintManager() : null;
+    var reset = function() {
+        if($scope.sparqlService && $scope.facetTreeConfig) {
+            var labelConfig = $scope.facetTreeConfig.getBestLiteralConfig();
+            var mappedConcept = jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig);
+            var ls = jassa.sponate.LookupServiceUtils.createLookupServiceMappedConcept($scope.sparqlService, mappedConcept);
+            ls = new jassa.service.LookupServiceTransform(ls, function(val) {
+                return val.displayLabel || val.id;
+            });
+            $scope.constraintLabelsLookupService = new jassa.facete.LookupServiceConstraintLabels(ls);
+        }
     };
-    
-    var update = function() {
-        updateConfig();
-        self.refresh();
+
+    var refresh = function() {
+
+        if($scope.constraintLabelsLookupService) {
+
+            var constraints = $scope.constraintManager ? $scope.constraintManager.getConstraints() : [];
+            var promise = $scope.constraintLabelsLookupService.lookup(constraints);
+
+            $q.when(promise).then(function(map) {
+
+                var items =_(constraints).map(function(constraint) {
+                    var label = map.get(constraint);
+
+                    var r = {
+                        constraint: constraint,
+                        label: label
+                    };
+
+                    return r;
+                });
+
+                $scope.constraints = items;
+            });
+        }
     };
 
-
-    $scope.ObjectUtils = Jassa.util.ObjectUtils;
-
-    var watchList = '[ObjectUtils.hashCode(facetTreeConfig)]';
-    $scope.$watch(watchList, function() {
-		update();
-	}, true);
-    
-    $scope.$watch('sparqlService', function() {
-        update();
-    });
-    
-    $scope.$watch('labelService', function() {
-        update();
-    });
-    
-    
     var renderConstraint = function(constraint) {
         var type = constraint.getName();
 
@@ -49,39 +56,31 @@ angular.module('ui.jassa.constraint-list', [])
         default:
             result = constraint;
         }
-        
+
         return result;
     };
-    
-    self.refresh = function() {
 
-        var constraintManager = $scope.constraintManager;
-        var constraints = constraintManager ? constraintManager.getConstraints() : [];
+    $scope.$watch('constraintLabelsLookupService', function() {
+        refresh();
+    });
 
-        var promise = jassa.service.LookupServiceUtils.lookup($scope.labelService, constraints);
+    $scope.$watch('facetTreeConfig.getFacetConfig().getConstraintManager()', function(cm) {
+        $scope.constraintManager = cm;
+        refresh();
+    }, true);
 
-        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
+    $scope.$watch('sparqlService', function() {
+        reset();
+    });
 
-            var items =_(constraints).map(function(constraint) {
-                var label = map.get(constraint);
+    $scope.$watch('facetTreeConfig.getBestLiteralConfig()', function() {
+        reset();
+    }, true);
 
-                var r = {
-                    constraint: constraint,
-                    label: label
-                };
-                
-                return r;
-            });
-
-            $scope.constraints = items;
-        });
-    };
-    
     $scope.removeConstraint = function(item) {
         $scope.constraintManager.removeConstraint(item.constraint);
-        //$scope.$emit('facete:constraintsChanged');
     };
-    
+
 }])
 
 
@@ -89,7 +88,7 @@ angular.module('ui.jassa.constraint-list', [])
  * The actual dependencies are:
  * - sparqlServiceFactory
  * - facetTreeConfig
- * - labelMap (maybe this should be part of the facetTreeConfig) 
+ * - labelMap (maybe this should be part of the facetTreeConfig)
  */
 .directive('constraintList', function() {
     return {

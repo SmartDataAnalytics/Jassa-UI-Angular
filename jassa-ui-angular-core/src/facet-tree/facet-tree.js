@@ -54,6 +54,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
     var watchList = '[ObjectUtils.hashCode(facetTreeConfig)]';
     $scope.$watch(watchList, function() {
+        console.log('UpdateTree', $scope.facetTreeConfig);
         update();
     }, true);
 

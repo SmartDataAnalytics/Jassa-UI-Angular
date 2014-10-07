@@ -93,7 +93,8 @@
 
 
         $scope.facetTreeConfig = new facete.FacetTreeConfig();
-
+        console.log('FacetTreeConfig: ', $scope.facetTreeConfig);
+        $scope.facetTreeConfig.getFacetTreeState().getPathExpansions().add(new facete.Path());
 
         $scope.path = null;
 
@@ -153,6 +154,7 @@
    <h1>Facet Tree Demo</h1>
    <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
+   <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 <!--
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 
