@@ -12,7 +12,7 @@ angular.module("template/facet-tree/facet-dir-content.html", []).run(["$template
     "    entries)</span>\n" +
     "\n" +
     "<div style=\"padding-left: 16px\"\n" +
-    "    ng-repeat=\"facet in dirset.children\"\n" +
+    "    ng-repeat=\"facet in dirset.children track by facet.path\"\n" +
     "    ng-include=\"'template/facet-tree/facet-tree-item.html'\" ></div>\n" +
     "\n" +
     "\n" +

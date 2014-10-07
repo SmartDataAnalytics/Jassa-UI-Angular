@@ -48,7 +48,7 @@ angular.module('ui.jassa.facet-value-list', [])
                 var dataPromise = ls.fetchItems(filter, pageSize, offset);
 
                 $q.when(countPromise).then(function(countInfo) {
-                    console.log('countInfo: ', countInfo);
+                    //console.log('countInfo: ', countInfo);
 
                     $scope.pagination.totalItems = countInfo.count;
                 });
@@ -57,7 +57,7 @@ angular.module('ui.jassa.facet-value-list', [])
                     var items = entries.map(function(entry) {
                         var labelInfo = entry.val.labelInfo = {};
                         labelInfo.displayLabel = '' + entry.key;
-                        console.log('entry: ', entry);
+                        //console.log('entry: ', entry);
 
                         entry.val.node = entry.key;
                         entry.val.path = $scope.path;

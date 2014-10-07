@@ -11,7 +11,7 @@
     entries)</span>
 
 <div style="padding-left: 16px"
-    ng-repeat="facet in dirset.children"
+    ng-repeat="facet in dirset.children track by facet.path"
     ng-include="'template/facet-tree/facet-tree-item.html'" ></div>
 
 

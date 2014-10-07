@@ -10,7 +10,12 @@
 
         <a title="{{facet.property.getUri()}}" href="" ng-click="onSelect({path: facet.path})">{{facet.labelInfo.displayLabel || facet.property.getUri()}}</a>
 
+        <small><span style="color: gray;" ng-bind-html="(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)"></span></small>
+
         <a style="margin-left: 5px; margin-right: 5px;" ng-class="!facet.isExpanded ? 'hide' : { 'visible-on-hover-child': !facet.tags.showControls }" href="" ng-click="toggleControls(facet.path)"><span class="glyphicon glyphicon-cog"></span></a>
+
+        <a style="margin-left: 5px; margin-right: 5px;" ng-class="{ 'visible-on-hover-child': !isEqual(facet.path, startPath) }" href="" ng-click="setStartPath(facet.path)"><span class="glyphicon glyphicon-pushpin"></span></a>
+
 
         <template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list>
 
@@ -31,10 +36,10 @@
             ></pagination>
         </div>
 
-        <span style="float: right" class="badge" ng-bind-html="(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)"></span>
+<!--         <span style="float: right" class="badge" ng-bind-html="(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)"></span> -->
 
-        <div ng-if="facet.isExpanded && facet.tags.showControls && facet.incoming" style="width:100%" ng-repeat="dirset in [facet.incoming]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
-        <div ng-if="facet.isExpanded && facet.tags.showControls && facet.outgoing" style="width:100%" ng-repeat="dirset in [facet.outgoing]" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+        <div ng-if="facet.isExpanded && facet.tags.showControls && facet.incoming" style="width:100%" ng-repeat="dirset in [facet.incoming] track by dirset.pathHead" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
+        <div ng-if="facet.isExpanded && facet.tags.showControls && facet.outgoing" style="width:100%" ng-repeat="dirset in [facet.outgoing] track by dirset.pathHead" ng-include="'template/facet-tree/facet-dir-ctrl.html'"></div>
     </div>
 
     <div ng-if="facet.isExpanded" style="width:100%">

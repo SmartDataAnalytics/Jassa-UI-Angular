@@ -62,6 +62,27 @@
 
     </style>
 
+
+    <script type="text/ng-template" id="default-list-item.html">
+        <li class="media" ng-repeat="item in items">
+            <a class="pull-left" href="#">
+                <div class="thumbnail thumbnail-center" style="width: 100px; height: 100px;">
+                    <div class="thumbnail-wrapper">
+                        <img ng-src="{{item.depiction}}">
+                    </div>
+                </div>
+            </a>
+
+            <div class="media-body">
+
+                <b>{{item.label || 'Sorry, there is no title available in your preferred languages'}}</b> <a href="{{item.id}}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+                <br />
+                <span bind-html-unsafe="item.comment || 'Sorry, there is no description available in your preferred languages' | typeaheadHighlight:searchString"></span>
+            </div>
+        </li>
+        <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li>
+    </script>
+
     <script type="text/javascript">
     _.mixin(_.str.exports());
 
@@ -71,29 +92,65 @@
     var rdf = jassa.rdf;
     var sparql = jassa.sparql;
     var service = jassa.service;
+    var sponate = jassa.sponate;
     var facete = jassa.facete;
 
     var myModule = angular.module('FacetTreeDemo', ['ngSanitize', 'ui.bootstrap', 'ngGrid', 'ui.jassa']);
 
-    myModule.controller('MyCtrl', ['$scope', function($scope) {
-
-        $scope.$watch('facetTreeConfig.hashCode()', function(newState) {
-            console.log('Config change detected', newState);
-        });
+    myModule.controller('MyCtrl', ['$scope', '$q', function($scope, $q) {
 
 
         //var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
 
         //$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
+
         $scope.sparqlService = service.SparqlServiceBuilder
-            //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
             .http('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/'], {type: 'POST'})
             .virtFix().cache().paginate(1000).pageExpand(100).create();
 //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
+            //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
+
+
+        /*
+         * Set up the sparql service with as many buffs (decorations) as we like
+         */
+//         $scope.sparqlService = service.SparqlServiceBuilder
+//            .http('http://akswnc3.informatik.uni-leipzig.de/data/misc/sparql', ['http://pokedex.org'], {type: 'POST'})
+//            .cache().virtFix().paginate(1000).pageExpand(100).create();
+
+
+        /*
+         * Set up the Sponate mapping for the data we are interested in
+         */
+        var prefixes = {
+            'foaf': 'http://xmlns.com/foaf/0.1/',
+            'pokedex': 'http://pokedex.dataincubator.org/pkm/'
+        };
+
+        var store = new sponate.StoreFacade($scope.sparqlService, prefixes);
+
+        $scope.langs = ['de', 'en', 'fr', 'ja', 'it', 'es', ''];
+
+        var labelConfig = new sparql.BestLabelConfig($scope.langs);
+        var labelTemplate = sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig);
+        var commentTemplate = sponate.MappedConceptUtils.createMappedConceptBestLabel(new sparql.BestLabelConfig($scope.langs, [rdf.NodeFactory.createUri(prefixes.pokedex + 'description')]));
+
+        store.addMap({
+            name: 'pokemons',
+            template: [{
+                id: '?s',
+                label: { $ref: { target: labelTemplate, attr: 'displayLabel' }},
+                comment: { $ref: { target: commentTemplate, attr: 'displayLabel' }},
+                depiction: '?d',
+            }],
+            from: '?s a pokedex:Pokemon . Optional { ?s foaf:depiction ?d }'
+        });
+
 
 
         $scope.facetTreeConfig = new facete.FacetTreeConfig();
-        console.log('FacetTreeConfig: ', $scope.facetTreeConfig);
+//         $scope.facetTreeConfig.getFacetConfig().setBaseConcept(sparql.ConceptUtils.createTypeConcept('http://pokedex.dataincubator.org/pkm/Pokemon'));
+//         console.log('FacetTreeConfig: ', $scope.facetTreeConfig);
         $scope.facetTreeConfig.getFacetTreeState().getPathExpansions().add(new facete.Path());
 
         $scope.path = null;
@@ -102,6 +159,40 @@
             //alert('Selected Path: [' + path + ']');
             $scope.path = path;
         };
+
+        $scope.listService = store.pokemons.getListService();
+        $scope.listService = new service.ListServicePageExpand($scope.listService, 100);
+
+
+        $scope.$watch('facetTreeConfig.getFacetConfig().getConstraintManager();', function() {
+            $scope.facetValueConceptService = new facete.FacetValueConceptServiceExact($scope.facetTreeConfig.getFacetConfig());
+
+            $scope.facetValueConceptService.prepareConcept(new facete.Path()).then(function(concept) {
+
+
+                var q = new sparql.Query();
+                q.setQuerySelectType();
+                q.setQueryPattern(concept.getElement());
+                q.getProject().add(concept.getVar());
+                q.getOrderBy().push(new sparql.SortCondition(new sparql.ExprVar(concept.getVar())));
+
+                concept = new sparql.Concept(new sparql.ElementSubQuery(q), concept.getVar());
+
+                console.log('CONCEPT: ' + concept);
+
+                $q.when($scope.listService.fetchItems(concept, 10)).then(function(items) {
+                    console.log('Got ' + items.length + ' items');
+                    $scope.items = _(items).pluck('val');
+                });
+
+                $q.when($scope.listService.fetchCount(concept)).then(function(countInfo) {
+                    $scope.itemCount = countInfo;
+                });
+            });
+
+        }, true);
+
+
 
 /*
 
@@ -155,6 +246,10 @@
    <facet-tree style="width: 500px" sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
    <facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
+   {{itemCount}} items
+   <ul>
+       <li ng-repeat="item in items" ng-include="'default-list-item.html'"></li>
+   </ul>
 <!--
    <constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
 

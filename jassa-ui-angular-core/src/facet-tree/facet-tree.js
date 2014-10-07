@@ -48,13 +48,16 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
         self.refresh();
     };
 
+    $scope.itemsPerPage = [10, 25, 50, 100];
 
     $scope.ObjectUtils = jassa.util.ObjectUtils;
     $scope.Math = Math;
 
-    var watchList = '[ObjectUtils.hashCode(facetTreeConfig)]';
+    $scope.startPath = null;
+
+    var watchList = '[ObjectUtils.hashCode(facetTreeConfig), startPath]';
     $scope.$watch(watchList, function() {
-        console.log('UpdateTree', $scope.facetTreeConfig);
+        //console.log('UpdateTree', $scope.facetTreeConfig);
         update();
     }, true);
 
@@ -84,7 +87,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
     self.refresh = function() {
 
         if($scope.facetTreeService) {
-            var promise = $scope.facetTreeService.fetchFacetTree();
+            var promise = $scope.facetTreeService.fetchFacetTree($scope.startPath);
             $q.when(promise).then(function(data) {
                 $scope.facet = data;
                 //console.log('TREE: ' + JSON.stringify($scope.facet, null, 4));
@@ -113,6 +116,20 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
 
         // No need to refresh here, as we are changing the config object
         //self.refresh();
+    };
+
+    $scope.isEqual = function(a, b) {
+        var r = a == null ? b == null : a.equals(b);
+        return r;
+    };
+
+    $scope.setStartPath = function(path) {
+        //var p = path.getParent();
+        //var isRoot = p == null || $scope.isEqual($scope.startPath, p);
+        //$scope.startPath = isRoot ? null : p;
+
+        var isRoot = path == null || $scope.isEqual($scope.startPath, path);
+        $scope.startPath = isRoot ? null : path;
     };
 
     $scope.selectIncoming = function(path) {

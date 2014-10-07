@@ -12,7 +12,12 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
     "\n" +
     "        <a title=\"{{facet.property.getUri()}}\" href=\"\" ng-click=\"onSelect({path: facet.path})\">{{facet.labelInfo.displayLabel || facet.property.getUri()}}</a>\n" +
     "\n" +
+    "        <small><span style=\"color: gray;\" ng-bind-html=\"(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)\"></span></small>\n" +
+    "\n" +
     "        <a style=\"margin-left: 5px; margin-right: 5px;\" ng-class=\"!facet.isExpanded ? 'hide' : { 'visible-on-hover-child': !facet.tags.showControls }\" href=\"\" ng-click=\"toggleControls(facet.path)\"><span class=\"glyphicon glyphicon-cog\"></span></a>\n" +
+    "\n" +
+    "        <a style=\"margin-left: 5px; margin-right: 5px;\" ng-class=\"{ 'visible-on-hover-child': !isEqual(facet.path, startPath) }\" href=\"\" ng-click=\"setStartPath(facet.path)\"><span class=\"glyphicon glyphicon-pushpin\"></span></a>\n" +
+    "\n" +
     "\n" +
     "        <template-list style=\"list-style:none; display: inline; padding-left: 0px;\" templates=\"plugins\" data=\"facet\" context=\"pluginContext\"></template-list>\n" +
     "\n" +
@@ -33,10 +38,10 @@ angular.module("template/facet-tree/facet-tree-item.html", []).run(["$templateCa
     "            ></pagination>\n" +
     "        </div>\n" +
     "\n" +
-    "        <span style=\"float: right\" class=\"badge\" ng-bind-html=\"(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)\"></span>\n" +
+    "<!--         <span style=\"float: right\" class=\"badge\" ng-bind-html=\"(!facet.valueCountInfo || facet.valueCountInfo.hasMoreItems) ? '&#8230;' : ('' + facet.valueCountInfo.count)\"></span> -->\n" +
     "\n" +
-    "        <div ng-if=\"facet.isExpanded && facet.tags.showControls && facet.incoming\" style=\"width:100%\" ng-repeat=\"dirset in [facet.incoming]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
-    "        <div ng-if=\"facet.isExpanded && facet.tags.showControls && facet.outgoing\" style=\"width:100%\" ng-repeat=\"dirset in [facet.outgoing]\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
+    "        <div ng-if=\"facet.isExpanded && facet.tags.showControls && facet.incoming\" style=\"width:100%\" ng-repeat=\"dirset in [facet.incoming] track by dirset.pathHead\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
+    "        <div ng-if=\"facet.isExpanded && facet.tags.showControls && facet.outgoing\" style=\"width:100%\" ng-repeat=\"dirset in [facet.outgoing] track by dirset.pathHead\" ng-include=\"'template/facet-tree/facet-dir-ctrl.html'\"></div>\n" +
     "    </div>\n" +
     "\n" +
     "    <div ng-if=\"facet.isExpanded\" style=\"width:100%\">\n" +

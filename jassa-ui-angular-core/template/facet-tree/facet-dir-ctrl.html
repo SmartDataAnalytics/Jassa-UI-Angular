@@ -1,15 +1,23 @@
 <div style="width: 100%; background-color: #eeeeff;">
-    {{pageCount}} {{currentPage}}
     <div style="padding-right: 16px; padding-left: 16px">
 
-        <form class="form-inline" role="form" ng-submit="doFilter(dirset.pathHead, dirset.filterString)">
+        <form class="form-inline" role="form" ng-submit="doFilter(dirset.pathHead, dirset.listFilter.concept)">
 
             <div class="form-group">
-                <input type="text" class="form-control input-sm" placeholder="Filter" ng-model="dirset.filterString" />
+                <div class="input-group">
+                    <input type="text" class="form-control input-sm" placeholder="Filter" ng-model="dirset.listFilter.concept" ng-change="doFilter(dirset.pathHead, dirset.listFilter.concept)"/>
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default input-sm">Filter</button>
+                    </span>
+                    <span class="input-group-btn">
+                        <select class="btn btn-default input-sm" ng-model="dirset.listFilter.limit" ng-options="item for item in itemsPerPage"></select>
+                    </span>
+                </div>
+<!--                 <div class="input-group"> -->
+<!--                     <select class="form-control input-sm" ng-model="dirset.limit" ng-options="item for item in itemsPerPage"></select> -->
+<!--                 </div> -->
             </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-default input-sm">Filter</button>
-            </div>
+
 
         </form>
     </div>
