@@ -59,11 +59,26 @@ angular.module('ui.jassa.facet-value-list', [])
                         labelInfo.displayLabel = '' + entry.key;
                         //console.log('entry: ', entry);
 
+                        var path = $scope.path;
                         entry.val.node = entry.key;
-                        entry.val.path = $scope.path;
+                        entry.val.path = path;
 
+                        entry.val.tags = {};
 
                         return entry.val;
+                    });
+                    var cm = $scope.facetTreeConfig.getFacetConfig().getConstraintManager();
+                    var cs = cm.getConstraintsByPath(path);
+                    var values = {};
+                    cs.forEach(function(c) {
+                        if(c.getName() === 'equals') {
+                            values[c.getValue()] = true;
+                        }
+                    });
+
+                    items.forEach(function(item) {
+                        var isConstrained = values['' + item.node];
+                        item.tags.isConstrainedEqual = isConstrained;
                     });
 
                     $scope.facetValues = items;

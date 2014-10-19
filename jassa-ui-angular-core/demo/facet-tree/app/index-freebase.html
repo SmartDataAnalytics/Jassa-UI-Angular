@@ -30,9 +30,8 @@
     <script src="bower_components/angular-ui-sortable/sortable.js"></script>
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <!-- endbower -->
-
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/bluebird/1.2.2/bluebird.min.js"></script>
 
     <script src="/home/raven/Projects/Eclipse/jassa-core-parent/dist/jassa.js"></script>
 
@@ -113,29 +112,18 @@
     var service = jassa.service;
     var sponate = jassa.sponate;
     var facete = jassa.facete;
+    var vocab = jassa.vocab;
 
     var myModule = angular.module('FacetTreeDemo', ['ngSanitize', 'ui.bootstrap', 'ngGrid', 'ui.jassa']);
 
     myModule.controller('MyCtrl', ['$scope', '$q', function($scope, $q) {
 
-
-        //var sparqlServiceFactory = new service.SparqlServiceFactoryDefault();
-
-        //$scope.sparqlService = sparqlServiceFactory.createSparqlService('http://fp7-pp.publicdata.eu/sparql', []);
-
-//         $scope.sparqlService = service.SparqlServiceBuilder
-//             .http('http://fp7-pp.publicdata.eu/sparql', ['http://fp7-pp.publicdata.eu/'], {type: 'POST'})
-//             .virtFix().cache().paginate(1000).pageExpand(100).create();
-
-        //        $scope.sparqlService = sparqlServiceFactory.createSparqlService('http://localhost/fts-sparql', []);
-            //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
-
-
         /*
          * Set up the sparql service with as many buffs (decorations) as we like
          */
         $scope.sparqlService = service.SparqlServiceBuilder
-           .http('http://akswnc3.informatik.uni-leipzig.de/data/misc/sparql', ['http://pokedex.org'], {type: 'POST'})
+           //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
+            .http('http://localhost/data/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
            .cache().virtFix().paginate(1000).pageExpand(100).create();
 
 
@@ -156,34 +144,21 @@
         var commentTemplate = sponate.MappedConceptUtils.createMappedConceptBestLabel(new sparql.BestLabelConfig($scope.langs, [rdf.NodeFactory.createUri(prefixes.pokedex + 'description')]));
 
         store.addMap({
-            name: 'pokemons',
+            name: 'basicDescriptions',
             template: [{
                 id: '?s',
                 label: { $ref: { target: labelTemplate, attr: 'displayLabel' }},
                 comment: { $ref: { target: commentTemplate, attr: 'displayLabel' }},
                 depiction: '?d',
-            }],
-            from: '?s a pokedex:Pokemon . Optional { ?s foaf:depiction ?d }'
-        });
-
-
-        store.addMap({
-            name: 'basicDescriptions',
-            template: [{
-                id: '?s',
-                depiction: '?d',
-                displayLabel: { $ref: { target: labelTemplate, attr: 'displayLabel' } },
                 types: [{
                     id: '?t',
                     displayLabel: { $ref: { target: labelTemplate, attr: 'displayLabel', on: '?t' } },
                 }],
             }],
-            from: '?s a ?t . Optional { ?s foaf:depiction ?d }',
+            from: '?s a ?t . Optional { ?s foaf:depiction ?d }'
         });
 
         $scope.facetTreeConfig = new facete.FacetTreeConfig();
-//         $scope.facetTreeConfig.getFacetConfig().setBaseConcept(sparql.ConceptUtils.createTypeConcept('http://pokedex.dataincubator.org/pkm/Pokemon'));
-//         console.log('FacetTreeConfig: ', $scope.facetTreeConfig);
         $scope.facetTreeConfig.getFacetTreeState().getPathExpansions().add(new facete.Path());
 
 
@@ -207,8 +182,63 @@
             $scope.path = path;
         };
 
-        $scope.listService = store.pokemons.getListService();
+
+
+        /*
+         * Create a list service for our mapping and decorate it with
+         * keyword search support
+         */
+        $scope.searchModes = [{
+            label: 'regex',
+            mode: 'regex'
+        }, {
+            label: 'fulltext',
+            mode: 'fulltext'
+        }];
+
+        $scope.activeSearchMode = $scope.searchModes[0];
+
+        $scope.listService = store.basicDescriptions.getListService();
         $scope.listService = new service.ListServicePageExpand($scope.listService, 100);
+
+/*
+        $scope.listService = new service.ListServiceTransformConcept($scope.listService, function(searchString) {
+
+            var concept = null;
+            if(searchString != null) {
+                var searchConfig = new sparql.BestLabelConfig($scope.langs, [[vocab.rdfs.label, vocab.rdfs.comment]]);
+                var labelRelation = sparql.LabelUtils.createRelationPrefLabels(searchConfig);
+                concept = sparql.KeywordSearchUtils.createConceptRegexLabelOnly(labelRelation, searchString);
+            }
+
+            return concept;
+        });
+*/
+
+        /*
+         * Angular setup
+         */
+        $scope.availableLangs = ['de', 'en', 'jp', 'ko'];
+
+
+        $scope.offset = 0;
+        $scope.limit = 10;
+        $scope.totalItems = 0;
+        $scope.items = [];
+        $scope.maxSize = 7;
+
+        $scope.doFilter = function(searchString) {
+            $scope.filter = {
+                searchString: searchString,
+                mode: $scope.activeSearchMode.mode
+            };
+            $scope.offset = 0;
+        };
+
+        $scope.context = {
+            // TODO Get rid of the limitation of having to pass in the itemTemplate via a 'context' object
+            itemTemplate: 'default-list-item.html',
+        };
 
 
         $scope.$watch('facetTreeConfig.getFacetConfig().getConstraintManager();', function() {
@@ -216,14 +246,19 @@
 
             $scope.facetValueConceptService.prepareConcept(new facete.Path()).then(function(concept) {
 
+                var searchString = $scope.filter ? $scope.filter.searchString : null;
+                var relation = sparql.LabelUtils.createRelationPrefLabels(labelConfig);
+                var r = sparql.KeywordSearchUtils.createConceptRegex(relation, searchString, true);
 
-                var q = new sparql.Query();
-                q.setQuerySelectType();
-                q.setQueryPattern(concept.getElement());
-                q.getProject().add(concept.getVar());
-                q.getOrderBy().push(new sparql.SortCondition(new sparql.ExprVar(concept.getVar())));
+                concept = r ? sparql.ConceptUtils.createCombinedConcept(concept, r) : concept;
 
-                concept = new sparql.Concept(new sparql.ElementSubQuery(q), concept.getVar());
+//                 var q = new sparql.Query();
+//                 q.setQuerySelectType();
+//                 q.setQueryPattern(concept.getElement());
+//                 q.getProject().add(concept.getVar());
+//                 q.getOrderBy().push(new sparql.SortCondition(new sparql.ExprVar(concept.getVar())));
+
+//                 concept = new sparql.Concept(new sparql.ElementSubQuery(q), concept.getVar());
 
                 console.log('CONCEPT: ' + concept);
 
@@ -342,11 +377,31 @@
 
             <div class="col-md-7">
 
-               {{itemCount}} items
-               <ul class="media-list">
-                   <li class="media" ng-repeat="item in items" ng-include="'default-list-item.html'"></li>
-                   <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li>
-               </ul>
+            <div class="container"><div class="row"><div class="col-md-12">
+
+    <jassa-list-browser
+        list-service="listService"
+        offset="offset"
+        limit="limit"
+        max-size="maxSize"
+        filter="filter"
+        do-filter="doFilter"
+        total-items="totalItems"
+        items="items"
+        langs="langs"
+        availableLangs="availableLangs"
+        search-modes="searchModes"
+        active-search-mode="activeSearchMode"
+        context="context"
+        item-template="itemTemplate"
+    ></jassa-list-browser>
+</div></div></div>
+
+<!--                {{itemCount}} items -->
+<!--                <ul class="media-list"> -->
+<!--                    <li class="media" ng-repeat="item in items" ng-include="'default-list-item.html'"></li> -->
+<!--                    <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li> -->
+<!--                </ul> -->
             </div>
         </div>
     </div>
