@@ -1,6 +1,6 @@
 # Jassa-Angular-UI
 
-This repository contains a set of reusable angularjs directives (widgets) for user interface components based on the [JAvaScript Suite for Sparql Access (Jassa)](https://github.com/GeoKnow/Jassa).
+This repository contains a set of reusable angularjs directives (widgets) for user interface components based on the [JAvaScript Suite for Sparql Access (Jassa)](https://github.com/GeoKnow/Jassa-Core).
 The widgets are designed to work _directly_ on a SPARQL endpoint and cope with large result sets by means of pagination support.
 
 
