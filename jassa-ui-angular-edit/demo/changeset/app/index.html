@@ -8,6 +8,7 @@
     <title>RDF Edit Demo</title>
 
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
     <!-- build:css(.tmp) styles/main.css -->
 
     <!-- bower:css -->
@@ -16,19 +17,12 @@
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <!-- endbower -->
 
-    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
 
     <!-- endbuild -->
 
-    <!-- build:js scripts/scripts.js -->
-
-    <script src="bower_components/jscache/cache.js"></script>
-
     <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
@@ -41,12 +35,6 @@
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <!-- endbower -->
 
-    <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
-    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
-
-    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
-    <script src="bower_components/jqueryui-timepicker-addon/src/jquery-ui-timepicker-addon.js"></script>
-
     <!-- endbuild -->
 
 
@@ -57,7 +45,9 @@
     </script>
 
     <script type="text/javascript">
-    _.mixin(_.str.exports());
+    //_.mixin(_.str.exports());
+
+    var jassa = new Jassa(Promise, $.ajax);
 
     var rdf = jassa.rdf;
     var sparql = jassa.sparql;
