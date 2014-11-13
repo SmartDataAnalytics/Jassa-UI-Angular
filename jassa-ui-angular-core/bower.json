@@ -10,7 +10,7 @@
     "jassa-ui-angular.css"
   ],
   "dependencies": {
-    "jassa": "0.0.4-SNAPSHOT",
+    "jassa": "0.9.0-SNAPSHOT",
     "angular": "1.2.16-build.63+sha.8d4d437",
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap": "",

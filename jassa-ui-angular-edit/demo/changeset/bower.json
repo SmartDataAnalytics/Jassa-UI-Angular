@@ -1,0 +1,8 @@
+{
+  "name": "jassa-ui-angular-core-demo",
+  "version": "0.0.1",
+  "dependencies": {
+    "jassa-ui-angular": "0.9.0-SNAPSHOT",
+    "bluebird": "2.3.5"
+  }
+}
