@@ -3,3 +3,4 @@ components
 bower_components
 target
 dist
+*~
