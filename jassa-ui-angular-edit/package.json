@@ -1,9 +1,8 @@
 {
   "author": "https://github.com/GeoKnow/Jassa-UI-Angular/graphs/contributors",
   "name": "jassa-ui-angular-edit",
-  "version": "0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/GeoKnow/Jassa-UI-Angular",
-  "dependencies": {},
   "scripts": {
     "test": "gulp test",
     "precommit": "gulp lint",
