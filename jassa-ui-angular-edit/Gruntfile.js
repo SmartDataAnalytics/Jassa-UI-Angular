@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     modules: [],//to be filled in by build task
     pkg: grunt.file.readJSON('package.json'),
     dist: 'dist',
-    filename: 'jassa-ui-angular',
+    filename: 'jassa-ui-angular-edit',
     filenamecustom: '<%= filename %>-custom',
 
     meta: {
