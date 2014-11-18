@@ -26,6 +26,7 @@
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/ng-grid/build/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
@@ -35,16 +36,37 @@
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <!-- endbower -->
 
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
-
     <!-- endbuild -->
 
 
-    <script type="text/ng-template" id="rdf-form">
-    <div>
-        <button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Edit Resource</button>
-    </div>
+    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/form.html">
+    <ul ui-sortable>
+        <li ng-repeat="subject in formData.subjects">
+            {{subject.iri}}
+            <ul ui-sortable>
+                <li ng-repeat="value in values">{{value}}</li>
+                <li><button type="button" class="btn btn-primary" ng-click="addProperty()">Add Property</button></li>
+            </ul>
+        </li>
+        <li><button type="button" class="btn btn-primary" ng-click="addSubject()">Add Resource</button></li>
+    </ul>
     </script>
+
+    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/property-list.html">
+    <ul ui-sortable>
+        <li ng-repeat="value in values">{{value}}</li>
+        <li><button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Add Value</button></li>
+    </ul>
+    </script>
+
+    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/property.html">
+    <li>
+        <button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Add Value</button>
+    </li>
+    </script>
+
+
+
 
     <script type="text/javascript">
     //_.mixin(_.str.exports());
@@ -62,6 +84,33 @@
 
     var vocab = jassa.vocab;
 
+
+    var getRawState = function(rexContext) {
+        var result = {};
+
+        //if(rexContext) {
+            rexContext.resources.forEach(function(resourceScope) {
+                var subjectUri = resourceScope.rexResource;
+
+                if(!subjectUri) {
+                    return;
+                }
+
+                var p = result[subjectUri] = (result[subjectUri] || {});
+
+                resourceScope.properties.forEach(function(propertyScope) {
+                    var propertyUri = propertyScope.rexProperty;
+
+                    var o = p[propertyUri] = (p[propertyUri] || []);
+                });
+            });
+        //}
+
+        console.log('rexContext: ', rexContext, result);
+
+        return result;
+    };
+
     /*
     'jassa.ui.edit.demo.widgets', [
       'jassa.ui.edit.demo.widgets.sparqlupdate',
@@ -77,10 +126,309 @@
 
     angular.module('jassa.ui.edit.demo.widgets', ['ngSanitize', 'ui.bootstrap', 'ui.jassa'])
 
+    /*
+    .directive('resourceRef', function() {
+        return {
+            priority: 10,
+            restrict: 'A',
+            scope: {
+                resource: '=?'
+            },
+            controller: ['$scope', function($scope) {
+                this.getResource = function() {
+                    return $scope.resource;
+                };
+            }],
+            link: function(scope, ele, attrs, ctrls) {
+                console.log('<resource>', scope.resource);
+            }
+        };
+    })
+    */
+    // Awesomeness: http://stackoverflow.com/questions/23803871/how-to-get-two-way-data-binding-in-a-directive-without-an-isolate-scope
+
+    .directive('rexContext', function() {
+        return {
+            priority: 11,
+            restrict: 'A',
+            scope: true,
+            controller: ['$scope', function($scope) {
+                //var rexContext = $scope.rexContext = $scope.rexContext || {};
+
+                this.getValue = function() {
+                    return $scope.rexContext;
+                };
+
+                this.addResource = function(scope) {
+                    console.log('Added resource to context ', this.getValue(), scope);
+                    $scope.rexContext.resources.push(scope);
+                };
+
+                this.removeResource = function(scope) {
+                    jassa.util.ArrayUtils.removeItemStrict($scope.rexContext.resources, scope);
+                };
+
+            }],
+            compile: function(ele, attrs) {
+                return {
+                    pre: function(scope, ele, attrs, ctrls) {
+                        scope.rexContext = scope.$parent.$eval(attrs.rexContext);
+                        scope.rexContext.resources = scope.rexContext.resources || [];
+//                         scope.$watch(function() {
+//                             return scope.$parent.$eval(attrs.rexContext);
+//                         }, function(val) {
+//                             scope.rexContext = val;
+//                             scope.rexContext.resources = scope.rexContext.resources || [];
+//                         });
+
+                        //scope.$watch()
+                        //var rexContext = scope.rexContext = scope.$parent.$eval(attrs.rexContext);
+                    },
+                    post: function(scope, ele, attrs, ctrls) {
+                        console.log('<context>', scope.rexContext);
+                    }
+                };
+            }
+        };
+    })
+
+    .directive('rexResource', function() {
+        return {
+            priority: 10,
+            restrict: 'A',
+            scope: true,
+            require: '^rexContext',
+            controller: ['$scope', function($scope) {
+                this.getValue = function() {
+                    return $scope.rexResource;
+                };
+
+                this.addProperty = function(scope) {
+                    console.log('Added property to resource ', this.getValue(), scope);
+                    $scope.properties.push(scope);
+                };
+
+                this.removeProperty = function(scope) {
+                    jassa.util.ArrayUtils.removeItemStrict($scope.properties, scope);
+                }
+
+            }],
+            compile: function(ele, attrs) {
+                return {
+                    pre: function(scope, ele, attrs, contextCtrl) {
+                        scope.$watch(function() {
+                            return scope.$parent.$eval(attrs.rexResource);
+                        }, function(val) {
+                            scope.rexResource = val;
+                        });
+
+
+                        //scope.rexResource = scope.$parent.$eval(attrs.rexResource);
+                        scope.properties = scope.properties || [];
+
+                        contextCtrl.addResource(scope);
+
+                        console.log('<resource>', scope.rexResource);
+                    },
+                    post: function(scope, ele, attrs, contextCtrl) {
+                        scope.$on('$destroy', function() {
+                            contextCtrl.removeResource(scope);
+                        });
+                    }
+                };
+            }
+        };
+    })
+
+// For simplicity, we maybe should leave out the graph, and assume that this is part of the context instead
+//     .directive('rexGraph', function() {
+//         return {
+//             priority: 10,
+//             restrict: 'A',
+//             scope: true,
+//             controller: ['$scope', function($scope) {
+//                 var properties = [];
+
+//                 this.getValue = function() {
+//                     return $scope.rexGraph;
+//                 };
+
+//                 this.addProperty = function(scope) {
+//                     console.log('Added property to resource ', this.getValue(), scope);
+//                     properties.push(scope);
+//                 };
+
+//             }],
+//             link: function(scope, ele, attrs, ctrls) {
+//                 scope.rexResource = scope.$parent.$eval(attrs.rexResource);
+
+//                 console.log('<resource>', scope.rexResource);
+//             }
+//         };
+//     })
+
+    .directive('rexTypeof', function() {
+        return {
+            priority: 9,
+            restrict: 'A',
+            scope: {
+                rexTypeof: '='
+            },
+            controller: ['$scope', function($scope) {
+                this.getValue = function() {
+                    return $scope.rexTypeof;
+                };
+            }],
+            compile: function(ele, attrs) {
+                return {
+                    pre: function(scope, ele, attrs, ctrls) {
+                        scope.rexTypeof = scope.$parent.$eval(attrs.rexTypeof);
+
+                        console.log('<typeof>', scope.rexTypeof);
+                    },
+                    post: function(scope, ele, attrs, ctrls) {
+                    }
+                };
+            },
+        };
+    })
+
+    .directive('rexProperty', function() {
+        return {
+            priority: 8,
+            restrict: 'A',
+            scope: true,
+            require: '^rexResource',
+            controller: ['$scope', function($scope) {
+                this.values = [];
+
+                this.getValue = function() {
+                    return $scope.rexProperty;
+                };
+            }],
+            compile: function(ele, attrs) {
+                return {
+                    pre: function(scope, ele, attrs, resourceCtrl) {
+                        scope.$watch(function() {
+                            return scope.$parent.$eval(attrs.rexProperty);
+                        }, function(val) {
+                            scope.rexProperty = val;
+                        });
+
+                        resourceCtrl.addProperty(scope);
+                        console.log('<property>', scope.rexProperty);
+                    },
+                    post: function(scope, ele, attrs, resourceCtrl) {
+
+                    }
+                };
+            }
+        };
+    })
+
+    .directive('rexDatatype', function() {
+        return {
+            priority: 7,
+            restrict: 'A',
+            scope: true,
+            controller: ['$scope', function($scope) {
+                this.getValue = function() {
+                    return $scope.rexDatatype;
+                };
+            }],
+            link: function(scope, ele, attrs, ctrls) {
+                scope.rexDatatype = scope.$parent.$eval(attrs.rexDatatype);
+                console.log('<datatype>', scope.rexDatatype);
+            }
+        };
+    })
+
+    .directive('rexLang', function() {
+        return {
+            priority: 6,
+            restrict: 'A',
+            scope: true,
+            controller: ['$scope', function($scope) {
+                this.getValue = function() {
+                    return $scope.rexLang;
+                };
+            }],
+            link: function(scope, ele, attrs, ctrls) {
+                scope.rexLang = scope.$parent.$eval(attrs.rexLang);
+                console.log('<lang>', scope.rexLang);
+            }
+        };
+    })
+
+    .directive('rexGraph', function() {
+        return {
+            priority: 6,
+            restrict: 'A',
+            require: ['?^rexResource', '?^rexProperty', '?^rexDatatype', '?^rexRang', '?^rexTypeof'],
+            // '?^about', '?^rel', '?^rev', '?^src', '?^href', '?^content'
+            scope: true,
+            controller: ['$scope', function($scope) {
+                var ctrls = $scope.ctrls;
+
+                if(ctrls) {
+                    ctrls.forEach(function(ctrl) {
+                        if(ctrl != null) {
+                            console.log('Value: ', ctrl, ctrl.getValue());
+                        }
+                    });
+                }
+
+            }],
+            link: function(scope, ele, attrs, ctrls) {
+
+                scope.ctrls = ctrls;
+
+//                 var resourceCtrl = ctrls[0];
+//                 var propertyCtrl = ctrls[1];
+//                 var datatypeCtrl = ctrls[2];
+//                 var langCtrl = ctrls[3];
+            }
+        };
+    })
+
+    .directive('modelGraph', function() {
+        return {
+            priority: 6,
+            restrict: 'A',
+            require: ['?^rexResource', '?^rexProperty', '?^rexDatatype', '?^rexLang', '?^rexTypeof'],
+            // '?^about', '?^rel', '?^rev', '?^src', '?^href', '?^content'
+            link: function(scope, ele, attrs, ctrls) {
+                var datatypeCtrl = ctrls[8];
+                console.log('States: ', ctrls); //ctrls[5], ctrls[6], ctrls[8]);
+
+                console.log('Got datatype: ' + datatypeCtrl.getDatatype());
+            }
+        };
+    })
+
+    .controller('RdfFormCtrl', ['$scope', function($scope) {
+        $scope.addSubject = function() {
+            $scope.formData.push({
+                url: 'http://foo',
+                values: [{
+                    type: 'iri',
+                    lexicalValue: 'foo',
+                    datatype: 'xsd:string',
+                    lang: 'en'
+                }]
+            });
+        }
+    }])
+
     .directive('rdfForm', ['$compile', function($compile) {
         return {
-            restrict: 'A',
+            restrict: 'EA',
             replace: true,
+            templateUrl: 'partials/jassa-ui-angular-edit/form.html',
+            scope: {
+                formData: '='
+            },
+            controller: 'RdfFormCtrl',
             link: function(scope, ele, attrs) {
 //                 scope.$watch(attrs.dynamic, function(html) {
 //                     ele.html(html);
@@ -91,7 +439,37 @@
     }])
 
     .controller('AppCtrl', ['$scope', function($scope) {
-      //var graph = new rdf.GraphImpl();
+        $scope.formData = {
+            subjects: [{
+                url: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+                values: [{
+                    type: 'iri',
+                    lexicalValue: 'foo',
+                    datatype: 'xsd:string',
+                    lang: 'en'
+                }]
+            }, {
+                url: 'http://www.w3.org/2000/01/rdf-schema#label',
+                values: [{
+                    type: 'iri',
+                    lexicalValue: 'foo',
+                    datatype: 'xsd:string',
+                    lang: 'en'
+                }]
+            }]
+        };
+
+
+        $scope.editContext = {};
+
+        $scope.getRawState = getRawState;
+        $scope.$watch('getRawState(editContext)', function(editContext) {
+           console.log('Changed context: ', editContext);
+        }, true);
+
+        $scope.items = ['http://dbpedia.org/resource/Leipzig', 'http://dbpedia.org/resource/London'];
+
+        $scope.propertyUri = 'http://www.w3.org/2000/01/rdf-schema#label';
     }]);
     </script>
 </head>
@@ -99,9 +477,21 @@
 
 <body ng-controller="AppCtrl">
 
-    <rdf-form
+    <input type="text" ng-model="propertyUri">
 
-    ></rdf-form>
+    <div rex-context="editContext">
+        <div ng-repeat="item in items" rex-resource="item">
+            <div rex-property="propertyUri">
+                <input type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-graph="'foo'">
+                <button class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button>
+            </div>
+        </div>
+    </div>
+
+
+<!--     <rdf-form -->
+<!--         formData="formData" -->
+<!--     ></rdf-form> -->
 
 </body>
 
