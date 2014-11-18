@@ -1,0 +1,20 @@
+<div class="input-group {{rdfTermId}}">
+  <span class="input-group-addon">
+    <i ng-if="isPlainTermType(rdfTermType)" class="icon fa fa-file"></i>
+    <i ng-if="isTypedTermType(rdfTermType)" class="icon fa fa-file"></i>
+    <i ng-if="isUriTermType(rdfTermType)" class="icon fa fa-bookmark"></i>
+  </span>
+  <div class="input-group-btn">
+    <button type="button" class="btn btn-default dropdown-toggle no-border-radius" data-toggle="dropdown" tabindex="-1">
+      <span class="currentRdfTermTypeValue">{{rdfTermTypeValue}}</span>
+      <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-left" role="menu">
+      <li ng-repeat="(key,value) in rdfTermTypeTags"><a ng-click="setRdfTermType(key)" href="#">{{value}}</a></li>
+    </ul>
+  </div>
+  <jassa-switch-lang ng-if="isPlainTermType(rdfTermType)" ng-model="lang" value-store="valueStore"></jassa-switch-lang>
+  <jassa-switch-type ng-if="isTypedTermType(rdfTermType)" ng-model="type" value-store="valueStore"></jassa-switch-type>
+  <input type="text" class="form-control margin-left-1" ng-model="termValue" ></input>
+</div>
