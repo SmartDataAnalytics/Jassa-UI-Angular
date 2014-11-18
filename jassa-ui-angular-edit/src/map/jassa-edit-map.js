@@ -61,8 +61,8 @@ angular.module('jassa.ui.edit.map', ['ui.bootstrap', 'ui.jassa'])
         function init() {
           map = new OpenLayers.Map('openlayers-map');
 
-          var wmsLayer = new OpenLayers.Layer.WMS("OpenLayers WMS",
-            "http://vmap0.tiles.osgeo.org/wms/vmap0?", {layers: 'basic'});
+          var wmsLayer = new OpenLayers.Layer.WMS('OpenLayers WMS',
+            'http://vmap0.tiles.osgeo.org/wms/vmap0?', {layers: 'basic'});
 
           panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
 
@@ -74,7 +74,7 @@ angular.module('jassa.ui.edit.map', ['ui.bootstrap', 'ui.jassa'])
           var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
           renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 
-          vectors = new OpenLayers.Layer.Vector("Vector Layer", {
+          vectors = new OpenLayers.Layer.Vector('Vector Layer', {
             renderers: renderer
           });
 
@@ -173,8 +173,8 @@ angular.module('jassa.ui.edit.map', ['ui.bootstrap', 'ui.jassa'])
         function toggleControl() {
           console.log('toggleControl', scope.geometry);
           var control = drawControls[scope.geometry];
-          for(key in drawControls) {
-            var control = drawControls[key];
+          for(var key in drawControls) {
+            control = drawControls[key];
             if(scope.geometry == key && scope.chooseGeometry) {
               control.activate();
             } else {
@@ -184,20 +184,20 @@ angular.module('jassa.ui.edit.map', ['ui.bootstrap', 'ui.jassa'])
         }
 
         function onModificationStart(feature) {
-          console.log(feature.id + " is ready to be modified");
+          console.log(feature.id + ' is ready to be modified');
           drawControls[scope.geometry].deactivate();
 
         }
 
         function onModification(feature) {
-          console.log(feature.id + " has been modified");
+          console.log(feature.id + ' has been modified');
           var wktValue = generateWKT(feature);
           scope.config.data = wktValue;
           scope.$apply();
         }
 
         function onModificationEnd(feature) {
-          console.log(feature.id + " is finished to be modified");
+          console.log(feature.id + ' is finished to be modified');
           drawControls[scope.geometry].activate();
         }
 

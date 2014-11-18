@@ -53,7 +53,7 @@ angular.module('jassa.ui.edit.meta', ['ui.bootstrap', 'ui.jassa'])
           scope.language = newValue;
         });
       }
-    }
+    };
   }).directive('jassaSwitchType', function() {
     return {
       restrict: 'EA',
@@ -100,7 +100,7 @@ angular.module('jassa.ui.edit.meta', ['ui.bootstrap', 'ui.jassa'])
           scope.datatype = newValue.getUri();
         });
       }
-    }
+    };
   }).directive('jassaEditMeta', function($compile) {
 
     var scopeCache = {};

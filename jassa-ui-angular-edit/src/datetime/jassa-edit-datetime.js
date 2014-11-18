@@ -13,7 +13,8 @@ angular.module('jassa.ui.edit.datetime', ['ui.bootstrap', 'ui.jassa'])
           currObjectElement.find('.' + fnDatepickerId).datepicker('destroy');
           currObjectElement.find('.' + fnDatepickerId).removeClass('hasDatepicker');
 
-          if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#date") {
+          if (fnCurrDtype === 'http://www.w3.org/2001/XMLSchema#date') {
+            /*jshint -W083 */
             currObjectElement.find('.' + fnDatepickerId).datepicker({
               dateFormat: $.datepicker.ISO_8601,
               // showOn: 'both',
@@ -27,14 +28,15 @@ angular.module('jassa.ui.edit.datetime', ['ui.bootstrap', 'ui.jassa'])
             currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
           }
 
-          if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#dateTime") {
+          if (fnCurrDtype === 'http://www.w3.org/2001/XMLSchema#dateTime') {
+            /*jshint -W083 */
             currObjectElement.find('.' + fnDatepickerId).datetimepicker({
               separator: 'T',
               dateFormat: $.datepicker.ISO_8601,
               showSecond: true,
               timeFormat: 'HH:mm:ssZ',
               showTimezone: true,
-              timezone: "+00:00",
+              timezone: '+00:00',
               firstDay: 1,
               beforeShow: function() {
                 setTimeout(function(){
@@ -45,12 +47,13 @@ angular.module('jassa.ui.edit.datetime', ['ui.bootstrap', 'ui.jassa'])
             currObjectElement.find('.icon').addClass('fa-calendar').removeClass('fa-clock-o');
           }
 
-          if (fnCurrDtype === "http://www.w3.org/2001/XMLSchema#time") {
+          if (fnCurrDtype === 'http://www.w3.org/2001/XMLSchema#time') {
+            /*jshint -W083 */
             currObjectElement.find('.' + fnDatepickerId).timepicker({
               showSecond: true,
               timeFormat: 'HH:mm:ssZ',
               showTimezone: true,
-              timezone: "+00:00",
+              timezone: '+00:00',
               beforeShow: function() {
                 setTimeout(function(){
                   jQuery('.ui-datepicker').css('z-index', 99999999999999);
