@@ -34,10 +34,12 @@
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
     <!-- endbower -->
 
     <!-- endbuild -->
 
+    <script src="js/rex.js"></script>
 
     <script type="text/ng-template" id="partials/jassa-ui-angular-edit/form.html">
     <ul ui-sortable>
@@ -73,6 +75,7 @@
 
     var jassa = new Jassa(Promise, $.ajax);
 
+    var vocab = jassa.vocab;
     var rdf = jassa.rdf;
     var sparql = jassa.sparql;
     var service = jassa.service;
@@ -111,6 +114,71 @@
         return result;
     };
 
+
+
+    var nestedMapsToTriples = function(spos) {
+        var result = [];
+
+        _.forEach(spos, function(pos, s) {
+            var x = rdf.NodeFactory.createUri(s);
+
+            _.forEach(pos, function(os, p) {
+                var y = rdf.NodeFactory.createUri(p);
+
+                os.forEach(function(o) {
+                    var z = rdf.NodeFactory.createUri(o); // TODO Make that properly
+
+                    var triple = new rdf.Triple(x, y, z);
+                    result.push(triple);
+                });
+            });
+        });
+
+        return result;
+    };
+
+
+
+    var sparqlService = service.SparqlServiceBuilder
+        .http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+        .cache().virtFix().paginate(50000).pageExpand(100).create();
+
+    var store = new sponate.StoreFacade(sparqlService, {
+//        'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+//        'llo': 'http://www.linklion.org/ontology#'
+    });
+
+    var bestLiteralConfig = new sparql.BestLabelConfig(); //['ja', 'ko', 'en', '']);
+    var mappedConcept = sponate.MappedConceptUtils.createMappedConceptBestLabel(bestLiteralConfig);
+
+    store.addMap({
+        name: 'spo',
+        template: [{
+            id: '?s',
+            displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel' }},
+            predicates: [{
+                id: '?p',
+                displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?p' }},
+                values: [{
+                    id: '?o',
+                    displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?o' }},
+                }]
+            }]
+        }],
+        from: '?s ?p ?o',
+    });
+
+    var ls = store.spo.getListService();
+
+    ls = new service.LookupServiceListServiceSparql(ls);
+
+    ls.lookup([rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(map) {
+       alert(JSON.stringify(map));
+    });
+
+
+
+
     /*
     'jassa.ui.edit.demo.widgets', [
       'jassa.ui.edit.demo.widgets.sparqlupdate',
@@ -124,121 +192,6 @@
       'ui.jassa']);
    */
 
-    angular.module('jassa.ui.edit.demo.widgets', ['ngSanitize', 'ui.bootstrap', 'ui.jassa'])
-
-    /*
-    .directive('resourceRef', function() {
-        return {
-            priority: 10,
-            restrict: 'A',
-            scope: {
-                resource: '=?'
-            },
-            controller: ['$scope', function($scope) {
-                this.getResource = function() {
-                    return $scope.resource;
-                };
-            }],
-            link: function(scope, ele, attrs, ctrls) {
-                console.log('<resource>', scope.resource);
-            }
-        };
-    })
-    */
-    // Awesomeness: http://stackoverflow.com/questions/23803871/how-to-get-two-way-data-binding-in-a-directive-without-an-isolate-scope
-
-    .directive('rexContext', function() {
-        return {
-            priority: 11,
-            restrict: 'A',
-            scope: true,
-            controller: ['$scope', function($scope) {
-                //var rexContext = $scope.rexContext = $scope.rexContext || {};
-
-                this.getValue = function() {
-                    return $scope.rexContext;
-                };
-
-                this.addResource = function(scope) {
-                    console.log('Added resource to context ', this.getValue(), scope);
-                    $scope.rexContext.resources.push(scope);
-                };
-
-                this.removeResource = function(scope) {
-                    jassa.util.ArrayUtils.removeItemStrict($scope.rexContext.resources, scope);
-                };
-
-            }],
-            compile: function(ele, attrs) {
-                return {
-                    pre: function(scope, ele, attrs, ctrls) {
-                        scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-                        scope.rexContext.resources = scope.rexContext.resources || [];
-//                         scope.$watch(function() {
-//                             return scope.$parent.$eval(attrs.rexContext);
-//                         }, function(val) {
-//                             scope.rexContext = val;
-//                             scope.rexContext.resources = scope.rexContext.resources || [];
-//                         });
-
-                        //scope.$watch()
-                        //var rexContext = scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-                    },
-                    post: function(scope, ele, attrs, ctrls) {
-                        console.log('<context>', scope.rexContext);
-                    }
-                };
-            }
-        };
-    })
-
-    .directive('rexResource', function() {
-        return {
-            priority: 10,
-            restrict: 'A',
-            scope: true,
-            require: '^rexContext',
-            controller: ['$scope', function($scope) {
-                this.getValue = function() {
-                    return $scope.rexResource;
-                };
-
-                this.addProperty = function(scope) {
-                    console.log('Added property to resource ', this.getValue(), scope);
-                    $scope.properties.push(scope);
-                };
-
-                this.removeProperty = function(scope) {
-                    jassa.util.ArrayUtils.removeItemStrict($scope.properties, scope);
-                }
-
-            }],
-            compile: function(ele, attrs) {
-                return {
-                    pre: function(scope, ele, attrs, contextCtrl) {
-                        scope.$watch(function() {
-                            return scope.$parent.$eval(attrs.rexResource);
-                        }, function(val) {
-                            scope.rexResource = val;
-                        });
-
-
-                        //scope.rexResource = scope.$parent.$eval(attrs.rexResource);
-                        scope.properties = scope.properties || [];
-
-                        contextCtrl.addResource(scope);
-
-                        console.log('<resource>', scope.rexResource);
-                    },
-                    post: function(scope, ele, attrs, contextCtrl) {
-                        scope.$on('$destroy', function() {
-                            contextCtrl.removeResource(scope);
-                        });
-                    }
-                };
-            }
-        };
-    })
 
 // For simplicity, we maybe should leave out the graph, and assume that this is part of the context instead
 //     .directive('rexGraph', function() {
@@ -267,129 +220,7 @@
 //         };
 //     })
 
-    .directive('rexTypeof', function() {
-        return {
-            priority: 9,
-            restrict: 'A',
-            scope: {
-                rexTypeof: '='
-            },
-            controller: ['$scope', function($scope) {
-                this.getValue = function() {
-                    return $scope.rexTypeof;
-                };
-            }],
-            compile: function(ele, attrs) {
-                return {
-                    pre: function(scope, ele, attrs, ctrls) {
-                        scope.rexTypeof = scope.$parent.$eval(attrs.rexTypeof);
-
-                        console.log('<typeof>', scope.rexTypeof);
-                    },
-                    post: function(scope, ele, attrs, ctrls) {
-                    }
-                };
-            },
-        };
-    })
-
-    .directive('rexProperty', function() {
-        return {
-            priority: 8,
-            restrict: 'A',
-            scope: true,
-            require: '^rexResource',
-            controller: ['$scope', function($scope) {
-                this.values = [];
-
-                this.getValue = function() {
-                    return $scope.rexProperty;
-                };
-            }],
-            compile: function(ele, attrs) {
-                return {
-                    pre: function(scope, ele, attrs, resourceCtrl) {
-                        scope.$watch(function() {
-                            return scope.$parent.$eval(attrs.rexProperty);
-                        }, function(val) {
-                            scope.rexProperty = val;
-                        });
-
-                        resourceCtrl.addProperty(scope);
-                        console.log('<property>', scope.rexProperty);
-                    },
-                    post: function(scope, ele, attrs, resourceCtrl) {
-
-                    }
-                };
-            }
-        };
-    })
-
-    .directive('rexDatatype', function() {
-        return {
-            priority: 7,
-            restrict: 'A',
-            scope: true,
-            controller: ['$scope', function($scope) {
-                this.getValue = function() {
-                    return $scope.rexDatatype;
-                };
-            }],
-            link: function(scope, ele, attrs, ctrls) {
-                scope.rexDatatype = scope.$parent.$eval(attrs.rexDatatype);
-                console.log('<datatype>', scope.rexDatatype);
-            }
-        };
-    })
-
-    .directive('rexLang', function() {
-        return {
-            priority: 6,
-            restrict: 'A',
-            scope: true,
-            controller: ['$scope', function($scope) {
-                this.getValue = function() {
-                    return $scope.rexLang;
-                };
-            }],
-            link: function(scope, ele, attrs, ctrls) {
-                scope.rexLang = scope.$parent.$eval(attrs.rexLang);
-                console.log('<lang>', scope.rexLang);
-            }
-        };
-    })
-
-    .directive('rexGraph', function() {
-        return {
-            priority: 6,
-            restrict: 'A',
-            require: ['?^rexResource', '?^rexProperty', '?^rexDatatype', '?^rexRang', '?^rexTypeof'],
-            // '?^about', '?^rel', '?^rev', '?^src', '?^href', '?^content'
-            scope: true,
-            controller: ['$scope', function($scope) {
-                var ctrls = $scope.ctrls;
-
-                if(ctrls) {
-                    ctrls.forEach(function(ctrl) {
-                        if(ctrl != null) {
-                            console.log('Value: ', ctrl, ctrl.getValue());
-                        }
-                    });
-                }
-
-            }],
-            link: function(scope, ele, attrs, ctrls) {
-
-                scope.ctrls = ctrls;
-
-//                 var resourceCtrl = ctrls[0];
-//                 var propertyCtrl = ctrls[1];
-//                 var datatypeCtrl = ctrls[2];
-//                 var langCtrl = ctrls[3];
-            }
-        };
-    })
+    angular.module('jassa.ui.edit.demo.widgets', ['ngSanitize', 'ui.bootstrap', 'ui.jassa', 'ui.jassa.rex'])
 
     .directive('modelGraph', function() {
         return {
@@ -464,12 +295,143 @@
 
         $scope.getRawState = getRawState;
         $scope.$watch('getRawState(editContext)', function(editContext) {
-           console.log('Changed context: ', editContext);
+           //console.log('Changed context: ', editContext);
+           console.log('Triples: ', nestedMapsToTriples(editContext));
         }, true);
 
         $scope.items = ['http://dbpedia.org/resource/Leipzig', 'http://dbpedia.org/resource/London'];
 
         $scope.propertyUri = 'http://www.w3.org/2000/01/rdf-schema#label';
+
+        var PointUtils = {
+            lonlatToWkt: function(lonlat) {
+                var result = this.pointToWkt(lonlat.lon, lonlat.lat);
+                return result;
+            },
+
+            xyToWkt: function(xy) {
+                var result = this.pointToWkt(xy.x, xy.y);
+                return result;
+            },
+
+            pointToWkt: function(x, y) {
+                var result = 'POINT (' + x + ' ' + y + ')';
+                return result;
+            },
+
+            wktPointRegex: /\s*POINT\s*\(([^\s]+)\s*([^)]+)\)\s*/,
+
+            wktToXy: function(wktStr) {
+                var match = this.wktPointRegex.exec(wktStr);
+                var xStr = match[1];
+                var yStr = match[2];
+
+                var result = {
+                    x: parseFloat(xStr),
+                    y: parseFloat(yStr)
+                };
+
+                return result;
+            }
+        };
+
+        //alert(JSON.stringify(PointUtils.wktToXy('POINT(123 456)')));
+
+        var wgsTripleFnFactory = function(subject, latPredicate, longPredicate, datatypeStr) {
+            latPredicate = latPredicate || vocab.wgs84.lat;
+            lonPredicate = longPredicate || vocab.wgs84.lon;
+            datatypeStr = datatypeStr || vocab.xsd.xstring.getUri();
+
+            var result = function(xy) {
+                var x = rdf.NodeFactory.createTypedLiteralFromString('' + xy.x, datatypeStr);
+                var y = rdf.NodeFactory.createTypedLiteralFromString('' + xy.y, datatypeStr);
+
+                var r = [
+                    new rdf.Triple(subject, latPredicate, x),
+                    new rdf.Triple(subject, longPredicate, y)
+                ]
+
+                return r;
+            };
+
+            return result;
+        };
+
+        // Note: referencing values in a json-rdf representation is done with object-refs
+        // The question is: how does an objectref referencen the object component of a triple?
+                // Option A: By index - drawback is that this is not necessarily stable under sort
+                // Option B: By a generated id - we could just alloc one whenever we encounter an object
+
+        // Issue: How to create objects?
+                // I think datatype and lang (possibly term type) can be seen as modifiers for a given value
+                // So rex-value="expr" could be the main attribute for generating rdf-terms
+                // if no rex-type, rex-lang or rex-datatype are present, than a default of xsd:string with no language tag is assumed
+
+                // A general question is, whether arbitrary rdf terms should be allowed in predicate and subject posititons
+                // Since in an edit scenario there is not much point in blank-node-resources, i suppose it is safe to omit this features
+
+        // Issue: Are conflicts possible with the rex directives - such as having the same object with distinct values
+
+
+
+        wgsTripleFn = wgsTripleFnFactory(rdf.NodeFactory.createUri('http://foobar'));
+
+        //alert(JSON.stringify(wgsTripleFn({x: 1, y: 2})));
+
+
+        var wktToWgs = {
+            write: function(wktStr) {
+                // Check if the wgs
+            },
+            read: function() {
+
+            }
+        }
+
+        $scope.wgsModel = function(newVal) {
+
+            //return angular.isDefined(newName) ? (_name = newName) : _name;
+
+            return 'temp';
+        };
+
+
+        var RexContext = jassa.ext.Class.create({
+            initialize: function(lookupService) {
+                this.lookupService = lookupService;
+
+                // the status of the resources as retrieved from the lookup service
+                this.cache = new util.HashMap();
+
+                // values
+                // this.overrides = {};
+
+            },
+
+            fetchData: function(subject) {
+                if(this.cache.containsKey(subject)) {
+                    // TODO Do something
+                }
+
+                this.lookupService.lookup([subject]).then(function(map) {
+                    this.cache.putMap(map);
+                });
+
+            },
+
+            /*
+            fetchProperties: function(subjectNode) {
+                var r = this.lookupService.lookup([subjectNode]).then(function(map) {
+                    var s = map.get(subjectNode);
+
+                });
+                return r;
+            }
+            */
+        });
+
+
+
     }]);
     </script>
 </head>
@@ -479,12 +441,31 @@
 
     <input type="text" ng-model="propertyUri">
 
+
+    <div rex-context="formContext" rex-resource="'someResource'">
+        <div ng-repeat="property in formContext.fetchProperties(someResource)" rex-property="property">
+            <div ng-repeat=""></div>
+        </div>
+    </div>
+
     <div rex-context="editContext">
         <div ng-repeat="item in items" rex-resource="item">
             <div rex-property="propertyUri">
-                <input type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-graph="'foo'">
-                <button class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                <span rex-value="'yay'" rex-object>test</span>
+
+
+
+                <input ng-model="m" type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-object>
+
+                <!-- Note rex-value="m" is not necessary, as rex-object will by default interpret any present ng-model as the lex-value -->
+
+                <button rex-term="'yay'" class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button>
             </div>
+
+            <div rex-graph="">
+                <input type="text" ng-model="wgsModel" ng-model-options="{ getterSetter: true }" rex-object>
+            </div>
+
         </div>
     </div>
 

@@ -19,11 +19,11 @@
     <script src="bower_components/jscache/cache.js"></script>
 
     <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
-<!--    <script src="bower_components/jassa/jassa.js"></script> -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/ng-grid/build/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
@@ -31,6 +31,7 @@
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
     <!-- endbower -->
 
 <!--     <script src="/home/raven/Projects/Eclipse/jassa-core-parent/dist/jassa.js"></script> -->
@@ -122,9 +123,9 @@
          * Set up the sparql service with as many buffs (decorations) as we like
          */
         $scope.sparqlService = service.SparqlServiceBuilder
-           //.http('http://cstadler.aksw.org/conti/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
-            .http('http://localhost/data/freebase/germany/sparql', ['http://freebase.com/2013-09-22/data/'], {type: 'POST'})
-           .cache().virtFix().paginate(1000).pageExpand(100).create();
+            .http('http://akswnc3.informatik.uni-leipzig.de/data/misc/sparql', ['http://pokedex.org'], {type: 'POST'})
+            .create();
+            //.cache().virtFix().paginate(1000).pageExpand(100).create();
 
 
         /*
@@ -140,19 +141,19 @@
         $scope.langs = ['de', 'en', 'fr', 'ja', 'it', 'es', ''];
 
         var labelConfig = new sparql.BestLabelConfig($scope.langs);
-        var labelTemplate = sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig);
-        var commentTemplate = sponate.MappedConceptUtils.createMappedConceptBestLabel(new sparql.BestLabelConfig($scope.langs, [rdf.NodeFactory.createUri(prefixes.pokedex + 'description')]));
+        var labelTemplateFn = function() { return sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig); };
+        var commentTemplateFn = function() { return sponate.MappedConceptUtils.createMappedConceptBestLabel(new sparql.BestLabelConfig($scope.langs, [rdf.NodeFactory.createUri(prefixes.pokedex + 'description')])); };
 
         store.addMap({
             name: 'basicDescriptions',
             template: [{
                 id: '?s',
-                label: { $ref: { target: labelTemplate, attr: 'displayLabel' }},
-                comment: { $ref: { target: commentTemplate, attr: 'displayLabel' }},
+                label: { $ref: { target: labelTemplateFn, attr: 'displayLabel' }},
+                comment: { $ref: { target: commentTemplateFn, attr: 'displayLabel' }},
                 depiction: '?d',
                 types: [{
                     id: '?t',
-                    displayLabel: { $ref: { target: labelTemplate, attr: 'displayLabel', on: '?t' } },
+                    displayLabel: { $ref: { target: labelTemplateFn, attr: 'displayLabel', on: '?t' } },
                 }],
             }],
             from: '?s a ?t . Optional { ?s foaf:depiction ?d }'

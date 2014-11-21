@@ -34,7 +34,7 @@ angular.module('ui.jassa.facet-tree', ['ui.jassa.template-list'])
  * Supports nested incoming and outgoing properties
  *
  */
-.controller('FacetTreeCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
+.controller('FacetListCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
 
     var self = this;
 
