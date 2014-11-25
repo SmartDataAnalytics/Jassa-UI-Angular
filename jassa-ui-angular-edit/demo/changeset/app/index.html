@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
     <!-- endbower -->
 
     <link rel="stylesheet" href="css/style.css" />
@@ -35,9 +36,13 @@
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/codemirror/lib/codemirror.js"></script>
+    <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
     <!-- endbower -->
 
     <!-- endbuild -->
+
+    <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
 
     <script src="js/rex.js"></script>
 
@@ -140,7 +145,8 @@
 
 
     var sparqlService = service.SparqlServiceBuilder
-        .http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+        //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+        .http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
         .cache().virtFix().paginate(50000).pageExpand(100).create();
 
     var store = new sponate.StoreFacade(sparqlService, {
@@ -151,32 +157,219 @@
     var bestLiteralConfig = new sparql.BestLabelConfig(); //['ja', 'ko', 'en', '']);
     var mappedConcept = sponate.MappedConceptUtils.createMappedConceptBestLabel(bestLiteralConfig);
 
+
+    var indexResource = function(map) {
+        var result = {};
+
+        var subjects = map.entries();
+        subjects.forEach(function(entry) {
+            var subjectIri = entry.key;
+            var predicates = entry.val.predicates.entries();
+
+            var s = result[subjectIri] = {};
+
+
+            predicates.forEach(function(entry) {
+                var predicateIri = entry.key;
+
+                var p = s[predicateIri] = {};
+
+                var objects = entry.val.values.entries();
+                objects.forEach(function(entry) {
+                    var node = entry.val.id;
+                    var json = jassa.rdf.NodeUtils.toTalisJsonRdf(node);
+                    p.push(json);
+                });
+            });
+        });
+    }
+
+    var toMap = function(arr) {
+        //console.log('ARGH', arr);
+        var result = new util.HashMap();
+        arr.forEach(function(item) {
+            result.put(item.id, item);
+        });
+        return result;
+    };
+
+    var toTalisJsonRdf = function(items) {
+        var result = items.map(function(item) {
+            var r = jassa.rdf.NodeUtils.toTalisJsonRdf(item.id);
+            return r;
+        });
+        return result;
+    };
+
+
+    /*
     store.addMap({
         name: 'spo',
         template: [{
             id: '?s',
             displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel' }},
-            predicates: [{
+            predicates: [[{
                 id: '?p',
                 displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?p' }},
-                values: [{
-                    id: '?o',
-                    displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?o' }},
-                }]
-            }]
+                values: [[{
+                    id: '?o | node',
+                    displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?o' }}
+                }], toTalisJsonRdf],
+            }], toMap],
+        }],
+        from: '?s ?p ?o',
+    });
+    */
+
+
+
+    var assembleTalisJsonRdf = function(map) {
+        var result = {};
+
+        var entries = map.entries();
+
+        entries.forEach(function(entry) {
+            var coordinate = entry.key;
+            var str = entry.val;
+
+            var s = result;
+            var p = s[coordinate.s] = s[coordinate.s] || {};
+            var x = p[coordinate.p] = p[coordinate.p] || [];
+            var o = x[coordinate.i] = x[coordinate.i] || {};
+
+            o[coordinate.c] = str;
+        });
+
+        return result;
+    };
+
+    var changeIndex = function(triples) {
+        var spToCount = {};
+
+        var result = new jassa.util.HashMap();
+        //var result = {};
+
+
+        triples.forEach(function(triple) {
+            var sp = triple.s + ' ' + triple.p;
+            var i = spToCount[sp] = (spToCount[sp] || 0);
+            ++spToCount[sp];
+
+            var json = jassa.rdf.NodeUtils.toTalisJsonRdf(triple.o);
+
+            var attrs = Object.keys(json);
+            attrs.forEach(function(attr) {
+                var key = {
+                    s: triple.s,
+                    p: triple.p,
+                    i: i,
+                    c: attr,
+                };
+
+                var val = json[attr];
+
+                result.put(key, val);
+            });
+        })
+
+//         var assembled = assembleTalisJsonRdf(result);
+//         console.log('Assembled: ', assembled);
+
+        return result;
+    };
+
+
+    store.addMap({
+        name: 'spo',
+        template: [{
+            id: '?s',
+            data: [[{
+                id: '?rowId',
+                s: '?s',
+                p: '?p',
+                o: '?o | node'
+            }], changeIndex]
         }],
         from: '?s ?p ?o',
     });
 
     var ls = store.spo.getListService();
 
-    ls = new service.LookupServiceListServiceSparql(ls);
+    var lookupService = new service.LookupServiceListServiceSparql(ls);
+    //lookupService =
 
-    ls.lookup([rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(map) {
-       alert(JSON.stringify(map));
+    lookupService.lookup([rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(map) {
+       console.log('Lookup result: ', map);
     });
 
 
+
+    /*
+    var MapRexWrapper = jassa.ext.Class.create({
+        /**
+         * nestedRdfMap must have the structure:
+         * Map<String, {predicates: Map<String, {values: []}>]}>
+         * /
+        initialize: function(nestedRdfMap) {
+            this.nestedRdfMap = nestedRdfMap;
+        },
+
+        /**
+         * Coordinate is a json object with
+         *
+         * /
+        get: function(coordinate) {
+
+        },
+
+        containsKey: function()
+    });
+    */
+
+    var MapUnion = jassa.ext.Class.create({
+        initialize: function(subMaps) {
+            this.subMaps = subMaps;
+        },
+
+        get: function(key) {
+            var map = _(this.subMaps).find(function(subMap) {
+                var r = subMap.containsKey(key);
+                return r;
+            });
+
+            var result = map ? map.get(key) : null;
+            return result;
+        },
+
+        containsKey: function(key) {
+            var result = this.subMaps.some(function(subMap) {
+                var r = subMap.containsKey(key);
+                return r;
+            });
+
+            return result;
+        },
+
+        entries: function() {
+            var keys = new jassa.util.HashSet();
+
+            var result = [];
+            this.subMaps.forEach(function(subMap) {
+                var subEntries = subMap.entries();
+
+                subEntries.forEach(function(subEntry) {
+                    var k = subEntry.key;
+                    var alreadySeen = keys.contains(k);
+                    if(!alreadySeen) {
+                        keys.add(k);
+                        result.push(subEntry);
+                    }
+                });
+            });
+
+            return result;
+        }
+    });
 
 
     /*
@@ -220,7 +413,13 @@
 //         };
 //     })
 
-    angular.module('jassa.ui.edit.demo.widgets', ['ngSanitize', 'ui.bootstrap', 'ui.jassa', 'ui.jassa.rex'])
+    angular.module(
+        'jassa.ui.edit.demo.widgets',
+        ['ngSanitize', 'ui.bootstrap', 'ui.jassa', 'ui.jassa.rex', 'ui.codemirror'],
+        ['$rootScopeProvider', function($rootScopeProvider) {
+            $rootScopeProvider.digestTtl(10);
+        }]
+   )
 
     .directive('modelGraph', function() {
         return {
@@ -293,11 +492,12 @@
 
         $scope.editContext = {};
 
-        $scope.getRawState = getRawState;
-        $scope.$watch('getRawState(editContext)', function(editContext) {
-           //console.log('Changed context: ', editContext);
-           console.log('Triples: ', nestedMapsToTriples(editContext));
-        }, true);
+
+//         $scope.getRawState = getRawState;
+//         $scope.$watch('getRawState(editContext)', function(editContext) {
+//            //console.log('Changed context: ', editContext);
+//            console.log('Triples: ', nestedMapsToTriples(editContext));
+//         }, true);
 
         $scope.items = ['http://dbpedia.org/resource/Leipzig', 'http://dbpedia.org/resource/London'];
 
@@ -396,6 +596,18 @@
         };
 
 
+        var RexChangeManager = jassa.ext.Class.create({
+            initialize: function() {
+                this.map = new jassa.util.HashMap();
+            },
+
+            addChange: function(key, value) {
+
+            }
+
+        });
+
+
         var RexContext = jassa.ext.Class.create({
             initialize: function(lookupService) {
                 this.lookupService = lookupService;
@@ -403,23 +615,114 @@
                 // the status of the resources as retrieved from the lookup service
                 this.cache = new util.HashMap();
 
+                this.override = new util.HashMap();
+
+                this.json = {};
+                //this.combined = new MapUnion([this.override, this.cache]);
                 // values
                 // this.overrides = {};
 
             },
 
-            fetchData: function(subject) {
+            prefetch: function(subject) {
                 if(this.cache.containsKey(subject)) {
                     // TODO Do something
                 }
 
-                this.lookupService.lookup([subject]).then(function(map) {
-                    this.cache.putMap(map);
+                // TODO Set a loading flag on the resource
+
+                var self = this;
+                var result = this.lookupService.lookup([subject]).then(function(map) {
+                    console.log('Successfully prefetched: ', map);
+                    var entries = map.entries();
+                    entries.forEach(function(entry) {
+                        var dataMap = entry.val.data;
+                        self.cache.putMap(dataMap);
+
+                        var tmp = assembleTalisJsonRdf(dataMap);
+                        _(self.json).extend(tmp);
+
+                    });
                 });
 
+                return result;
             },
 
+            combinedMap: function() {
+                var subMaps = [this.override, this.cache].filter(function(item) {
+                    return item != null;
+                });
+
+                var result = new MapUnion(subMaps);
+
+                return result;
+            },
+
+            getValue: function(coordinate) {
+                //var subject = rdf.NodeFactory.createUri(coordinate.s);
+
+                //var c = this.cache.get(subject);
+                //var o = this.override.get(subject);
+
+                //console.log('Cache: ', this.cache);
+
+                var map = this.combinedMap();
+
+                var result = map.get(coordinate);
+
+                console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
+
+                return result;
+            },
+
+            asTalisJsonRdf: function() {
+                var map = this.combinedMap();
+
+                var result = assembleTalisJsonRdf(map);
+                return result;
+            }
+
+//             setValue: function(coordiate) {
+
+//             }
+
             /*
+            getObjects: function(subject, predicate) {
+
+                var p = this.cache.get(subject);
+                //var x = (p && p.predicates && p.predicates.get(predicate)) || {};
+                var x;
+                if(p && p.predicates) {
+                    x = p.predicates.get(predicate);
+                } else {
+                    x = {};
+                }
+
+                //var x = (p && p.predicates ? p.predicates.get(predicate) : null) || {};
+                var o = (x && x.values) || [];
+
+                console.log('Retrieved ', o, ' for ', subject, ' ', predicate, ' from ', this.cache);
+
+                return o;
+            },
+
+            allocateObjects: function(subject, predicate) {
+                var p = this.cache.get(subject);
+                if(!p) {
+                    p = new jassa.util.HashMap();
+                    this.cache.put(subject, p);
+                }
+
+                var o = p.get(predicate);
+                if(!o) {
+                    o = [];
+                    p.put(predicate, o);
+                }
+
+                return o;
+            },
+
+            / *
             fetchProperties: function(subjectNode) {
                 var r = this.lookupService.lookup([subjectNode]).then(function(map) {
                     var s = map.get(subjectNode);
@@ -431,49 +734,139 @@
         });
 
 
+        $scope.editorOptions = {
+            ttl: {
+                lineWrapping : true,
+                lineNumbers: true,
+                tabMode: 'indent',
+                matchBrackets: true,
+                mode: 'text/turtle',
+                readOnly: true
+            }
+        };
 
+
+        $scope.createRexContext = function() {
+            return new RexContext(lookupService);
+        }
+
+        //$scope.formContext = new RexContext(lookupService);
+        //$scope.subject = 'http://dbpedia.org/London';
     }]);
     </script>
 </head>
 
 
 <body ng-controller="AppCtrl">
+<div class="container">
+<div class="row">
+<div class="col-md-8 col-md-offset-2">
 
-    <input type="text" ng-model="propertyUri">
-
-
-    <div rex-context="formContext" rex-resource="'someResource'">
-        <div ng-repeat="property in formContext.fetchProperties(someResource)" rex-property="property">
-            <div ng-repeat=""></div>
+    <div class="alert alert-info" role="alert">
+        <h3>Initializing a model from rexSubject</h3>
+        <div rex-context="ex01.context" rex-subject="'http://dbpedia.org/resource/Leipzig'" ng-init="ex01={}; ex01.context=createRexContext()">
+            <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input type="text" class="form-control" ng-model="placeUri" ng-init="placeUri=rexSubject">
+            </div>
         </div>
     </div>
 
-    <div rex-context="editContext">
-        <div ng-repeat="item in items" rex-resource="item">
-            <div rex-property="propertyUri">
-                <span rex-value="'yay'" rex-object>test</span>
 
-
-
-                <input ng-model="m" type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-object>
-
-                <!-- Note rex-value="m" is not necessary, as rex-object will by default interpret any present ng-model as the lex-value -->
-
-                <button rex-term="'yay'" class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button>
+    <div class="alert alert-info" role="alert" ng-init="ex02={}; ex02.context=createRexContext(); ex02.subject='http://dbpedia.org/resource/London'">
+        <h3>Two-way binding of subject and model</h3>
+        <div rex-context="ex02.context" rex-subject="ex02.subject">
+            <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input type="text" class="form-control" ng-model="ex02.subject">
             </div>
-
-            <div rex-graph="">
-                <input type="text" ng-model="wgsModel" ng-model-options="{ getterSetter: true }" rex-object>
-            </div>
-
         </div>
     </div>
+
+    <div class="alert alert-info" role="alert" ng-init="ex03={}; ex03.context=createRexContext(); ex03.predicate='http://www.w3.org/2000/01/rdf-schema#label'; ex03.label='<s> <p> <o> .'">
+        <h3>Creating an actual triple</h3>
+        <form role="form" rex-context="ex03.context" rex-subject="'http://dbpedia.org/resource/Vienna'">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Label: </span>
+                    <input type="text" class="form-control" ng-model="ex03.label" rex-predicate="ex03.predicate" rex-object-iri="ex03.label">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Predicate IRI: </span>
+                    <input type="text" class="form-control" ng-model="ex03.predicate">
+                </div>
+            </div>
+        </form>
+
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.label">
+        </div>
+
+    </div>
+
+
+    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://dbpedia.org/resource/Berlin'">
+        <h3>Preloading all data</h3>
+        <form role="form" rex-context="ex04.context" rex-subject="ex04.subject">
+<!--         {{rexContext.asTalisJsonRdf()[rexSubject]}} -->
+            <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]">
+                {{property}}:
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData"">
+                    <div class="input-group">
+                        <span class="input-group-addon">{{$index}} </span>
+                        <input type="text" class="form-control" ng-model="foobar" rex-predicate="property" rex-object-iri="foobar">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+<!--         <div ui-codemirror="editorOptions.ttl" ng-model="ex03.label"> -->
+<!--         </div> -->
+
+    </div>
+
+
+
+<!--     <div rex-context="formContext" rex-subject="'http://dbpedia.org/Leipzig'"> -->
+<!--         <input type="text" ng-model="placeUri" ng-init="placeUri=rexSubject"> -->
+<!--         <input type="text" value="{{rexSubject}}"> -->
+
+<!--         <div ng-repeat="property in formContext.fetchProperties(someResource)" rex-property="property"> -->
+<!--             <div ng-repeat=""></div> -->
+<!--         </div> -->
+<!--     </div> -->
+
+
+<!--     <div rex-context="editContext"> -->
+<!--         <div ng-repeat="item in items" rex-resource="item"> -->
+<!--             <div rex-property="propertyUri"> -->
+<!--                 <span rex-value="'yay'" rex-object>test</span> -->
+
+
+
+<!--                 <input ng-model="m" type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-object> -->
+
+<!--                 Note rex-value="m" is not necessary, as rex-object will by default interpret any present ng-model as the lex-value -->
+
+<!--                 <button rex-term="'yay'" class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button> -->
+<!--             </div> -->
+
+<!--             <div rex-graph=""> -->
+<!--                 <input type="text" ng-model="wgsModel" ng-model-options="{ getterSetter: true }" rex-object> -->
+<!--             </div> -->
+
+<!--         </div> -->
+<!--     </div> -->
 
 
 <!--     <rdf-form -->
 <!--         formData="formData" -->
 <!--     ></rdf-form> -->
 
+</div>
+</div>
+</div>
 </body>
 
 </html>

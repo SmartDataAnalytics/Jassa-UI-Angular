@@ -5,6 +5,7 @@
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
     "angular-ui-utils": "",
     "bluebird": "2.3.5",
-    "underscore": "1.7.0"
+    "underscore": "1.7.0",
+    "angular-ui-codemirror": "0.1.6"
   }
 }
