@@ -80,6 +80,7 @@
 
     var jassa = new Jassa(Promise, $.ajax);
 
+
     var vocab = jassa.vocab;
     var rdf = jassa.rdf;
     var sparql = jassa.sparql;
@@ -222,26 +223,6 @@
     */
 
 
-
-    var assembleTalisJsonRdf = function(map) {
-        var result = {};
-
-        var entries = map.entries();
-
-        entries.forEach(function(entry) {
-            var coordinate = entry.key;
-            var str = entry.val;
-
-            var s = result;
-            var p = s[coordinate.s] = s[coordinate.s] || {};
-            var x = p[coordinate.p] = p[coordinate.p] || [];
-            var o = x[coordinate.i] = x[coordinate.i] || {};
-
-            o[coordinate.c] = str;
-        });
-
-        return result;
-    };
 
     var changeIndex = function(triples) {
         var spToCount = {};
@@ -468,7 +449,16 @@
         };
     }])
 
-    .controller('AppCtrl', ['$scope', function($scope) {
+    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
+
+        $scope.scrollTo = function(target) {
+            console.log('Scrolling to: ', target);
+            $timeout(function() {
+                $location.hash(target);
+                $anchorScroll();
+            }, 50);
+        };
+
         $scope.formData = {
             subjects: [{
                 url: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
@@ -670,7 +660,7 @@
 
                 var result = map.get(coordinate);
 
-                console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
+                //console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
 
                 return result;
             },
@@ -789,7 +779,7 @@
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">Label: </span>
-                    <input type="text" class="form-control" ng-model="ex03.label" rex-predicate="ex03.predicate" rex-object-iri="ex03.label">
+                    <input type="text" class="form-control" ng-model="ex03.label" rex-predicate="ex03.predicate" rex-object-literal="ex03.label">
                 </div>
             </div>
             <div class="form-group">
@@ -800,7 +790,7 @@
             </div>
         </form>
 
-        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.label">
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.context.talisJson">
         </div>
 
     </div>
@@ -808,14 +798,34 @@
 
     <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://dbpedia.org/resource/Berlin'">
         <h3>Preloading all data</h3>
+
+        <form role="form">
+                <div class="form-group" >
+                    <div class="input-group">
+                        <span class="input-group-addon">IRI: </span>
+                        <input id="ex04top" type="text" class="form-control" ng-model="ex04.subject" ng-change="scrollTo('ex04top');">
+                    </div>
+                </div>
+        </form>
+
+<!--         <form> -->
+<!--                 <div class="form-group"> -->
+<!--                     <div class="input-group"> -->
+<!--                         <span class="input-group-addon">{{$index}} </span> -->
+<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar"> -->
+<!--                     </div> -->
+<!--                 </div> -->
+<!--         </form> -->
+
         <form role="form" rex-context="ex04.context" rex-subject="ex04.subject">
-<!--         {{rexContext.asTalisJsonRdf()[rexSubject]}} -->
-            <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]">
+<!--         {{rexContext.json[rexSubject]}} -->
+            <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
-                <div class="form-group" ng-repeat="(object, objectData) in propertyData"">
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData">
                     <div class="input-group">
                         <span class="input-group-addon">{{$index}} </span>
-                        <input type="text" class="form-control" ng-model="foobar" rex-predicate="property" rex-object-iri="foobar">
+<!--                         <input type="text" class="form-control" ng-model="foobar" rex-object rex-value="foobar"> -->
+                        <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar">
                     </div>
                 </div>
             </div>
