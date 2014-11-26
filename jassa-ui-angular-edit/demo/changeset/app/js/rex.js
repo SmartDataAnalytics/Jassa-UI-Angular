@@ -1,4 +1,33 @@
 
+/*
+var getModelExpr(attrs, baseAttrName) {
+    var result = attrs[baseAttrName];
+
+    if(!result) {
+
+    }
+
+}
+*/
+
+var getModelAttribute = function(attrs) {
+    var modelAttrNames = ['ngModel', 'model'];
+
+    var keys = Object.keys(attrs);
+
+    var result = null;
+    modelAttrNames.some(function(item) {
+        var r = keys.indexOf(item) >= 0;
+        if(r) {
+            result = item;
+        }
+        return r;
+    });
+
+    return result;
+};
+
+
 function capitalize(s)
 {
     return s && s[0].toUpperCase() + s.slice(1);
@@ -13,8 +42,14 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
         pre: function(scope, ele, attrs, ctrls) {
 
 
-            var modelGetter = $parse(attrs[$rexComponent$]);
+            var modelExprStr = attrs[$rexComponent$];
+            var modelGetter = $parse(modelExprStr);
             var modelSetter = modelGetter.assign;
+
+//            if(!modelSetter) {
+//                console.log('[ERROR] Model must be writable: Attribute ', $rexComponent$, ' with argument ', modelExprStr, ' among ', attrs, ' on ', ele);
+//                throw new Error('Model must be writable');
+//            }
 
             //console.log('Setting up rexValue');
 
@@ -76,17 +111,23 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 // TODO: We need to update the override with the new value before we enter the following $watch below.
             }, true);
 
-            scope.$watch(function() {
-                var coordinate = createCoordinate(scope, $component$);
-                var r = scope.rexContext.getValue(coordinate);
-                return r;
-            }, function(newVal, oldVal) {
-                var coordinate = createCoordinate(scope, $component$);
-                console.log(tag + ' Coordinate-target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
-                if(newVal) {
-                    modelSetter(scope, newVal);
-                }
-            }, true);
+
+            if(modelSetter) {
+
+                scope.$watch(function() {
+                    var coordinate = createCoordinate(scope, $component$);
+                    var r = scope.rexContext.getValue(coordinate);
+                    return r;
+                }, function(newVal, oldVal) {
+                    var coordinate = createCoordinate(scope, $component$);
+                    console.log(tag + ' Coordinate-target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
+                    if(newVal) {
+                        modelSetter(scope, newVal);
+                    }
+                }, true);
+
+            }
+
         }
     };
 };
@@ -139,11 +180,21 @@ var talisJsonRdfToTurtle = function(data) {
             var oStrs = os.map(function(o) {
                 var r;
                 try {
+                    if(o.datatype === 'http://www.w3.org/2001/XMLSchema#date') {
+                        //alert(new Date(o.value));
+                        console.log('DEBUG ME');
+                    }
+
                     node = jassa.rdf.NodeFactory.createFromTalisRdfJson(o);
                     r = '' + node;
                 } catch(err) {
+                    r += '\n';
+
                     //console.log('Error: could not create node from ' + o);
-                    r = '[Invalid data for RDF generation: ' + JSON.stringify(o) + ']';
+                    r += '        // Invalid data for RDF generation:\n';
+                    r += '        // ' + JSON.stringify(o) + '\n';
+                    r += '        // ' + err + '\n';
+                    r += '\n';
                 }
 
                 return r;
@@ -220,15 +271,15 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
                 var self = this;
 
-                console.log('[SLOT]: Allocted ' + id);
+                //console.log('[SLOT]: Allocated ' + id);
 
                 var result = this.rexChangeSlots[id] = {
                     id: id,
                     release: function() {
-                        console.log('[SLOT]: Released ' + id);
+                        //console.log('[SLOT]: Released ' + id);
                         delete self.rexChangeSlots[id];
 
-                        console.log('[SLOT]: In Use ' + Object.keys(self.rexChangeSlots).length);
+                        //console.log('[SLOT]: In Use ' + Object.keys(self.rexChangeSlots).length);
                     }
                 };
 
@@ -259,7 +310,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                             return entry != null && entry.val != null;
                         });
 
-                        console.log('Test: ', entries);
+                        console.log('Updating override with ', entries.length, ' remaining entries:', entries);
                         return entries;
 
                     }, function(newEntries) {
@@ -277,6 +328,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                             var turtle = talisJsonRdfToTurtle(talis);
                             scope.rexContext.talisJson = turtle;
 
+                            console.log('Talis: ', talis);
                         }
                     }, true);
 
@@ -427,6 +479,15 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                 pre: function(scope, ele, attrs, ctrls) {
                     var modelExprStr = ele.attr('rex-object-literal');
 
+                    if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
+                        var name = getModelAttribute(attrs);
+                        modelExprStr = attrs[name];
+                    }
+
+                    if(!modelExprStr) {
+                        throw new Error('No model provided and found');
+                    }
+
                     ele.removeAttr('rex-object-literal');
 
                     ele.attr('rex-object', ''); //'objectIriObject');
@@ -524,9 +585,10 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         priority: 7,
         restrict: 'A',
         scope: true,
+        require: ['^rexContext', '^rexObject'],
         controller: function() {},
-        link: function(scope, ele, attrs, ctrls) {
-            syncAttr($parse, scope, attrs, 'rexDatatype');
+        compile: function(scope, ele, attrs, ctrls) {
+            return createCompileComponent('rexDatatype', 'datatype', $parse);
         }
     };
 }])
@@ -536,9 +598,10 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         priority: 7,
         restrict: 'A',
         scope: true,
+        require: ['^rexContext', '^rexObject'],
         controller: function() {},
-        link: function(scope, ele, attrs, ctrls) {
-            syncAttr($parse, scope, attrs, 'rexLang');
+        compile: function(scope, ele, attrs, ctrls) {
+            return createCompileComponent('rexLang', 'lang', $parse);
         }
     };
 }])

@@ -740,6 +740,42 @@
             return new RexContext(lookupService);
         }
 
+
+        // Date picker stuff
+        $scope.dp = {};
+
+//         $scope.today = function() {
+//             $scope.dt = new Date();
+//           };
+//           $scope.today();
+
+          $scope.clear = function () {
+            $scope.dt = null;
+          };
+
+          // Disable weekend selection
+          $scope.disabled = function(date, mode) {
+            return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+          };
+
+          $scope.toggleMin = function() {
+            $scope.minDate = $scope.minDate ? null : new Date();
+          };
+          $scope.toggleMin();
+
+          $scope.dp.opened = false;
+          $scope.open = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+
+            $scope.dp.opened = true;
+          };
+
+          $scope.dateOptions = {
+            formatYear: 'yyyy',
+            startingDay: 1
+          };
+
         //$scope.formContext = new RexContext(lookupService);
         //$scope.subject = 'http://dbpedia.org/London';
     }]);
@@ -790,50 +826,104 @@
             </div>
         </form>
 
-        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.context.talisJson">
-        </div>
-
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.context.talisJson"></div>
     </div>
 
 
-    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://dbpedia.org/resource/Berlin'">
+
+    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'">
+        <h3>Person data</h3>
+
+        <form role="form" rex-context="ex04.context" rex-subject="ex04.subject">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">URI: </span>
+                    <input type="text" class="form-control" ng-model="ex04.subject">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">First Name: </span>
+                    <input type="text" class="form-control" ng-model="firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Last Name: </span>
+                    <input type="text" class="form-control" ng-model="lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal="lastName">
+                </div>
+            </div>
+
+            <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: '50 other options...', uri: 'http://other'}]">
+                <div class="input-group">
+                    <span class="input-group-addon">Gender: </span>
+                    <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-literal="gender.uri"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Birthdate: </span>
+                    <input
+                        type="text" class="form-control"
+                        ng-model="birthDate"
+
+                        rex-predicate="'http://dbpedia.org/ontology/birthDate'"
+                        rex-object-literal="birthDate"
+                        rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
+
+                        datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
+                        min-date="'1920-01-01'" max-date="'2015-06-22'"
+                        datepicker-options="dateOptions" close-text="Close"
+                    >
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
+            </div>
+        </form>
+
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex04.context.talisJson"></div>
+    </div>
+
+<!-- I suppose rexContext should be separated into additional directives:
+    rex-output="talisJsonObject"
+    rex-input="baseTalisJsonData"
+    rex-lookup="lookupService" // automatically set data in rex-input
+    rex-base="preBaseTalisJsonData" // do we need a layer of data befor the input? my gut feeling is no
+    rex-context
+
+-->
+
+
+
+    <div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Berlin'">
         <h3>Preloading all data</h3>
 
         <form role="form">
                 <div class="form-group" >
                     <div class="input-group">
                         <span class="input-group-addon">IRI: </span>
-                        <input id="ex04top" type="text" class="form-control" ng-model="ex04.subject" ng-change="scrollTo('ex04top');">
+                        <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-change="scrollTo('ex05top');">
                     </div>
                 </div>
         </form>
 
-<!--         <form> -->
-<!--                 <div class="form-group"> -->
-<!--                     <div class="input-group"> -->
-<!--                         <span class="input-group-addon">{{$index}} </span> -->
-<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar"> -->
-<!--                     </div> -->
-<!--                 </div> -->
-<!--         </form> -->
-
-        <form role="form" rex-context="ex04.context" rex-subject="ex04.subject">
-<!--         {{rexContext.json[rexSubject]}} -->
+        <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
                 <div class="form-group" ng-repeat="(object, objectData) in propertyData">
                     <div class="input-group">
                         <span class="input-group-addon">{{$index}} </span>
-<!--                         <input type="text" class="form-control" ng-model="foobar" rex-object rex-value="foobar"> -->
-                        <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar">
+                        <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar" rex-termtype="tt" rex-datatype="dt" rex-lang="lang"></textarea>
                     </div>
                 </div>
             </div>
         </form>
 
-<!--         <div ui-codemirror="editorOptions.ttl" ng-model="ex03.label"> -->
-<!--         </div> -->
-
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
     </div>
 
 
