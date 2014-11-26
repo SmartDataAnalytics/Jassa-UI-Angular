@@ -129,48 +129,16 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             var modelGetter = $parse(modelExprStr);
             var modelSetter = modelGetter.assign;
 
-//            if(!modelSetter) {
-//                console.log('[ERROR] Model must be writable: Attribute ', $rexComponent$, ' with argument ', modelExprStr, ' among ', attrs, ' on ', ele);
-//                throw new Error('Model must be writable');
-//            }
-
-            //console.log('Setting up rexValue');
-
             var obj = syncAttr($parse, scope, attrs, $rexComponent$);
 
             var contextCtrl = ctrls[0];
             var objectCtrl = ctrls[1];
 
-
-            //contextCtrl.rexChangeScopes.push(scope);
             var slot = contextCtrl.allocSlot();
 
             scope.$on('$destroy', function() {
-                //jassa.util.ArrayUtils.removeItemStrict(scope.rexChangeScopes, scope);
                 slot.release();
             });
-
-
-//            var typeMap = TypeMapper.getInstance().uriToDt;
-//            var datatypeLabel = typeMap[rexDatatype];
-
-
-            // Forwards: If the model changes, we need to update the change object
-            // in the scope
-
-            scope.$watch(function() {
-                var r = modelGetter(scope);
-
-                return r;
-            }, function(newVal, oldVal) {
-                var coordinate = createCoordinate(scope, $component$);
-                slot.entry = {
-                    key: coordinate,
-                    val: newVal
-                };
-                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, '; updating override ', slot.entry);
-            }, true);
-
 
             // Backwards: If the referenced value changes, we need to update
             // the model
@@ -184,21 +152,45 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 return coordinate;
             }, function(newCoordinate, oldCoordinate) {
                 var r = modelGetter(scope);
-                //console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, '; updating coordinate-target with value ', r);
-                slot.entry = {
-                    key: newCoordinate,
-                    val: r
-                };
 
-                //console.log('ContextCtrl', contextCtrl);
-                // Preliminary registration at the override
-                //contextCtrl.rexContext.override.putEntries([scope.entry]);
-                contextCtrl.getOverride().putEntries([slot.entry]);
+                var isUndefined = angular.isUndefined(r);
+                var msg = isUndefined ? ' however skipping model update due to undefined ' : ' updating coordinate-target with value ';
+
+                //console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, msg + '; ', r);
+
+                if(!isUndefined) {
+
+                    slot.entry = {
+                        key: newCoordinate,
+                        val: r
+                    };
+
+                    contextCtrl.getOverride().putEntries([slot.entry]);
+                }
 
                 // TODO: We need to update the override with the new value before we enter the following $watch below.
             }, true);
 
+            // Forwards: If the model changes, we need to update the
+            // change object in the scope
+            scope.$watch(function() {
+                var r = modelGetter(scope);
 
+                return r;
+            }, function(newVal, oldVal) {
+                var coordinate = createCoordinate(scope, $component$);
+                slot.entry = {
+                    key: coordinate,
+                    val: newVal
+                };
+
+                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, '; updating override ', slot.entry);
+            }, true);
+
+
+
+             // If the given model is writeable, then we need to update it
+             // whenever the coordinate's value changes
             if(modelSetter) {
 
                 scope.$watch(function() {
@@ -246,6 +238,57 @@ var assembleTalisJsonRdf = function(map) {
     return result;
 };
 
+var createTalisJsonObjectWithDefaults = function(o) {
+    var result = {
+        type: o.type || 'literal',
+        value: o.value || '',
+        lang: o.lang || '',
+        datatype: o.datatype || ''
+    };
+
+    return result;
+};
+
+var talisJsonRdfToTriples = function(data) {
+    var result = [];
+
+    var ss = Object.keys(data);
+    ss.sort();
+
+    ss.forEach(function(sStr) {
+
+        var s = jassa.rdf.NodeUtils.createUri(sStr);
+
+        var po = data[sStr];
+        var ps = Object.keys(po);
+        ps.sort();
+
+        ps.forEach(function(pStr) {
+            var p = jassa.rdf.NodeUtils.createUri(pStr);
+
+            var os = po[p];
+
+            os.forEach(function(oJson) {
+
+                // Create a clone with defaults applied
+                var clone = createTalisJsonObjectWithDefaults(oJson);
+
+                try {
+                    o = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
+
+                    var triple = new jassa.rdf.Triple(s, p, o);
+                    result.push(triple);
+
+                } catch(err) {
+                  console.log('Error: could not create node from ' + oJson);
+                }
+            })
+        })
+    });
+
+    return result;
+};
+
 var talisJsonRdfToTurtle = function(data) {
     var ss = Object.keys(data);
     ss.sort();
@@ -266,20 +309,10 @@ var talisJsonRdfToTurtle = function(data) {
 
             var oStrs = os.map(function(o) {
 
-                var clone = {
-                    type: o.type || 'literal',
-                    value: o.value || '',
-                    lang: o.lang || '',
-                    datatype: o.lang || ''
-                };
+                var clone = createTalisJsonObjectWithDefaults(o);
 
                 var r;
                 try {
-//                    if(o.datatype === 'http://www.w3.org/2001/XMLSchema#date') {
-                        //alert(new Date(o.value));
-                        //console.log('DEBUG ME');
-//                    }
-
                     node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
                     r = '' + node;
                 } catch(err) {
@@ -349,6 +382,191 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
 
 
 angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
+
+.directive('rdfTermInput', ['$parse', function($parse) {
+
+    // Some vocab - later we could fetch labels on-demand based on the uris.
+    var vocab = {
+        iri: 'http://iri',
+        plainLiteral: 'http://plainLiteral',
+        typedLiteral: 'http://typedLiteral'
+    };
+
+    return {
+        restrict: 'EA',
+        priority: 4,
+        require: '^ngModel',
+        templateUrl: 'template/rdf-term-input/rdf-term-input.html',
+        replace: true,
+        scope: true,
+//        scope: {
+//            ngModel: '=',
+//            logo: '@?',
+//            langs: '=?', // suggestions of available languages
+//            datatypes: '=?' // suggestions of available datatypes
+//        },
+        controller: ['$scope', function($scope) {
+
+            $scope.state = $scope.$state || {};
+
+
+
+            $scope.vocab = vocab;
+
+            $scope.termTypes = [
+                {id: vocab.iri, displayLabel: 'IRI'},
+                {id: vocab.plainLiteral, displayLabel: 'plain'},
+                {id: vocab.typedLiteral, displayLabel: 'typed'}
+            ];
+
+            var langs = [
+                {id: '', displayLabel: '(none)'},
+                {id: 'en', displayLabel: 'en'},
+                {id: 'de', displayLabel: 'de'},
+                {id: 'fr', displayLabel: 'fr'},
+                {id: 'zh', displayLabel: 'zh'},
+                {id: 'ja', displayLabel: 'ja'}
+            ];
+
+//            setModelAttr: function(attr, val) {
+//                ngModel.$modelValue[attr] = val;
+//                $scope.apply();
+//            };
+
+            /*
+            $scope.termTypes = [vocab.iri, vocab.plainLiteral, vocab.typedLiteral];
+
+            $scope.termTypeLabels = {};
+            $scope.termTypeLabels[vocab.iri] = 'IRI';
+            $scope.termTypeLabels[vocab.plainLiteral] = 'plain';
+            $scope.termTypeLabels[vocab.typedLiteral] = 'typed';
+            */
+
+
+            $scope.langs = $scope.langs || langs;
+
+            var keys = Object.keys(jassa.vocab.xsd);
+            $scope.datatypes = keys.map(function(key) {
+
+                var id = jassa.vocab.xsd[key].getUri();
+                return {
+                    id: id,
+                    displayLabel: jassa.util.UriUtils.extractLabel(id)
+                };
+            });
+            //$scope.
+
+        }],
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ngModel) {
+
+                    var getValidState = function() {
+                        var result;
+
+                        var state = scope.state;
+                        var type = state.type;
+                        switch(type) {
+                        case vocab.iri:
+                            result = {
+                                type: 'uri',
+                                value: state.value
+                            };
+                            break;
+                        case vocab.plainLiteral:
+                            result = {
+                                type: 'literal',
+                                value: state.value,
+                                lang: state.lang
+                            };
+                            break;
+                        case vocab.typedLiteral:
+                            result = {
+                                type: 'literal',
+                                value: state.value,
+                                datatype: state.datatype || jassa.vocab.xsd.xstring.getUri()
+                            };
+                            break;
+                        }
+
+                        return result;
+                    };
+
+                    var convertToState = function(talisJson) {
+                        var clone = createTalisJsonObjectWithDefaults(talisJson);
+
+                        var node;
+                        try {
+                            node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
+                        } catch(err) {
+                            console.log(err);
+                        }
+
+
+                        var result;
+                        if(node.isUri()) {
+                            result = {
+                                type: vocab.iri,
+                                value: node.getUri()
+                            };
+                        } else if(node.isLiteral()) {
+                            var dt = node.getLiteralDatatypeUri();
+                            var hasDatatype = !jassa.util.ObjectUtils.isEmptyString(dt)
+
+                            if(hasDatatype) {
+                                result = {
+                                    type: vocab.typedLiteral,
+                                    value: node.getLiteralLexicalForm(),
+                                    datatype: dt
+                                };
+                            } else {
+                                result = {
+                                    type: vocab.plainLiteral,
+                                    value: node.getLiteralLexicalForm(),
+                                    lang: node.getLiteralLanguage()
+                                };
+                            }
+                        }
+
+                        return result;
+                    };
+
+                    var modelExprStr = attrs['ngModel'];
+                    var modelGetter = $parse(modelExprStr);
+                    var modelSetter = modelGetter.assign;
+
+                    //console.log('Sigh', modelExprStr, modelGetter(scope));
+
+                    scope.$watch(function () {
+                        var r = modelGetter(scope);
+                        return r;
+                    }, function(talisJson) {
+                        //console.log('Got outside change: ', talisJson);
+
+                        if(talisJson) {
+                            var newState = convertToState(talisJson);
+                            scope.state = newState;
+                            //console.log('ABSORBED', newState, ' from ', talisJson);
+                        }
+                    }, true);
+
+                    if(modelSetter) {
+
+                        scope.$watch(function () {
+                            var r = getValidState();
+                            return r;
+                        }, function(newValue) {
+                            if(newValue) {
+                                modelSetter(scope, newValue);
+                                //console.log('EXPOSED', newValue);
+                            }
+                        }, true);
+                    }
+                }
+            };
+        }
+    };
+}])
 
 
 .directive('rexContext', ['$parse', function($parse) {

@@ -22,6 +22,31 @@
 
     <!-- endbuild -->
 
+    <style>
+    .input-group-addon {
+        min-width:100px;
+        text-align:left;
+    }
+    </style>
+
+    <style>
+    button.no-border-radius {
+        border-radius: 0px !important;
+    }
+
+    input.margin-left-1 {
+        margin-left: -1px;
+    }
+
+    button.margin-left-1 {
+      margin-left: -1px;
+    }
+
+    .icon {
+      width: 15px;
+    }
+    </style>
+
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
@@ -45,33 +70,6 @@
     <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
 
     <script src="js/rex.js"></script>
-
-    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/form.html">
-    <ul ui-sortable>
-        <li ng-repeat="subject in formData.subjects">
-            {{subject.iri}}
-            <ul ui-sortable>
-                <li ng-repeat="value in values">{{value}}</li>
-                <li><button type="button" class="btn btn-primary" ng-click="addProperty()">Add Property</button></li>
-            </ul>
-        </li>
-        <li><button type="button" class="btn btn-primary" ng-click="addSubject()">Add Resource</button></li>
-    </ul>
-    </script>
-
-    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/property-list.html">
-    <ul ui-sortable>
-        <li ng-repeat="value in values">{{value}}</li>
-        <li><button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Add Value</button></li>
-    </ul>
-    </script>
-
-    <script type="text/ng-template" id="partials/jassa-ui-angular-edit/property.html">
-    <li>
-        <button type="button" class="btn btn-primary" ng-click="addPropertyConfig()">Add Value</button>
-    </li>
-    </script>
-
 
 
 
@@ -792,7 +790,17 @@
 
         //$scope.formContext = new RexContext(lookupService);
         //$scope.subject = 'http://dbpedia.org/London';
+        $scope.enabled = {
+                'ex01': false,
+                'ex02': false,
+                'ex03': false,
+                'ex04': true,
+                'ex05': false
+            };
+
     }]);
+
+
     </script>
 </head>
 
@@ -802,7 +810,7 @@
 <div class="row">
 <div class="col-md-8 col-md-offset-2">
 
-    <div class="alert alert-info" role="alert">
+    <div ng-if="enabled['ex01']" class="alert alert-info" role="alert">
         <h3>Initializing a model from rexSubject</h3>
         <div rex-context="ex01.context" rex-subject="'http://dbpedia.org/resource/Leipzig'" ng-init="ex01={}; ex01.context=createRexContext()">
             <div class="input-group">
@@ -813,7 +821,7 @@
     </div>
 
 
-    <div class="alert alert-info" role="alert" ng-init="ex02={}; ex02.context=createRexContext(); ex02.subject='http://dbpedia.org/resource/London'">
+    <div ng-if="enabled['ex02']" class="alert alert-info" role="alert" ng-init="ex02={}; ex02.context=createRexContext(); ex02.subject='http://dbpedia.org/resource/London'">
         <h3>Two-way binding of subject and model</h3>
         <div rex-context="ex02.context" rex-subject="ex02.subject">
             <div class="input-group">
@@ -823,7 +831,7 @@
         </div>
     </div>
 
-    <div class="alert alert-info" role="alert" ng-init="ex03={}; ex03.context=createRexContext(); ex03.predicate='http://www.w3.org/2000/01/rdf-schema#label'; ex03.label='<s> <p> <o> .'">
+    <div ng-if="enabled['ex03']" class="alert alert-info" role="alert" ng-init="ex03={}; ex03.context=createRexContext(); ex03.predicate='http://www.w3.org/2000/01/rdf-schema#label'; ex03.label='<s> <p> <o> .'">
         <h3>Creating an actual triple</h3>
         <form role="form" rex-context="ex03.context" rex-subject="'http://dbpedia.org/resource/Vienna'">
             <div class="form-group">
@@ -845,16 +853,22 @@
 
 
 
-    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'; ex04.baseIri='http://example.org/resource/'">
+    <div ng-if="enabled['ex04']" class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'; ex04.baseIri='http://example.org/resource/'">
         <h3>Person data</h3>
 
         <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://Person'">
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">URI: </span>
-                    <input name="uri" type="text" class="form-control" ng-model="ex04.subject" sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}" sync-source-interpolate sync-target="ex04.subject" sync-to-target sync-to-target-cond="personForm.uri.$pristine">
-                    <span class="input-group-btn">
-                        <button title="Reset to default value" type="button" ng-hide="personForm.uri.$pristine" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                    <input name="uri" type="text" class="form-control"
+                        ng-model="ex04.subject"
+                        sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}"
+                        sync-source-interpolate
+                        sync-target="ex04.subject"
+                        sync-to-target
+                        sync-to-target-cond="personForm.uri.$pristine">
+                    <span ng-if="!personForm.uri.$pristine" class="input-group-btn">
+                        <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
                     </span>
                 </div>
             </div>
@@ -880,7 +894,7 @@
                 </div>
             </div>
 
-            <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: '50 other options...', uri: 'http://other'}]">
+            <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
                 <div class="input-group">
                     <span class="input-group-addon">Gender: </span>
                     <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
@@ -930,7 +944,7 @@
 
 
 
-    <div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Berlin'">
+    <div ng-if="enabled['ex05']" class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/B'">
         <h3>Preloading all data</h3>
 
         <form role="form">
@@ -940,16 +954,29 @@
                         <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-change="scrollTo('ex05top');">
                     </div>
                 </div>
+
+            <div class="form-group">
+                <rdf-term-input class="input-group" ng-model="foobar">
+            </div>
+
         </form>
 
         <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
                 <div class="form-group" ng-repeat="(object, objectData) in propertyData">
-                    <div class="input-group">
-                        <span class="input-group-addon">{{$index}} </span>
-                        <textarea style="resize:vertical;" class="form-control" ng-model="foobar" rex-object rex-value="foobar" rex-termtype="tt" rex-datatype="dt" rex-lang="lang"></textarea>
-                    </div>
+<!--                     <div class="input-group" ng-init="term={}"> -->
+<!--                         <span class="input-group-addon">{{$index}} </span> -->
+                        <!-- Note:  The term models are initialized by fetching values from the background data base on the scope's coordinate-->
+<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="term.value" rex-object rex-value="term.value" rex-termtype="term.tt" rex-datatype="term.dt" rex-lang="term.lang"></textarea> -->
+<!--                         <span class="input-group-addon">{{term.dt}}, {{term.lang}}</span> -->
+
+<!--                     </div> -->
+<!--                     <div ng-init="t={term: {}}"> -->
+
+                        <rdf-term-input logo="{{$index}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+<!--                         {{t.term}} -->
+<!--                     </div> -->
                 </div>
             </div>
         </form>
