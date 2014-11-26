@@ -10,11 +10,28 @@ var getModelExpr(attrs, baseAttrName) {
 }
 */
 
+// Prefix str:
+var parsePrefixStr = function(str) {
+    regex = /\s*([^:]+)\s*:\s*([^\s]+)\s*/g;
+}
+
+
+var parsePrefixes = function(prefixMapping) {
+    var result = prefixMapping
+        ? prefixMapping instanceof PrefixMappingImpl
+            ? prefixMapping
+            : new PrefixMappingImpl(prefixMapping)
+        : new PrefixMappingImpl();
+
+    return result;
+};
+
+
 // Updates a target model based on transformation whenever the source changes
-var syncHelper = function(scope, attrs, $parse, sourceAttr, targetAttr, fnAttr) {
+var syncHelper = function(scope, attrs, $parse, $interpolate, sourceAttr, targetAttr, fnAttr, conditionAttr, iterpolateSource) {
 
     var sourceExprStr = attrs[sourceAttr];
-    var sourceGetter = $parse(sourceExprStr);
+    var sourceGetter = iterpolateSource ? $interpolate(sourceExprStr) : $parse(sourceExprStr);
 
     var targetExprStr = attrs[targetAttr];
     var targetGetter = $parse(targetExprStr);
@@ -23,14 +40,46 @@ var syncHelper = function(scope, attrs, $parse, sourceAttr, targetAttr, fnAttr) 
     var fnExprStr = attrs[fnAttr];
     var fnGetter = $parse(fnExprStr);
 
+    var identity = function(x) {
+        return x;
+    };
+
+
+    var conditionExprStr = attrs[conditionAttr];
+    var conditionGetter = $parse(conditionExprStr);
+
+    var checkCondition = function() {
+        var tmp = conditionGetter(scope);
+        var result = angular.isUndefined(tmp) ? true : tmp;
+        return result;
+    };
+
+    var doSync = function() {
+        var isConditionSatisfied = checkCondition();
+        if(isConditionSatisfied) {
+            var sourceValue = sourceGetter(scope);
+            var fn = fnGetter(scope) || identity;
+            var v = fn(sourceValue);
+            targetSetter(scope, v);
+        }
+    }
+
+    // If the condition changes to 'true', resync the models
+    scope.$watch(function() {
+        var r = checkCondition();
+        return r;
+    }, function(isConditionSatisfied) {
+        if(isConditionSatisfied) {
+            doSync();
+        }
+    });
+
     scope.$watch(function() {
         var r = fnGetter(scope);
         return r;
     }, function(newFn) {
         if(newFn) {
-            var sourceValue = sourceGetter(scope);
-            var v = newFn(sourceValue);
-            targetSetter(scope, v);
+            doSync();
         }
     });
 
@@ -38,9 +87,7 @@ var syncHelper = function(scope, attrs, $parse, sourceAttr, targetAttr, fnAttr) 
         var r = sourceGetter(scope);
         return r;
     }, function(sourceValue) {
-        var fn = fnGetter(scope);
-        var v = fn(sourceValue);
-        targetSetter(scope, v);
+        doSync();
     }, true);
 
 };
@@ -121,7 +168,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     key: coordinate,
                     val: newVal
                 };
-                console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, '; updating override ', slot.entry);
+                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, '; updating override ', slot.entry);
             }, true);
 
 
@@ -137,7 +184,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 return coordinate;
             }, function(newCoordinate, oldCoordinate) {
                 var r = modelGetter(scope);
-                console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, '; updating coordinate-target with value ', r);
+                //console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, '; updating coordinate-target with value ', r);
                 slot.entry = {
                     key: newCoordinate,
                     val: r
@@ -160,7 +207,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     return r;
                 }, function(newVal, oldVal) {
                     var coordinate = createCoordinate(scope, $component$);
-                    console.log(tag + ' Coordinate-target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
+                    //console.log(tag + ' Coordinate-target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
                     if(newVal) {
                         modelSetter(scope, newVal);
                     }
@@ -228,10 +275,10 @@ var talisJsonRdfToTurtle = function(data) {
 
                 var r;
                 try {
-                    if(o.datatype === 'http://www.w3.org/2001/XMLSchema#date') {
+//                    if(o.datatype === 'http://www.w3.org/2001/XMLSchema#date') {
                         //alert(new Date(o.value));
-                        console.log('DEBUG ME');
-                    }
+                        //console.log('DEBUG ME');
+//                    }
 
                     node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
                     r = '' + node;
@@ -267,7 +314,13 @@ var createCoordinate = function(scope, component) {
     };
 };
 
-var syncAttr = function($parse, $scope, attrs, attrName, deep) {
+
+/**
+ * One way binding of the value of an attribute into scope
+ * (possibly via a transformation function)
+ *
+ */
+var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
     var attr = attrs[attrName];
     var getterFn = $parse(attr);
 
@@ -276,6 +329,11 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep) {
         return r;
     }, function(newVal, oldVal) {
         //console.log('Syncing: ', attrName, ' to ', newVal, ' in ', $scope);
+
+        if(transformFn) {
+            newVal = transformFn(newVal);
+        }
+
         $scope[attrName] = newVal;
     }, deep);
 
@@ -359,7 +417,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                             return entry != null && entry.val != null;
                         });
 
-                        console.log('Updating override with ', entries.length, ' remaining entries:', entries);
+                        //console.log('Updating override with ', entries.length, ' remaining entries:', entries);
                         return entries;
 
                     }, function(newEntries) {
@@ -371,13 +429,13 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
                             //console.log('Override: ', JSON.stringify(newEntries));
                             //console.log('Override: ', JSON.stringify(override.entries()));
-                            console.log('Override: ', override);
+                            //console.log('Override: ', override);
 
                             var talis = assembleTalisJsonRdf(override);
                             var turtle = talisJsonRdfToTurtle(talis);
                             scope.rexContext.talisJson = turtle;
 
-                            console.log('Talis: ', talis);
+                            //console.log('Talis: ', talis);
                         }
                     }, true);
 
@@ -480,6 +538,46 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         }
     };
 }])
+
+
+/**
+ * Convenience directive
+ *
+ * implies rex-prediacte="rdf:type" rex-object-iri
+ *
+ * !! Important: because rex-predicate is implied, this directive cannot be used on a directive
+ * that already hase rex-predicate defined !!
+ */
+.directive('rexTypeof', ['$parse', '$compile', function($parse, $compile) {
+    return {
+        priority: 396,
+        restrict: 'A',
+        scope: true,
+        terminal: true,
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    var modelExprStr = ele.attr('rex-typeof');
+
+                    // TODO Raise an error if rex-predicate exists on this element
+                    //if(ele.attr)
+
+                    ele.removeAttr('rex-typeof');
+
+                    ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
+                    ele.attr('rex-object-iri', modelExprStr);
+
+                    // Continue processing any further directives
+                    $compile(ele)(scope);
+                },
+                post: function(scope, ele, attrs, ctrls) {
+                }
+            };
+        }
+    };
+}])
+
 
 /**
  * Convenience directive
@@ -722,7 +820,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 */
 
 // sync-to-target="toString"
-.directive('syncToTarget', ['$parse', function($parse) {
+.directive('syncToTarget', ['$parse', '$interpolate', function($parse, $interpolate) {
     return {
         priority: 390,
         restrict: 'A',
@@ -731,14 +829,17 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncHelper(scope, attrs, $parse, 'syncSource', 'syncTarget', 'syncToTarget');
+
+                    var interpolateSource = 'syncSourceInterpolate' in attrs;
+
+                    syncHelper(scope, attrs, $parse, $interpolate, 'syncSource', 'syncTarget', 'syncToTarget', 'syncToTargetCond', interpolateSource);
                 }
             }
         }
     };
 }])
 
-.directive('syncToSource', ['$parse', function($parse) {
+.directive('syncToSource', ['$parse', '$interpolate', function($parse, $interpolate) {
     return {
         priority: 390,
         restrict: 'A',
@@ -747,7 +848,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncHelper(scope, attrs, $parse, 'syncTarget', 'syncSource', 'syncToSource');
+                    syncHelper(scope, attrs, $parse, $interpolate, 'syncTarget', 'syncSource', 'syncToSource', 'syncToSourceCond', false);
                 }
             }
         }

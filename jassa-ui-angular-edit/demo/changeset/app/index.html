@@ -845,35 +845,45 @@
 
 
 
-    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'">
+    <div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'; ex04.baseIri='http://example.org/resource/'">
         <h3>Person data</h3>
 
-        <form role="form" rex-context="ex04.context" rex-subject="ex04.subject">
+        <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://Person'">
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">URI: </span>
-                    <input type="text" class="form-control" ng-model="ex04.subject">
+                    <input name="uri" type="text" class="form-control" ng-model="ex04.subject" sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}" sync-source-interpolate sync-target="ex04.subject" sync-to-target sync-to-target-cond="personForm.uri.$pristine">
+                    <span class="input-group-btn">
+                        <button title="Reset to default value" type="button" ng-hide="personForm.uri.$pristine" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                    </span>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">First Name: </span>
-                    <input type="text" class="form-control" ng-model="firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal>
+                    <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">Last Name: </span>
-                    <input type="text" class="form-control" ng-model="lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal="lastName">
+                    <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal="ex04.lastName">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">E-Mail: </span>
+                    <input type="text" class="form-control" ng-model="email" rex-predicate="'http://xmlns.com/foaf/0.1/mbox'" rex-object-literal="email">
                 </div>
             </div>
 
             <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: '50 other options...', uri: 'http://other'}]">
                 <div class="input-group">
                     <span class="input-group-addon">Gender: </span>
-                    <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-literal="gender.uri"></select>
+                    <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
                 </div>
             </div>
 
