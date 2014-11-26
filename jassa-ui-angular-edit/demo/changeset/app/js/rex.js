@@ -10,6 +10,42 @@ var getModelExpr(attrs, baseAttrName) {
 }
 */
 
+// Updates a target model based on transformation whenever the source changes
+var syncHelper = function(scope, attrs, $parse, sourceAttr, targetAttr, fnAttr) {
+
+    var sourceExprStr = attrs[sourceAttr];
+    var sourceGetter = $parse(sourceExprStr);
+
+    var targetExprStr = attrs[targetAttr];
+    var targetGetter = $parse(targetExprStr);
+    var targetSetter = targetGetter.assign;
+
+    var fnExprStr = attrs[fnAttr];
+    var fnGetter = $parse(fnExprStr);
+
+    scope.$watch(function() {
+        var r = fnGetter(scope);
+        return r;
+    }, function(newFn) {
+        if(newFn) {
+            var sourceValue = sourceGetter(scope);
+            var v = newFn(sourceValue);
+            targetSetter(scope, v);
+        }
+    });
+
+    scope.$watch(function() {
+        var r = sourceGetter(scope);
+        return r;
+    }, function(sourceValue) {
+        var fn = fnGetter(scope);
+        var v = fn(sourceValue);
+        targetSetter(scope, v);
+    }, true);
+
+};
+
+
 var getModelAttribute = function(attrs) {
     var modelAttrNames = ['ngModel', 'model'];
 
@@ -68,12 +104,16 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             });
 
 
+//            var typeMap = TypeMapper.getInstance().uriToDt;
+//            var datatypeLabel = typeMap[rexDatatype];
+
 
             // Forwards: If the model changes, we need to update the change object
             // in the scope
 
             scope.$watch(function() {
                 var r = modelGetter(scope);
+
                 return r;
             }, function(newVal, oldVal) {
                 var coordinate = createCoordinate(scope, $component$);
@@ -178,6 +218,14 @@ var talisJsonRdfToTurtle = function(data) {
             var os = po[p];
 
             var oStrs = os.map(function(o) {
+
+                var clone = {
+                    type: o.type || 'literal',
+                    value: o.value || '',
+                    lang: o.lang || '',
+                    datatype: o.lang || ''
+                };
+
                 var r;
                 try {
                     if(o.datatype === 'http://www.w3.org/2001/XMLSchema#date') {
@@ -185,14 +233,15 @@ var talisJsonRdfToTurtle = function(data) {
                         console.log('DEBUG ME');
                     }
 
-                    node = jassa.rdf.NodeFactory.createFromTalisRdfJson(o);
+                    node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
                     r = '' + node;
                 } catch(err) {
                     r += '\n';
 
                     //console.log('Error: could not create node from ' + o);
                     r += '        // Invalid data for RDF generation:\n';
-                    r += '        // ' + JSON.stringify(o) + '\n';
+                    r += '        // raw: ' + JSON.stringify(o) + '\n';
+                    r += '        // defaults: ' + JSON.stringify(o) + '\n';
                     r += '        // ' + err + '\n';
                     r += '\n';
                 }
@@ -366,7 +415,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
     };
 }])
 
-.directive('rexPrefixes', ['$parse', function($parse) {
+.directive('rexPrefix', ['$parse', function($parse) {
     return {
         priority: 398,
         restrict: 'A',
@@ -376,7 +425,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncAttr($parse, scope, attrs, 'rexPrefixes');
+                    syncAttr($parse, scope, attrs, 'rexPrefix');
                 }
             };
         }
@@ -645,6 +694,70 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 }])
 
 /*
+.directive('rexSync', ['$parse', function($parse) {
+    return {
+        priority: 7,
+        restrict: 'A',
+        scope: true,
+        //require: ['^rexContext', '^rexObject'],
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    var modelExprStr = ele.attr('rex-sync');
+
+                    ele.removeAttr('rex-object-iri');
+
+                    ele.attr('rex-object', ''); //'objectIriObject');
+                    ele.attr('rex-termtype', '"uri"');
+                    ele.attr('rex-value', modelExprStr);
+
+                    // Continue processing any further directives
+                    $compile(ele)(scope);
+                }
+            };
+        }
+    };
+}])
+*/
+
+// sync-to-target="toString"
+.directive('syncToTarget', ['$parse', function($parse) {
+    return {
+        priority: 390,
+        restrict: 'A',
+        scope: true,
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    syncHelper(scope, attrs, $parse, 'syncSource', 'syncTarget', 'syncToTarget');
+                }
+            }
+        }
+    };
+}])
+
+.directive('syncToSource', ['$parse', function($parse) {
+    return {
+        priority: 390,
+        restrict: 'A',
+        scope: true,
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    syncHelper(scope, attrs, $parse, 'syncTarget', 'syncSource', 'syncToSource');
+                }
+            }
+        }
+    };
+}])
+
+
+
+
+/*
 .directive('rexObject', function() {
     return {
         priority: 0,
@@ -663,6 +776,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 })
 */
 
+/*
 .directive('rexType', function() {
     return {
         priority: 6,
@@ -675,11 +789,11 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         }],
         link: function(scope, ele, attrs, ctrls) {
             scope.rexLang = scope.$parent.$eval(attrs.rexLang);
-            console.log('<lang>', scope.rexLang);
+            //console.log('<lang>', scope.rexLang);
         }
     };
 })
-
+*/
 
 /**
  * A directive that can hold a json object with fields describing an RDF term.

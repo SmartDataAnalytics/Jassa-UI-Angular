@@ -776,6 +776,20 @@
             startingDay: 1
           };
 
+
+
+        $scope.dateToString = function(x) {
+            var r = !x ? null : x.toUTCString();
+            //console.log('[Sync] dateToString ', x, ' -> ', r);
+            return r;
+        };
+
+        $scope.parseDate = function(x) {
+            var r = !x ? null : new Date(x);
+            //console.log('[Sync] parseDate ', x, ' -> ', r);
+            return r;
+        };
+
         //$scope.formContext = new RexContext(lookupService);
         //$scope.subject = 'http://dbpedia.org/London';
     }]);
@@ -871,8 +885,15 @@
                         ng-model="birthDate"
 
                         rex-predicate="'http://dbpedia.org/ontology/birthDate'"
-                        rex-object-literal="birthDate"
+                        rex-object-literal="birthDateStr"
                         rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
+
+                        rex-sync-should-supersede-the-other-sync-attrs="birthDateStr"
+
+                        sync-source="birthDate"
+                        sync-target="birthDateStr"
+                        sync-to-target="dateToString"
+                        sync-to-source="parseDate"
 
                         datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
                         min-date="'1920-01-01'" max-date="'2015-06-22'"
@@ -923,6 +944,8 @@
             </div>
         </form>
 
+        <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
+        a full round trip of the data is demonstrated.</i>
         <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
     </div>
 
