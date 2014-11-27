@@ -257,16 +257,16 @@ var talisJsonRdfToTriples = function(data) {
 
     ss.forEach(function(sStr) {
 
-        var s = jassa.rdf.NodeUtils.createUri(sStr);
+        var s = jassa.rdf.NodeFactory.createUri(sStr);
 
         var po = data[sStr];
         var ps = Object.keys(po);
         ps.sort();
 
         ps.forEach(function(pStr) {
-            var p = jassa.rdf.NodeUtils.createUri(pStr);
+            var p = jassa.rdf.NodeFactory.createUri(pStr);
 
-            var os = po[p];
+            var os = po[pStr];
 
             os.forEach(function(oJson) {
 
@@ -398,13 +398,14 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
         replace: true,
-        scope: true,
-//        scope: {
-//            ngModel: '=',
-//            logo: '@?',
-//            langs: '=?', // suggestions of available languages
-//            datatypes: '=?' // suggestions of available datatypes
-//        },
+        //scope: true,
+        scope: {
+            //ngModel: '=',
+            bindModel: '=ngModel',
+            logo: '@?',
+            langs: '=?', // suggestions of available languages
+            datatypes: '=?' // suggestions of available datatypes
+        },
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
@@ -531,6 +532,38 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         return result;
                     };
 
+                    scope.$watch(function () {
+                        var r = scope.bindModel;
+                        return r;
+                    }, function(talisJson) {
+                        //console.log('Got outside change: ', talisJson);
+
+                        if(talisJson) {
+                            var newState = convertToState(talisJson);
+                            scope.state = newState;
+                            //console.log('ABSORBED', newState, ' from ', talisJson);
+                        }
+                    }, true);
+
+                    //if(modelSetter) {
+
+                        scope.$watch(function () {
+                            var r = getValidState();
+                            return r;
+                        }, function(newValue) {
+                            if(newValue) {
+                                //modelSetter(scope, newValue);
+                                //scope.bindModel = newValue;
+                                angular.copy(newValue, scope.bindModel);
+                                //console.log('EXPOSED', newValue);
+                            }
+                        }, true);
+                    //}
+                }
+
+
+                // Code below worked with scope:true - but we want an isolated one
+                    /*
                     var modelExprStr = attrs['ngModel'];
                     var modelGetter = $parse(modelExprStr);
                     var modelSetter = modelGetter.assign;
@@ -563,6 +596,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         }, true);
                     }
                 }
+                */
             };
         }
     };
@@ -651,6 +685,19 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
                             var talis = assembleTalisJsonRdf(override);
                             var turtle = talisJsonRdfToTurtle(talis);
+
+
+                            var tmp = assembleTalisJsonRdf(scope.rexContext.cache);
+
+                            var before = talisJsonRdfToTriples(tmp).map(function(x) { return '' + x; });
+
+                            var after = talisJsonRdfToTriples(talis).map(function(x) { return '' + x; });
+                            var remove = _(before).difference(after);
+                            var added = _(after).difference(before);
+
+                            console.log('DIFF: Added: ' + added);
+                            console.log('DIFF: Removed: ' + remove);
+
                             scope.rexContext.talisJson = turtle;
 
                             //console.log('Talis: ', talis);

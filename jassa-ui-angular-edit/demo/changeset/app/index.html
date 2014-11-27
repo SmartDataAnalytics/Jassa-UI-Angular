@@ -450,7 +450,7 @@
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
 
         $scope.scrollTo = function(target) {
-            console.log('Scrolling to: ', target);
+            //console.log('Scrolling to: ', target);
             $timeout(function() {
                 $location.hash(target);
                 $anchorScroll();
@@ -795,7 +795,7 @@
                 'ex02': false,
                 'ex03': false,
                 'ex04': true,
-                'ex05': false
+                'ex05': true
             };
 
     }]);
@@ -912,8 +912,6 @@
                         rex-object-literal="birthDateStr"
                         rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
 
-                        rex-sync-should-supersede-the-other-sync-attrs="birthDateStr"
-
                         sync-source="birthDate"
                         sync-target="birthDateStr"
                         sync-to-target="dateToString"
@@ -944,7 +942,7 @@
 
 
 
-    <div ng-if="enabled['ex05']" class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/B'">
+    <div ng-if="enabled['ex05']" class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'">
         <h3>Preloading all data</h3>
 
         <form role="form">
@@ -964,7 +962,7 @@
         <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
-                <div class="form-group" ng-repeat="(object, objectData) in propertyData">
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData" ng-init="term={}">
 <!--                     <div class="input-group" ng-init="term={}"> -->
 <!--                         <span class="input-group-addon">{{$index}} </span> -->
                         <!-- Note:  The term models are initialized by fetching values from the background data base on the scope's coordinate-->
@@ -974,8 +972,7 @@
 <!--                     </div> -->
 <!--                     <div ng-init="t={term: {}}"> -->
 
-                        <rdf-term-input logo="{{$index}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
-<!--                         {{t.term}} -->
+                        <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
 <!--                     </div> -->
                 </div>
             </div>
