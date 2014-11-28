@@ -794,9 +794,20 @@
                 'ex01': false,
                 'ex02': false,
                 'ex03': false,
-                'ex04': true,
+                'ex04': false,
                 'ex05': true
             };
+
+        var test = new jassa.util.HashMap();
+
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+
+        console.log('Map status: ', test, test.entries(), test.entries().length);
+
+        test.remove({'foo': 'bar'});
+        console.log('Map status: ', test, test.entries(), test.entries().length);
 
     }]);
 
@@ -853,7 +864,7 @@
 
 
 
-    <div ng-if="enabled['ex04']" class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.subject='http://example.org/person1'; ex04.baseIri='http://example.org/resource/'">
+    <div ng-if="enabled['ex04']" class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.baseIri='http://example.org/resource/'">
         <h3>Person data</h3>
 
         <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://Person'">
@@ -876,14 +887,14 @@
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">First Name: </span>
-                    <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal>
+                    <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal="ex04.firstName">
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon">Last Name: </span>
-                    <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal="ex04.lastName">
+                    <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal>
                 </div>
             </div>
 
@@ -946,34 +957,24 @@
         <h3>Preloading all data</h3>
 
         <form role="form">
-                <div class="form-group" >
-                    <div class="input-group">
-                        <span class="input-group-addon">IRI: </span>
-                        <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-change="scrollTo('ex05top');">
-                    </div>
+            <div class="form-group" >
+                <div class="input-group">
+                    <span class="input-group-addon">IRI: </span>
+                    <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-change="scrollTo('ex05top');">
                 </div>
-
-            <div class="form-group">
-                <rdf-term-input class="input-group" ng-model="foobar">
             </div>
-
         </form>
 
         <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
-                <div class="form-group" ng-repeat="(object, objectData) in propertyData" ng-init="term={}">
-<!--                     <div class="input-group" ng-init="term={}"> -->
-<!--                         <span class="input-group-addon">{{$index}} </span> -->
-                        <!-- Note:  The term models are initialized by fetching values from the background data base on the scope's coordinate-->
-<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="term.value" rex-object rex-value="term.value" rex-termtype="term.tt" rex-datatype="term.dt" rex-lang="term.lang"></textarea> -->
-<!--                         <span class="input-group-addon">{{term.dt}}, {{term.lang}}</span> -->
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object="0" ng-init="term={}">
+                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
 
-<!--                     </div> -->
-<!--                     <div ng-init="t={term: {}}"> -->
+<!--                     Term: {{term}} -->
+<!--                     Context: {{rexSubject}} {{rexPredicate}} {{rexObject}} : {{rexContext.getValue({s: rexSubject, p: rexPredicate, i: rexObject, c: 'value'})}} -->
 
-                        <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
-<!--                     </div> -->
+<!--                     <button ng-click="term.value='yay'">test</button> -->
                 </div>
             </div>
         </form>
@@ -982,6 +983,32 @@
         a full round trip of the data is demonstrated.</i>
         <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
     </div>
+
+
+<div ng-init="point={}">
+
+<!--                 <div ng-init="term={}"> -->
+<!--                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input> -->
+<!--                 </div> -->
+
+<!--
+<geometry-edit ng-model="wktStr" sync-target="point" sync-to-target="convertWktToPoint" sync-to-target-cond="isPoint(wktStr)" sync-to-source="convertPointToWkt"></geometry-edit>
+<input ng-if="isPoint(wktStr)" type="hidden" rex-predicte="geo:lat" rex-literal="point.x" rex-datatype="wkt:float" />
+<input ng-if="isPoint(wktStr)" type="hidden" rex-predicte="geo:long" rex-literal="point.y" rex-datatype="wkt:float" />
+ -->
+
+
+</div>
+
+<!--                     <div class="input-group" ng-init="term={}"> -->
+<!--                         <span class="input-group-addon">{{$index}} </span> -->
+                        <!-- Note:  The term models are initialized by fetching values from the background data base on the scope's coordinate-->
+<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="term.value" rex-object rex-value="term.value" rex-termtype="term.tt" rex-datatype="term.dt" rex-lang="term.lang"></textarea> -->
+<!--                         <span class="input-group-addon">{{term.dt}}, {{term.lang}}</span> -->
+
+<!--                     </div> -->
+<!--                     <div ng-init="t={term: {}}"> -->
+<!--                     </div> -->
 
 
 

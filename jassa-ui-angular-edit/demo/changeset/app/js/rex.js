@@ -1,3 +1,8 @@
+/*
+ * Important: The convenience directives must have a high priority, because
+ * any controller with a even higher priority will be compiled again!
+ *
+ */
 
 /*
 var getModelExpr(attrs, baseAttrName) {
@@ -9,6 +14,8 @@ var getModelExpr(attrs, baseAttrName) {
 
 }
 */
+
+var basePriority = 0;
 
 // Prefix str:
 var parsePrefixStr = function(str) {
@@ -72,7 +79,7 @@ var syncHelper = function(scope, attrs, $parse, $interpolate, sourceAttr, target
         if(isConditionSatisfied) {
             doSync();
         }
-    });
+    }); // Condition should be boolean - no need for deep watch
 
     scope.$watch(function() {
         var r = fnGetter(scope);
@@ -81,7 +88,7 @@ var syncHelper = function(scope, attrs, $parse, $interpolate, sourceAttr, target
         if(newFn) {
             doSync();
         }
-    });
+    }); // Functions are compared by reference - no need to deep watch
 
     scope.$watch(function() {
         var r = sourceGetter(scope);
@@ -153,18 +160,19 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             }, function(newCoordinate, oldCoordinate) {
                 var r = modelGetter(scope);
 
+                // typeof r === 'undefined';
                 var isUndefined = angular.isUndefined(r);
                 var msg = isUndefined ? ' however skipping model update due to undefined ' : ' updating coordinate-target with value ';
 
                 //console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, msg + '; ', r);
 
+                // In any case we need to declare the referenced value
+                slot.entry = {
+                    key: newCoordinate,
+                    val: r
+                };
+
                 if(!isUndefined) {
-
-                    slot.entry = {
-                        key: newCoordinate,
-                        val: r
-                    };
-
                     contextCtrl.getOverride().putEntries([slot.entry]);
                 }
 
@@ -184,7 +192,9 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     val: newVal
                 };
 
-                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, '; updating override ', slot.entry);
+                contextCtrl.getOverride().putEntries([slot.entry]);
+
+                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
 
 
@@ -199,13 +209,17 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     return r;
                 }, function(newVal, oldVal) {
                     var coordinate = createCoordinate(scope, $component$);
-                    //console.log(tag + ' Coordinate-target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
-                    if(newVal) {
+                    //console.log(tag + ' Coordinate target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
+                    if(newVal != null) {
                         modelSetter(scope, newVal);
                     }
                 }, true);
 
             }
+//            else {
+//                var coordinate = createCoordinate(scope, $component$);
+//                console.log('[WARN] No setter for ' + modelExprStr + ' for coordinate ', coordinate);
+//            }
 
         }
     };
@@ -494,18 +508,29 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                     };
 
                     var convertToState = function(talisJson) {
-                        var clone = createTalisJsonObjectWithDefaults(talisJson);
+                        // IMPORTANT: We cannot apply defaults here on the value taken from the model,
+                        // because otherwise
+                        // we would expose the state based on the defaults, which could
+                        // in turn update the model again and modify its value
+                        // Put differently: The model must not be changed unless there is user interaction
+                        // with this widget!
+
+                        //var clone = createTalisJsonObjectWithDefaults(talisJson);
+                        var clone = talisJson;
 
                         var node;
                         try {
                             node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
                         } catch(err) {
-                            console.log(err);
+                            // Ignore invalid model values, and just wait for them to become valid
+                            //console.log(err);
                         }
 
 
                         var result;
-                        if(node.isUri()) {
+                        if(!node) {
+                            result = {};
+                        } else if(node.isUri()) {
                             result = {
                                 type: vocab.iri,
                                 value: node.getUri()
@@ -555,7 +580,9 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                                 //modelSetter(scope, newValue);
                                 //scope.bindModel = newValue;
                                 angular.copy(newValue, scope.bindModel);
-                                //console.log('EXPOSED', newValue);
+
+                                //if(!scope.$phase) { scope.$apply(); }
+                                //console.log('EXPOSED', scope.bindModel);
                             }
                         }, true);
                     //}
@@ -605,7 +632,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
 .directive('rexContext', ['$parse', function($parse) {
     return {
-        priority: 399,
+        priority: basePriority + 20,
         restrict: 'A',
         scope: true,
         controller: ['$scope', function($scope) {
@@ -622,21 +649,25 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
             // Arrays where child directives can register slots where
             // they publish their change
             this.nextSlot = 0;
-            this.rexChangeSlots = $scope.rexChangeSlots = {};
+            $scope.rexChangeSlots = {};
+
+            //console.log('DA FUQ');
+
+            //this.rexChangeSlots =
 
             this.allocSlot = function() {
                 var tmp = this.nextSlot++;
                 var id = '' + tmp;
 
-                var self = this;
+                //var self = this;
 
                 //console.log('[SLOT]: Allocated ' + id);
 
-                var result = this.rexChangeSlots[id] = {
+                var result = $scope.rexChangeSlots[id] = {
                     id: id,
                     release: function() {
                         //console.log('[SLOT]: Released ' + id);
-                        delete self.rexChangeSlots[id];
+                        delete $scope.rexChangeSlots[id];
 
                         //console.log('[SLOT]: In Use ' + Object.keys(self.rexChangeSlots).length);
                     }
@@ -651,10 +682,160 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
         }],
         compile: function(ele, attrs) {
+            //console.log('DA FUQ ON', ele, attrs);
+
+
             return {
                 pre: function(scope, ele, attrs, ctrls) {
                     syncAttr($parse, scope, attrs, 'rexContext');
 
+                    // Remove all entries from map that exist in base
+                    var mapDifference = function(map, base) {
+                        var mapEntries = map.entries();
+                        mapEntries.forEach(function(mapEntry) {
+                            var mapKey = mapEntry.key;
+                            var mapVal = mapEntry.val;
+
+                            var baseVal = base.get(mapKey);
+
+                            if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
+                                map.remove(mapKey);
+                            }
+                        });
+                    };
+
+                    var updateDerivedValues = function() {
+                        var override = scope.rexContext.override;
+
+                        //console.log('Override', JSON.stringify(scope.rexContext.override.entries()));
+
+                        var talis = assembleTalisJsonRdf(override);
+                        //console.log('Talis JSON', talis);
+                        var turtle = talisJsonRdfToTurtle(talis);
+
+
+                        var tmp = assembleTalisJsonRdf(scope.rexContext.cache);
+
+                        var before = talisJsonRdfToTriples(tmp).map(function(x) { return '' + x; });
+
+                        var after = talisJsonRdfToTriples(talis).map(function(x) { return '' + x; });
+                        var remove = _(before).difference(after);
+                        var added = _(after).difference(before);
+
+                        //console.log('DIFF: Added: ' + added);
+                        //console.log('DIFF: Removed: ' + remove);
+
+                        scope.rexContext.talisJson = turtle;
+                    };
+
+
+                    /*
+                    var mapKeySet = function(map) {
+                        var result = new jassa.util.HashSet();
+
+                        var keys = map.keys();
+                        keys.forEach(function(key) {
+                            result.add(key);
+                        });
+                        return result;
+                    };*/
+
+                    var arrayToSet = function(arr) {
+                        var result = new jassa.util.HashSet();
+
+                        arr.forEach(function(item) {
+                            result.add(item);
+                        });
+                        return result;
+                    };
+
+
+
+                    var mapRetainKeys = function(map, keySet) {
+                        var mapKeys = map.keys();
+
+                        mapKeys.forEach(function(mapKey) {
+                            var isContained = keySet.contains(mapKey);
+                            if(!isContained) {
+                                map.remove(mapKey);
+                            }
+                        });
+                    };
+
+
+                    var getReferencedCoordinates = function() {
+                        var slots = scope.rexChangeSlots;
+                        var slotIds = Object.keys(slots);
+
+                        var result = slotIds.map(function(slotId) {
+                            var slot = slots[slotId];
+                            var entry = slot.entry;
+
+                            return entry ? entry.key : null;
+                        });
+
+                        result = result.filter(function(key) {
+                            return key != null;
+                        });
+
+                        //console.log('rcs:', scope.rexChangeSlots, ' SlotIds: ', slotIds, ' Coordinates: ', JSON.stringify(result), ' Slots: ', slots);
+
+                        return result;
+                    };
+
+                    var cleanupOverride = function()
+                    {
+                        var override = scope.rexContext.override;
+
+                        // Remove values from override that equal the source data
+                        mapDifference(override, scope.rexContext.cache);
+
+                        // Remove undefined entries from override
+                        var entries = override.entries();
+                        entries.forEach(function(entry) {
+                            if(entry.val == null) {
+                                override.remove(entry.key);
+                            }
+                        });
+                    };
+
+
+                    var cleanupReferences = function(coordinates) {
+                        coordinates = coordinates || getReferencedCoordinates();
+
+                        //console.log('Referenced coordinates', JSON.stringify(coordinates));
+                        var coordinateSet = arrayToSet(coordinates);
+
+                        mapRetainKeys(scope.rexContext.override, coordinateSet);
+                        //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
+                    };
+
+
+                    scope.$watch(function() {
+                        return scope.rexContext.override.entries();
+                    }, function() {
+                        //console.log('override modified', scope.rexContext.override.entries());
+                        //mapDifference(scope.rexContext.override, scope.rexContext.cache);
+
+                        // Remove values from override that are not referenced
+                        cleanupReferences();
+                        cleanupOverride();
+
+                        updateDerivedValues();
+                    }, true);
+
+
+                    // TODO Remove unreferenced values from the override
+                    scope.$watch(function() {
+                        return getReferencedCoordinates();
+                    }, function(coordinates) {
+                        //console.log('Override', scope.rexContext.override);
+                        cleanupReferences(coordinates);
+                        cleanupOverride();
+                    }, true);
+
+
+                    if(false) {
                     scope.$watch(function() {
                         //var entries = scope.rexChangeScopes.map(function(child) {
                         var ids = Object.keys(scope.rexChangeSlots);
@@ -695,15 +876,15 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                             var remove = _(before).difference(after);
                             var added = _(after).difference(before);
 
-                            console.log('DIFF: Added: ' + added);
-                            console.log('DIFF: Removed: ' + remove);
+                            //console.log('DIFF: Added: ' + added);
+                            //console.log('DIFF: Removed: ' + remove);
 
                             scope.rexContext.talisJson = turtle;
 
                             //console.log('Talis: ', talis);
                         }
                     }, true);
-
+                    }
 
                     //scope.rexChangeScopes = []; // Array of scopes of which each provides a 'getChanges()'
 
@@ -740,7 +921,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
 .directive('rexPrefix', ['$parse', function($parse) {
     return {
-        priority: 398,
+        priority: basePriority + 19,
         restrict: 'A',
         scope: true,
         // require: '^',
@@ -757,7 +938,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
 .directive('rexSubject', ['$parse', '$q', function($parse, $q) {
     return {
-        priority: 397,
+        priority: basePriority + 18,
         restrict: 'A',
         scope: true,
         require: '^rexContext',
@@ -787,7 +968,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
 .directive('rexPredicate', ['$parse', function($parse) {
     return {
-        priority: 396,
+        priority: basePriority + 17,
         restrict: 'A',
         scope: true,
         //require: ['^?rexSubject', '^?rexObject']
@@ -815,7 +996,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
  */
 .directive('rexTypeof', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: 396,
+        priority: basePriority + 1000,
         restrict: 'A',
         scope: true,
         terminal: true,
@@ -853,7 +1034,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
  */
 .directive('rexObjectIri', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: 395,
+        priority: basePriority + 1000,
         restrict: 'A',
         scope: true,
         terminal: true,
@@ -881,7 +1062,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
 
 .directive('rexObjectLiteral', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: 395,
+        priority: basePriority + 1000,
         restrict: 'A',
         scope: true,
         terminal: true,
@@ -901,6 +1082,8 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                     }
 
                     ele.removeAttr('rex-object-literal');
+
+                    // TODO: Do not overwrite rex-object if already present
 
                     ele.attr('rex-object', ''); //'objectIriObject');
                     ele.attr('rex-termtype', '"literal"');
@@ -950,22 +1133,43 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
  */
 .directive('rexObject', ['$parse', function($parse) {
     return {
-        priority: 380,
+        priority: basePriority + 13,
         restrict: 'A',
         scope: true,
         require: '^rexPredicate',
         controller: function() {},
         compile: function(ele, attrs) {
+
+//            var modelExprStr = ele.attr('rex-object');
+//            if(!modelExprStr) {
+//                ele.attr('rex-object')
+//            }
+//
+//            // TODO Raise an error if rex-predicate exists on this element
+//            //if(ele.attr)
+//
+//            ele.removeAttr('rex-typeof');
+//
+//            ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
+//            ele.attr('rex-object-iri', modelExprStr);
+
+
             return {
                 pre: function(scope, ele, attrs, predicateCtrl) {
                     var i = predicateCtrl.rexObjectScopes.length;
                     if(!attrs['rexObject']) {
                         attrs['rexObject'] = '' + i;
                     }
+                    //console.log('FOOO', attrs);
+
 //console.log('rexObject index: ' + i);
                     predicateCtrl.rexObjectScopes.push(scope);
 
                     syncAttr($parse, scope, attrs, 'rexObject');
+
+//                    scope.$watch('rexObject', function(newVal) {
+//                        console.log('rexObject is: ', newVal, typeof newVal);
+//                    })
 
                     scope.$on('$destroy', function() {
                         jassa.util.ArrayUtils.removeItemStrict(predicateCtrl.rexObjectScopes, scope);
