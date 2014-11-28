@@ -1,79 +1,91 @@
-<div class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.baseIri='http://dbpedia.org/resource/Albert_Einstein'">
-    <h3>Person data</h3>
+<div class="row" ng-init="ex04={}; ex04.context=createRexContext(); ex04.baseIri='http://dbpedia.org/resource/'">
+<div class="col-md-6">
 
-<!-- TODO: Resetting to the default value on an existing resource does not restore the original URL / need to think of something -->
 
-    <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://xmlns.com/foaf/0.1/Person'">
-        <div class="form-group">
-            <div class="input-group">
-                <span class="input-group-addon">URI: </span>
-                <input name="uri" type="text" class="form-control"
-                    ng-model="ex04.subject"
-                    sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}"
-                    sync-source-interpolate
-                    sync-target="ex04.subject"
-                    sync-to-target
-                    sync-to-target-cond="personForm.uri.$pristine && !rexContext.json[rexSubject]">
-                <span ng-if="!personForm.uri.$pristine" class="input-group-btn">
-                    <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
-                </span>
+    <div class="alert alert-info" role="alert">
+        <h3>Person data</h3>
+
+    <!-- TODO: Resetting to the default value on an existing resource does not restore the original URL / need to think of something -->
+
+        <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://xmlns.com/foaf/0.1/Person'">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">URI: </span>
+                    <input name="uri" type="text" class="form-control"
+                        ng-model="ex04.subject"
+                        sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}"
+                        sync-source-interpolate
+                        sync-target="ex04.subject"
+                        sync-to-target
+                        sync-to-target-cond="personForm.uri.$pristine">
+                    <span ng-if="!personForm.uri.$pristine" class="input-group-btn">
+                        <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                    </span>
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="input-group">
-                <span class="input-group-addon">First Name: </span>
-                <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/givenName'" rex-object-literal="ex04.firstName">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">First Name: </span>
+                    <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/givenName'" rex-object-literal="ex04.firstName">
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="input-group">
-                <span class="input-group-addon">Last Name: </span>
-                <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/surname'" rex-object-literal>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Last Name: </span>
+                    <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/surname'" rex-object-literal>
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="input-group">
-                <span class="input-group-addon">E-Mail: </span>
-                <input type="text" class="form-control" ng-model="email" rex-predicate="'http://xmlns.com/foaf/0.1/mbox'" rex-object-literal="email">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">E-Mail: </span>
+                    <input type="text" class="form-control" ng-model="email" rex-predicate="'http://xmlns.com/foaf/0.1/mbox'" rex-object-literal="email">
+                </div>
             </div>
-        </div>
 
-        <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
-            <div class="input-group">
-                <span class="input-group-addon">Gender: </span>
-                <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
+            <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
+                <div class="input-group">
+                    <span class="input-group-addon">Gender: </span>
+                    <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="input-group"
-                rex-predicate="'http://dbpedia.org/ontology/birthDate'"
-                rex-object-literal="birthDateStr"
-                rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
-            >
-                <span class="input-group-addon">Birthdate: </span>
-                <input
-                    type="text" class="form-control"
-                    ng-model="birthDate"
-
-                    sync-source="birthDate"
-                    sync-target="birthDateStr"
-                    sync-to-target="dateToString"
-                    sync-to-source="parseDate"
-
-                    datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
-                    min-date="'1920-01-01'" max-date="'2015-06-22'"
-                    datepicker-options="dateOptions" close-text="Close"
+            <div class="form-group">
+                <div class="input-group"
+                    rex-predicate="'http://dbpedia.org/ontology/birthDate'"
+                    rex-object-literal="birthDateStr"
+                    rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
                 >
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-                </span>
-            </div>
-        </div>
-    </form>
+                    <span class="input-group-addon">Birthdate: </span>
+                    <input
+                        type="text" class="form-control"
+                        ng-model="birthDate"
 
-    <div ui-codemirror="editorOptions.ttl" ng-model="ex04.context.talisJson"></div>
+                        sync-source="birthDate"
+                        sync-target="birthDateStr"
+                        sync-to-target="dateToString"
+                        sync-to-source="parseDate"
+
+                        datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
+                        min-date="'1920-01-01'" max-date="'2015-06-22'"
+                        datepicker-options="dateOptions" close-text="Close"
+                    >
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+<div class="col-md-6">
+    <div class="alert alert-success" role="alert">
+        <h3>Output</h3>
+
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex04.context.talisJson"></div>
+    </div>
+</div>
+
