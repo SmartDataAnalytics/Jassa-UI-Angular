@@ -150,15 +150,25 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             // Backwards: If the referenced value changes, we need to update
             // the model
 
-            // If the coordinate changes, we need to set the current model at that coordinate
+            // If the coordinate changes, we need to set the model to the current value at that coordinate*
             // Afterwards, if the value at the coordinate changes (though the coordinate is the same then),
             // we update the model
 
+            // * We do not retain the current value for the new coordinate,
+            // because when switching resources we would copy the state of the prior resource over
+
+            if(false) {
             scope.$watch(function() {
                 var coordinate = createCoordinate(scope, $component$);
                 return coordinate;
             }, function(newCoordinate, oldCoordinate) {
-                var r = modelGetter(scope);
+                var r = scope.rexContext.getValue(newCoordinate);
+
+                if(modelSetter) {
+                    modelSetter(scope, r);
+                }
+
+                //var r = modelGetter(scope);
 
                 // typeof r === 'undefined';
                 var isUndefined = angular.isUndefined(r);
@@ -178,6 +188,42 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
 
                 // TODO: We need to update the override with the new value before we enter the following $watch below.
             }, true);
+            }
+
+
+             // If the given model is writeable, then we need to update it
+             // whenever the coordinate's value changes
+            if(modelSetter) {
+
+                scope.$watch(function() {
+                    var coordinate = createCoordinate(scope, $component$);
+                    var r = {
+                        coordinate: coordinate,
+                        value: scope.rexContext.getValue(coordinate)
+                    };
+                    return r;
+                }, function(newVal, oldVal) {
+                    var coordinate = newVal.coordinate;//createCoordinate(scope, $component$);
+                    //console.log(tag + ' Coordinate target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
+
+
+                    var value = newVal.value;
+                    slot.entry = {
+                        key: coordinate,
+                        val: value
+                    };
+
+                    if(value != null) {
+                        modelSetter(scope, newVal.value);
+                    }
+                }, true);
+
+            }
+//            else {
+//                var coordinate = createCoordinate(scope, $component$);
+//                console.log('[WARN] No setter for ' + modelExprStr + ' for coordinate ', coordinate);
+//            }
+
 
             // Forwards: If the model changes, we need to update the
             // change object in the scope
@@ -196,30 +242,6 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
 
                 //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
-
-
-
-             // If the given model is writeable, then we need to update it
-             // whenever the coordinate's value changes
-            if(modelSetter) {
-
-                scope.$watch(function() {
-                    var coordinate = createCoordinate(scope, $component$);
-                    var r = scope.rexContext.getValue(coordinate);
-                    return r;
-                }, function(newVal, oldVal) {
-                    var coordinate = createCoordinate(scope, $component$);
-                    //console.log(tag + ' Coordinate target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
-                    if(newVal != null) {
-                        modelSetter(scope, newVal);
-                    }
-                }, true);
-
-            }
-//            else {
-//                var coordinate = createCoordinate(scope, $component$);
-//                console.log('[WARN] No setter for ' + modelExprStr + ' for coordinate ', coordinate);
-//            }
 
         }
     };
@@ -416,6 +438,7 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
         scope: {
             //ngModel: '=',
             bindModel: '=ngModel',
+            ngModelOptions: '=?',
             logo: '@?',
             langs: '=?', // suggestions of available languages
             datatypes: '=?' // suggestions of available datatypes
@@ -704,12 +727,31 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         });
                     };
 
-                    var updateDerivedValues = function() {
+                    var createDataMap = function(coordinates) {
+                        coordinates = coordinates || getReferencedCoordinates();
+
                         var override = scope.rexContext.override;
 
                         //console.log('Override', JSON.stringify(scope.rexContext.override.entries()));
 
-                        var talis = assembleTalisJsonRdf(override);
+                        var combined = new jassa.util.HashMap();
+
+                        //console.log('Coordinates: ', JSON.stringify(coordinates));
+                        //var map = new MapUnion([scope.rexContext.override, scope.rex]);
+                        var result = new jassa.util.HashMap();
+                        coordinates.forEach(function(coordinate) {
+                             var val = scope.rexContext.getValue(coordinate);
+                             result.put(coordinate, val);
+                        });
+
+                        //console.log('DATA', result.entries());
+
+                        return result;
+                    };
+
+                    var updateDerivedValues = function(dataMap) {
+
+                        var talis = assembleTalisJsonRdf(dataMap);
                         //console.log('Talis JSON', talis);
                         var turtle = talisJsonRdfToTurtle(talis);
 
@@ -810,10 +852,12 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
-
+if(false) {
                     scope.$watch(function() {
-                        return scope.rexContext.override.entries();
-                    }, function() {
+                        //var r = createDataMap();
+                        //return r;
+                        var r = scope.rexContext.override.entries();
+                    }, function(dataMap) {
                         //console.log('override modified', scope.rexContext.override.entries());
                         //mapDifference(scope.rexContext.override, scope.rexContext.cache);
 
@@ -821,9 +865,10 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         cleanupReferences();
                         cleanupOverride();
 
-                        updateDerivedValues();
+                        var dataMap = createDataMap();
+                        updateDerivedValues(dataMap);
                     }, true);
-
+}
 
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
@@ -834,6 +879,13 @@ angular.module('ui.jassa.rex', []) //['ngSanitize', 'ui.bootstrap', 'ui.jassa']
                         cleanupOverride();
                     }, true);
 
+                    scope.$watch(function() {
+                        var coordinates = getReferencedCoordinates();
+                        var r = createDataMap(coordinates);
+                        return r;
+                    }, function(dataMap) {
+                        updateDerivedValues(dataMap);
+                    }, true);
 
                     if(false) {
                     scope.$watch(function() {

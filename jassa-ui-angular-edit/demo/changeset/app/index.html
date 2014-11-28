@@ -49,8 +49,8 @@
 
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
-    <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/ng-grid/build/ng-grid.js"></script>
@@ -954,13 +954,13 @@
 
 
     <div ng-if="enabled['ex05']" class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'">
-        <h3>Preloading all data</h3>
+        <h3>Generic Resource Editor</h3>
 
         <form role="form">
             <div class="form-group" >
                 <div class="input-group">
                     <span class="input-group-addon">IRI: </span>
-                    <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-change="scrollTo('ex05top');">
+                    <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-model-options="{ debounce: 300 }" ng-change="scrollTo('ex05top');">
                 </div>
             </div>
         </form>
@@ -968,13 +968,8 @@
         <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
-                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object="0" ng-init="term={}">
-                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
-
-<!--                     Term: {{term}} -->
-<!--                     Context: {{rexSubject}} {{rexPredicate}} {{rexObject}} : {{rexContext.getValue({s: rexSubject, p: rexPredicate, i: rexObject, c: 'value'})}} -->
-
-<!--                     <button ng-click="term.value='yay'">test</button> -->
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object ng-init="term={}">
+                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 500 }"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
                 </div>
             </div>
         </form>
@@ -984,6 +979,13 @@
         <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
     </div>
 
+
+
+
+<!--                     Term: {{term}} -->
+<!--                     Context: {{rexSubject}} {{rexPredicate}} {{rexObject}} : {{rexContext.getValue({s: rexSubject, p: rexPredicate, i: rexObject, c: 'value'})}} -->
+
+<!--                     <button ng-click="term.value='yay'">test</button> -->
 
 <div ng-init="point={}">
 
