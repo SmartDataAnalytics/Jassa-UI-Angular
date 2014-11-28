@@ -968,7 +968,7 @@
         <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
             <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
                 {{property}}:
-                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object ng-init="term={}">
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object="0" ng-init="term={}">
                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 500 }"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
                 </div>
             </div>
