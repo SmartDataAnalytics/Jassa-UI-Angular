@@ -25,9 +25,9 @@ module.exports = function(grunt) {
     filenamecustom: '<%= filename %>-custom',
 
     meta: {
-      modules: 'angular.module("ui.jassa", [<%= srcModules %>]);',
-      tplmodules: 'angular.module("ui.jassa.tpls", [<%= tplModules %>]);',
-      all: 'angular.module("ui.jassa", ["ui.jassa.tpls", <%= srcModules %>]);',
+      modules: 'angular.module("ui.jassa.edit", [<%= srcModules %>]);',
+      tplmodules: 'angular.module("ui.jassa.edit.tpls", [<%= tplModules %>]);',
+      all: 'angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", <%= srcModules %>]);',
       banner: ['/*',
                ' * <%= pkg.name %>',
                ' * <%= pkg.homepage %>\n',

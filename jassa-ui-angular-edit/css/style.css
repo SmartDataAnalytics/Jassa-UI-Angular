@@ -1,0 +1,12 @@
+button.no-border-radius {
+    border-radius: 0px !important;
+}
+
+input.margin-left-1 {
+    margin-left: -1px;
+}
+
+button.margin-left-1 {
+    margin-left: -1px;
+}
+

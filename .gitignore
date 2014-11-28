@@ -4,3 +4,6 @@ bower_components
 target
 dist
 *~
+
+delete-when-refactored
+

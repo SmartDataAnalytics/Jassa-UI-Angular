@@ -1,0 +1,13 @@
+{
+  "name": "jassa-ui-angular-core-demo",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "v1.3.5-build.3630+sha.30694c8",
+    "angular-ui-bootstrap-bower": "0.12.0",
+    "jassa-ui-angular": "0.9.0-SNAPSHOT",
+    "angular-ui-utils": "",
+    "bluebird": "2.3.5",
+    "underscore": "1.7.0",
+    "angular-ui-codemirror": "0.1.6"
+  }
+}

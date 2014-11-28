@@ -8,6 +8,7 @@
   "eqnull": true,
   "quotmark": "single",
   "trailing": true,
+  "laxbreak": true,
   "globals": {
     "angular": true
   }

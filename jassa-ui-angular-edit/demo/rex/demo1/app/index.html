@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html ng-app="jassa.ui.edit.demo.widgets">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>RDF Edit Demo</title>
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <!-- build:css(.tmp) styles/main.css -->
+
+    <!-- bower:css -->
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="../bower_components/ng-grid/ng-grid.css" />
+    <link rel="stylesheet" href="../bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="../bower_components/codemirror/lib/codemirror.css" />
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- endbuild -->
+
+    <!-- bower:js -->
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
+    <script src="../bower_components/jassa/jassa.js"></script>
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="../bower_components/ng-grid/build/ng-grid.js"></script>
+    <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="../bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="../bower_components/angular-ui-sortable/sortable.js"></script>
+    <script src="../bower_components/angular-ui-utils/ui-utils.js"></script>
+    <script src="../bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="../bower_components/bluebird/js/browser/bluebird.js"></script>
+    <script src="../bower_components/underscore/underscore.js"></script>
+    <script src="../bower_components/codemirror/lib/codemirror.js"></script>
+    <script src="../bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+    <!-- endbower -->
+
+    <!-- endbuild -->
+
+
+    <!-- End of automatic generated header - custom content below -->
+
+    <style>
+    .input-group-addon {
+        min-width:100px;
+        text-align:left;
+    }
+    </style>
+
+    <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
+
+    <script src="jassa-ui-angular-edit-tpls-0.1.0.js"></script>
+
+
+
+    <script type="text/javascript">
+    //_.mixin(_.str.exports());
+
+    var jassa = new Jassa(Promise, $.ajax);
+
+
+    var vocab = jassa.vocab;
+    var rdf = jassa.rdf;
+    var sparql = jassa.sparql;
+    var service = jassa.service;
+    var sponate = jassa.sponate;
+    var facete = jassa.facete;
+    var util = jassa.util;
+
+    var geo = jassa.geo;
+
+    var vocab = jassa.vocab;
+
+
+    var getRawState = function(rexContext) {
+        var result = {};
+
+        //if(rexContext) {
+            rexContext.resources.forEach(function(resourceScope) {
+                var subjectUri = resourceScope.rexResource;
+
+                if(!subjectUri) {
+                    return;
+                }
+
+                var p = result[subjectUri] = (result[subjectUri] || {});
+
+                resourceScope.properties.forEach(function(propertyScope) {
+                    var propertyUri = propertyScope.rexProperty;
+
+                    var o = p[propertyUri] = (p[propertyUri] || []);
+                });
+            });
+        //}
+
+        console.log('rexContext: ', rexContext, result);
+
+        return result;
+    };
+
+
+
+    var nestedMapsToTriples = function(spos) {
+        var result = [];
+
+        _.forEach(spos, function(pos, s) {
+            var x = rdf.NodeFactory.createUri(s);
+
+            _.forEach(pos, function(os, p) {
+                var y = rdf.NodeFactory.createUri(p);
+
+                os.forEach(function(o) {
+                    var z = rdf.NodeFactory.createUri(o); // TODO Make that properly
+
+                    var triple = new rdf.Triple(x, y, z);
+                    result.push(triple);
+                });
+            });
+        });
+
+        return result;
+    };
+
+
+
+    var sparqlService = service.SparqlServiceBuilder
+        //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+        .http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
+        .cache().virtFix().paginate(50000).pageExpand(100).create();
+
+    var store = new sponate.StoreFacade(sparqlService, {
+//        'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+//        'llo': 'http://www.linklion.org/ontology#'
+    });
+
+    var bestLiteralConfig = new sparql.BestLabelConfig(); //['ja', 'ko', 'en', '']);
+    var mappedConcept = sponate.MappedConceptUtils.createMappedConceptBestLabel(bestLiteralConfig);
+
+
+    var indexResource = function(map) {
+        var result = {};
+
+        var subjects = map.entries();
+        subjects.forEach(function(entry) {
+            var subjectIri = entry.key;
+            var predicates = entry.val.predicates.entries();
+
+            var s = result[subjectIri] = {};
+
+
+            predicates.forEach(function(entry) {
+                var predicateIri = entry.key;
+
+                var p = s[predicateIri] = {};
+
+                var objects = entry.val.values.entries();
+                objects.forEach(function(entry) {
+                    var node = entry.val.id;
+                    var json = jassa.rdf.NodeUtils.toTalisJsonRdf(node);
+                    p.push(json);
+                });
+            });
+        });
+    }
+
+    var toMap = function(arr) {
+        //console.log('ARGH', arr);
+        var result = new util.HashMap();
+        arr.forEach(function(item) {
+            result.put(item.id, item);
+        });
+        return result;
+    };
+
+    var toTalisJsonRdf = function(items) {
+        var result = items.map(function(item) {
+            var r = jassa.rdf.NodeUtils.toTalisJsonRdf(item.id);
+            return r;
+        });
+        return result;
+    };
+
+
+    /*
+    store.addMap({
+        name: 'spo',
+        template: [{
+            id: '?s',
+            displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel' }},
+            predicates: [[{
+                id: '?p',
+                displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?p' }},
+                values: [[{
+                    id: '?o | node',
+                    displayLabel: { $ref: { target: mappedConcept, attr: 'displayLabel', on: '?o' }}
+                }], toTalisJsonRdf],
+            }], toMap],
+        }],
+        from: '?s ?p ?o',
+    });
+    */
+
+
+
+    var changeIndex = function(triples) {
+        var spToCount = {};
+
+        var result = new jassa.util.HashMap();
+        //var result = {};
+
+
+        triples.forEach(function(triple) {
+            var sp = triple.s + ' ' + triple.p;
+            var i = spToCount[sp] = (spToCount[sp] || 0);
+            ++spToCount[sp];
+
+            var json = jassa.rdf.NodeUtils.toTalisJsonRdf(triple.o);
+
+            var attrs = Object.keys(json);
+            attrs.forEach(function(attr) {
+                var key = {
+                    s: triple.s,
+                    p: triple.p,
+                    i: i,
+                    c: attr,
+                };
+
+                var val = json[attr];
+
+                result.put(key, val);
+            });
+        })
+
+//         var assembled = assembleTalisJsonRdf(result);
+//         console.log('Assembled: ', assembled);
+
+        return result;
+    };
+
+
+    store.addMap({
+        name: 'spo',
+        template: [{
+            id: '?s',
+            data: [[{
+                id: '?rowId',
+                s: '?s',
+                p: '?p',
+                o: '?o | node'
+            }], changeIndex]
+        }],
+        from: '?s ?p ?o',
+    });
+
+    var ls = store.spo.getListService();
+
+    var lookupService = new service.LookupServiceListServiceSparql(ls);
+    //lookupService =
+
+    lookupService.lookup([rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(map) {
+       console.log('Lookup result: ', map);
+    });
+
+
+
+    /*
+    var MapRexWrapper = jassa.ext.Class.create({
+        /**
+         * nestedRdfMap must have the structure:
+         * Map<String, {predicates: Map<String, {values: []}>]}>
+         * /
+        initialize: function(nestedRdfMap) {
+            this.nestedRdfMap = nestedRdfMap;
+        },
+
+        /**
+         * Coordinate is a json object with
+         *
+         * /
+        get: function(coordinate) {
+
+        },
+
+        containsKey: function()
+    });
+    */
+
+    var MapUnion = jassa.ext.Class.create({
+        initialize: function(subMaps) {
+            this.subMaps = subMaps;
+        },
+
+        get: function(key) {
+            var map = _(this.subMaps).find(function(subMap) {
+                var r = subMap.containsKey(key);
+                return r;
+            });
+
+            var result = map ? map.get(key) : null;
+            return result;
+        },
+
+        containsKey: function(key) {
+            var result = this.subMaps.some(function(subMap) {
+                var r = subMap.containsKey(key);
+                return r;
+            });
+
+            return result;
+        },
+
+        entries: function() {
+            var keys = new jassa.util.HashSet();
+
+            var result = [];
+            this.subMaps.forEach(function(subMap) {
+                var subEntries = subMap.entries();
+
+                subEntries.forEach(function(subEntry) {
+                    var k = subEntry.key;
+                    var alreadySeen = keys.contains(k);
+                    if(!alreadySeen) {
+                        keys.add(k);
+                        result.push(subEntry);
+                    }
+                });
+            });
+
+            return result;
+        }
+    });
+
+
+    /*
+    'jassa.ui.edit.demo.widgets', [
+      'jassa.ui.edit.demo.widgets.sparqlupdate',
+      'jassa.ui.edit.demo.widgets.meta',
+      'jassa.ui.edit.demo.widgets.plain',
+      'jassa.ui.edit.demo.widgets.typed',
+      'jassa.ui.edit.demo.widgets.uri',
+      'jassa.ui.edit.demo.widgets.text',
+      'jassa.ui.edit.demo.widgets.datetime',
+      'ui.bootstrap',
+      'ui.jassa']);
+   */
+
+
+// For simplicity, we maybe should leave out the graph, and assume that this is part of the context instead
+//     .directive('rexGraph', function() {
+//         return {
+//             priority: 10,
+//             restrict: 'A',
+//             scope: true,
+//             controller: ['$scope', function($scope) {
+//                 var properties = [];
+
+//                 this.getValue = function() {
+//                     return $scope.rexGraph;
+//                 };
+
+//                 this.addProperty = function(scope) {
+//                     console.log('Added property to resource ', this.getValue(), scope);
+//                     properties.push(scope);
+//                 };
+
+//             }],
+//             link: function(scope, ele, attrs, ctrls) {
+//                 scope.rexResource = scope.$parent.$eval(attrs.rexResource);
+
+//                 console.log('<resource>', scope.rexResource);
+//             }
+//         };
+//     })
+
+    var app = angular.module(
+        'jassa.ui.edit.demo.widgets',
+        ['ngSanitize', 'ui.bootstrap', 'ui.jassa.edit', 'ui.codemirror'],
+        ['$rootScopeProvider', function($rootScopeProvider) {
+            $rootScopeProvider.digestTtl(10);
+        }]
+    )
+
+    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
+
+        $scope.scrollTo = function(target) {
+            //console.log('Scrolling to: ', target);
+            $timeout(function() {
+                $location.hash(target);
+                $anchorScroll();
+            }, 50);
+        };
+
+        $scope.formData = {
+            subjects: [{
+                url: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+                values: [{
+                    type: 'iri',
+                    lexicalValue: 'foo',
+                    datatype: 'xsd:string',
+                    lang: 'en'
+                }]
+            }, {
+                url: 'http://www.w3.org/2000/01/rdf-schema#label',
+                values: [{
+                    type: 'iri',
+                    lexicalValue: 'foo',
+                    datatype: 'xsd:string',
+                    lang: 'en'
+                }]
+            }]
+        };
+
+
+        $scope.editContext = {};
+
+
+//         $scope.getRawState = getRawState;
+//         $scope.$watch('getRawState(editContext)', function(editContext) {
+//            //console.log('Changed context: ', editContext);
+//            console.log('Triples: ', nestedMapsToTriples(editContext));
+//         }, true);
+
+        $scope.items = ['http://dbpedia.org/resource/Leipzig', 'http://dbpedia.org/resource/London'];
+
+        $scope.propertyUri = 'http://www.w3.org/2000/01/rdf-schema#label';
+
+        var PointUtils = {
+            lonlatToWkt: function(lonlat) {
+                var result = this.pointToWkt(lonlat.lon, lonlat.lat);
+                return result;
+            },
+
+            xyToWkt: function(xy) {
+                var result = this.pointToWkt(xy.x, xy.y);
+                return result;
+            },
+
+            pointToWkt: function(x, y) {
+                var result = 'POINT (' + x + ' ' + y + ')';
+                return result;
+            },
+
+            wktPointRegex: /\s*POINT\s*\(([^\s]+)\s*([^)]+)\)\s*/,
+
+            wktToXy: function(wktStr) {
+                var match = this.wktPointRegex.exec(wktStr);
+                var xStr = match[1];
+                var yStr = match[2];
+
+                var result = {
+                    x: parseFloat(xStr),
+                    y: parseFloat(yStr)
+                };
+
+                return result;
+            }
+        };
+
+        //alert(JSON.stringify(PointUtils.wktToXy('POINT(123 456)')));
+
+        var wgsTripleFnFactory = function(subject, latPredicate, longPredicate, datatypeStr) {
+            latPredicate = latPredicate || vocab.wgs84.lat;
+            lonPredicate = longPredicate || vocab.wgs84.lon;
+            datatypeStr = datatypeStr || vocab.xsd.xstring.getUri();
+
+            var result = function(xy) {
+                var x = rdf.NodeFactory.createTypedLiteralFromString('' + xy.x, datatypeStr);
+                var y = rdf.NodeFactory.createTypedLiteralFromString('' + xy.y, datatypeStr);
+
+                var r = [
+                    new rdf.Triple(subject, latPredicate, x),
+                    new rdf.Triple(subject, longPredicate, y)
+                ]
+
+                return r;
+            };
+
+            return result;
+        };
+
+        // Note: referencing values in a json-rdf representation is done with object-refs
+        // The question is: how does an objectref referencen the object component of a triple?
+                // Option A: By index - drawback is that this is not necessarily stable under sort
+                // Option B: By a generated id - we could just alloc one whenever we encounter an object
+
+        // Issue: How to create objects?
+                // I think datatype and lang (possibly term type) can be seen as modifiers for a given value
+                // So rex-value="expr" could be the main attribute for generating rdf-terms
+                // if no rex-type, rex-lang or rex-datatype are present, than a default of xsd:string with no language tag is assumed
+
+                // A general question is, whether arbitrary rdf terms should be allowed in predicate and subject posititons
+                // Since in an edit scenario there is not much point in blank-node-resources, i suppose it is safe to omit this features
+
+        // Issue: Are conflicts possible with the rex directives - such as having the same object with distinct values
+
+
+
+        wgsTripleFn = wgsTripleFnFactory(rdf.NodeFactory.createUri('http://foobar'));
+
+        //alert(JSON.stringify(wgsTripleFn({x: 1, y: 2})));
+
+
+        var wktToWgs = {
+            write: function(wktStr) {
+                // Check if the wgs
+            },
+            read: function() {
+
+            }
+        }
+
+        $scope.wgsModel = function(newVal) {
+
+            //return angular.isDefined(newName) ? (_name = newName) : _name;
+
+            return 'temp';
+        };
+
+
+        var RexChangeManager = jassa.ext.Class.create({
+            initialize: function() {
+                this.map = new jassa.util.HashMap();
+            },
+
+            addChange: function(key, value) {
+
+            }
+
+        });
+
+
+        var RexContext = jassa.ext.Class.create({
+            initialize: function(lookupService) {
+                this.lookupService = lookupService;
+
+                // the status of the resources as retrieved from the lookup service
+                this.cache = new util.HashMap();
+
+                this.override = new util.HashMap();
+
+                this.json = {};
+                //this.combined = new MapUnion([this.override, this.cache]);
+                // values
+                // this.overrides = {};
+
+            },
+
+            prefetch: function(subject) {
+                if(this.cache.containsKey(subject)) {
+                    // TODO Do something
+                }
+
+                // TODO Set a loading flag on the resource
+
+                var self = this;
+                var result = this.lookupService.lookup([subject]).then(function(map) {
+                    console.log('Successfully prefetched: ', map);
+                    var entries = map.entries();
+                    entries.forEach(function(entry) {
+                        var dataMap = entry.val.data;
+                        self.cache.putMap(dataMap);
+
+                        var tmp = assembleTalisJsonRdf(dataMap);
+                        _(self.json).extend(tmp);
+
+                    });
+                });
+
+                return result;
+            },
+
+            combinedMap: function() {
+                var subMaps = [this.override, this.cache].filter(function(item) {
+                    return item != null;
+                });
+
+                var result = new MapUnion(subMaps);
+
+                return result;
+            },
+
+            getValue: function(coordinate) {
+                //var subject = rdf.NodeFactory.createUri(coordinate.s);
+
+                //var c = this.cache.get(subject);
+                //var o = this.override.get(subject);
+
+                //console.log('Cache: ', this.cache);
+
+                var map = this.combinedMap();
+
+                var result = map.get(coordinate);
+
+                //console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
+
+                return result;
+            },
+
+            asTalisJsonRdf: function() {
+                var map = this.combinedMap();
+
+                var result = assembleTalisJsonRdf(map);
+                return result;
+            }
+
+//             setValue: function(coordiate) {
+
+//             }
+
+            /*
+            getObjects: function(subject, predicate) {
+
+                var p = this.cache.get(subject);
+                //var x = (p && p.predicates && p.predicates.get(predicate)) || {};
+                var x;
+                if(p && p.predicates) {
+                    x = p.predicates.get(predicate);
+                } else {
+                    x = {};
+                }
+
+                //var x = (p && p.predicates ? p.predicates.get(predicate) : null) || {};
+                var o = (x && x.values) || [];
+
+                console.log('Retrieved ', o, ' for ', subject, ' ', predicate, ' from ', this.cache);
+
+                return o;
+            },
+
+            allocateObjects: function(subject, predicate) {
+                var p = this.cache.get(subject);
+                if(!p) {
+                    p = new jassa.util.HashMap();
+                    this.cache.put(subject, p);
+                }
+
+                var o = p.get(predicate);
+                if(!o) {
+                    o = [];
+                    p.put(predicate, o);
+                }
+
+                return o;
+            },
+
+            / *
+            fetchProperties: function(subjectNode) {
+                var r = this.lookupService.lookup([subjectNode]).then(function(map) {
+                    var s = map.get(subjectNode);
+
+                });
+                return r;
+            }
+            */
+        });
+
+
+        $scope.editorOptions = {
+            ttl: {
+                lineWrapping : true,
+                lineNumbers: true,
+                tabMode: 'indent',
+                matchBrackets: true,
+                mode: 'text/turtle',
+                readOnly: true
+            }
+        };
+
+
+        $scope.createRexContext = function() {
+            return new RexContext(lookupService);
+        }
+
+
+        // Date picker stuff
+        $scope.dp = {};
+
+//         $scope.today = function() {
+//             $scope.dt = new Date();
+//           };
+//           $scope.today();
+
+          $scope.clear = function () {
+            $scope.dt = null;
+          };
+
+          // Disable weekend selection
+          $scope.disabled = function(date, mode) {
+            return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+          };
+
+          $scope.toggleMin = function() {
+            $scope.minDate = $scope.minDate ? null : new Date();
+          };
+          $scope.toggleMin();
+
+          $scope.dp.opened = false;
+          $scope.open = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+
+            $scope.dp.opened = true;
+          };
+
+          $scope.dateOptions = {
+            formatYear: 'yyyy',
+            startingDay: 1
+          };
+
+
+
+        $scope.dateToString = function(x) {
+            var r = !x ? null : x.toUTCString();
+            //console.log('[Sync] dateToString ', x, ' -> ', r);
+            return r;
+        };
+
+        $scope.parseDate = function(x) {
+            var r = !x ? null : new Date(x);
+            //console.log('[Sync] parseDate ', x, ' -> ', r);
+            return r;
+        };
+
+        //$scope.formContext = new RexContext(lookupService);
+        //$scope.subject = 'http://dbpedia.org/London';
+        $scope.enabled = {
+                'ex01': false,
+                'ex02': false,
+                'ex03': false,
+                'ex04': true,
+                'ex05': true
+            };
+
+        var test = new jassa.util.HashMap();
+
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+        test.put({'foo': 'bar'}, {'foo': 'bar'});
+
+        console.log('Map status: ', test, test.entries(), test.entries().length);
+
+        test.remove({'foo': 'bar'});
+        console.log('Map status: ', test, test.entries(), test.entries().length);
+
+    }]);
+
+
+    </script>
+</head>
+
+
+<body ng-controller="AppCtrl">
+<div class="container">
+<div class="row">
+<div class="col-md-8 col-md-offset-2">
+
+    <div ng-if="enabled['ex01']" class="alert alert-info" role="alert">
+        <h3>Initializing a model from rexSubject</h3>
+        <div rex-context="ex01.context" rex-subject="'http://dbpedia.org/resource/Leipzig'" ng-init="ex01={}; ex01.context=createRexContext()">
+            <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input type="text" class="form-control" ng-model="placeUri" ng-init="placeUri=rexSubject">
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-if="enabled['ex02']" class="alert alert-info" role="alert" ng-init="ex02={}; ex02.context=createRexContext(); ex02.subject='http://dbpedia.org/resource/London'">
+        <h3>Two-way binding of subject and model</h3>
+        <div rex-context="ex02.context" rex-subject="ex02.subject">
+            <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input type="text" class="form-control" ng-model="ex02.subject">
+            </div>
+        </div>
+    </div>
+
+    <div ng-if="enabled['ex03']" class="alert alert-info" role="alert" ng-init="ex03={}; ex03.context=createRexContext(); ex03.predicate='http://www.w3.org/2000/01/rdf-schema#label'; ex03.label='<s> <p> <o> .'">
+        <h3>Creating an actual triple</h3>
+        <form role="form" rex-context="ex03.context" rex-subject="'http://dbpedia.org/resource/Vienna'">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Label: </span>
+                    <input type="text" class="form-control" ng-model="ex03.label" rex-predicate="ex03.predicate" rex-object-literal="ex03.label">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Predicate IRI: </span>
+                    <input type="text" class="form-control" ng-model="ex03.predicate">
+                </div>
+            </div>
+        </form>
+
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex03.context.talisJson"></div>
+    </div>
+
+
+
+    <div ng-if="enabled['ex04']" class="alert alert-info" role="alert" ng-init="ex04={}; ex04.context=createRexContext(); ex04.baseIri='http://example.org/resource/'">
+        <h3>Person data</h3>
+
+        <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://Person'">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">URI: </span>
+                    <input name="uri" type="text" class="form-control"
+                        ng-model="ex04.subject"
+                        sync-source="{{ex04.baseIri + ex04.firstName + ex04.lastName}}"
+                        sync-source-interpolate
+                        sync-target="ex04.subject"
+                        sync-to-target
+                        sync-to-target-cond="personForm.uri.$pristine">
+                    <span ng-if="!personForm.uri.$pristine" class="input-group-btn">
+                        <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">First Name: </span>
+                    <input name="firstName" type="text" class="form-control" ng-model="ex04.firstName" rex-predicate="'http://xmlns.com/foaf/0.1/firstName'" rex-object-literal="ex04.firstName">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">Last Name: </span>
+                    <input type="text" class="form-control" ng-model="ex04.lastName" rex-predicate="'http://xmlns.com/foaf/0.1/lastName'" rex-object-literal>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">E-Mail: </span>
+                    <input type="text" class="form-control" ng-model="email" rex-predicate="'http://xmlns.com/foaf/0.1/mbox'" rex-object-literal="email">
+                </div>
+            </div>
+
+            <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
+                <div class="input-group">
+                    <span class="input-group-addon">Gender: </span>
+                    <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group"
+                    rex-predicate="'http://dbpedia.org/ontology/birthDate'"
+                    rex-object-literal="birthDateStr"
+                    rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
+                >
+                    <span class="input-group-addon">Birthdate: </span>
+                    <input
+                        type="text" class="form-control"
+                        ng-model="birthDate"
+
+                        sync-source="birthDate"
+                        sync-target="birthDateStr"
+                        sync-to-target="dateToString"
+                        sync-to-source="parseDate"
+
+                        datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
+                        min-date="'1920-01-01'" max-date="'2015-06-22'"
+                        datepicker-options="dateOptions" close-text="Close"
+                    >
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </div>
+            </div>
+        </form>
+
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex04.context.talisJson"></div>
+    </div>
+
+<!-- I suppose rexContext should be separated into additional directives:
+    rex-output="talisJsonObject"
+    rex-input="baseTalisJsonData"
+    rex-lookup="lookupService" // automatically set data in rex-input
+    rex-base="preBaseTalisJsonData" // do we need a layer of data befor the input? my gut feeling is no
+    rex-context
+
+-->
+
+
+
+    <div ng-if="enabled['ex05']" class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'">
+        <h3>Generic Resource Editor</h3>
+
+        <form role="form">
+            <div class="form-group" >
+                <div class="input-group">
+                    <span class="input-group-addon">IRI: </span>
+                    <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-model-options="{ debounce: 300 }" ng-change="scrollTo('ex05top');">
+                </div>
+            </div>
+        </form>
+
+        <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
+            <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
+                {{property}}:
+                <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object="0" ng-init="term={}">
+                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 500 }"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+                </div>
+            </div>
+        </form>
+
+        <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
+        a full round trip of the data is demonstrated.</i>
+        <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
+    </div>
+
+
+
+
+<!--                     Term: {{term}} -->
+<!--                     Context: {{rexSubject}} {{rexPredicate}} {{rexObject}} : {{rexContext.getValue({s: rexSubject, p: rexPredicate, i: rexObject, c: 'value'})}} -->
+
+<!--                     <button ng-click="term.value='yay'">test</button> -->
+
+<div ng-init="point={}">
+
+<!--                 <div ng-init="term={}"> -->
+<!--                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" rex-object rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input> -->
+<!--                 </div> -->
+
+<!--
+<geometry-edit ng-model="wktStr" sync-target="point" sync-to-target="convertWktToPoint" sync-to-target-cond="isPoint(wktStr)" sync-to-source="convertPointToWkt"></geometry-edit>
+<input ng-if="isPoint(wktStr)" type="hidden" rex-predicte="geo:lat" rex-literal="point.x" rex-datatype="wkt:float" />
+<input ng-if="isPoint(wktStr)" type="hidden" rex-predicte="geo:long" rex-literal="point.y" rex-datatype="wkt:float" />
+ -->
+
+
+</div>
+
+<!--                     <div class="input-group" ng-init="term={}"> -->
+<!--                         <span class="input-group-addon">{{$index}} </span> -->
+                        <!-- Note:  The term models are initialized by fetching values from the background data base on the scope's coordinate-->
+<!--                         <textarea style="resize:vertical;" class="form-control" ng-model="term.value" rex-object rex-value="term.value" rex-termtype="term.tt" rex-datatype="term.dt" rex-lang="term.lang"></textarea> -->
+<!--                         <span class="input-group-addon">{{term.dt}}, {{term.lang}}</span> -->
+
+<!--                     </div> -->
+<!--                     <div ng-init="t={term: {}}"> -->
+<!--                     </div> -->
+
+
+
+<!--     <div rex-context="formContext" rex-subject="'http://dbpedia.org/Leipzig'"> -->
+<!--         <input type="text" ng-model="placeUri" ng-init="placeUri=rexSubject"> -->
+<!--         <input type="text" value="{{rexSubject}}"> -->
+
+<!--         <div ng-repeat="property in formContext.fetchProperties(someResource)" rex-property="property"> -->
+<!--             <div ng-repeat=""></div> -->
+<!--         </div> -->
+<!--     </div> -->
+
+
+<!--     <div rex-context="editContext"> -->
+<!--         <div ng-repeat="item in items" rex-resource="item"> -->
+<!--             <div rex-property="propertyUri"> -->
+<!--                 <span rex-value="'yay'" rex-object>test</span> -->
+
+
+
+<!--                 <input ng-model="m" type="text" rex-datatype="'http://www.w3.org/2001/XMLSchema#string'" rex-lang="'en'" rex-object> -->
+
+<!--                 Note rex-value="m" is not necessary, as rex-object will by default interpret any present ng-model as the lex-value -->
+
+<!--                 <button rex-term="'yay'" class="btn btn-primary" ng-click="items = items.splice($index, 1)"><span class="glyphicon glyphicon-remove-circle"></span></button> -->
+<!--             </div> -->
+
+<!--             <div rex-graph=""> -->
+<!--                 <input type="text" ng-model="wgsModel" ng-model-options="{ getterSetter: true }" rex-object> -->
+<!--             </div> -->
+
+<!--         </div> -->
+<!--     </div> -->
+
+
+<!--     <rdf-form -->
+<!--         formData="formData" -->
+<!--     ></rdf-form> -->
+
+</div>
+</div>
+</div>
+</body>
+
+</html>
