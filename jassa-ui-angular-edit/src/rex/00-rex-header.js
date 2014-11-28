@@ -1,3 +1,129 @@
+
+var MapUnion = jassa.ext.Class.create({
+    initialize: function(subMaps) {
+        this.subMaps = subMaps;
+    },
+
+    get: function(key) {
+        var map = _(this.subMaps).find(function(subMap) {
+            var r = subMap.containsKey(key);
+            return r;
+        });
+
+        var result = map ? map.get(key) : null;
+        return result;
+    },
+
+    containsKey: function(key) {
+        var result = this.subMaps.some(function(subMap) {
+            var r = subMap.containsKey(key);
+            return r;
+        });
+
+        return result;
+    },
+
+    entries: function() {
+        var keys = new jassa.util.HashSet();
+
+        var result = [];
+        this.subMaps.forEach(function(subMap) {
+            var subEntries = subMap.entries();
+
+            subEntries.forEach(function(subEntry) {
+                var k = subEntry.key;
+                var alreadySeen = keys.contains(k);
+                if(!alreadySeen) {
+                    keys.add(k);
+                    result.push(subEntry);
+                }
+            });
+        });
+
+        return result;
+    }
+});
+
+
+
+var RexContext = jassa.ext.Class.create({
+    initialize: function(lookupService) {
+        this.lookupService = lookupService;
+
+        // the status of the resources as retrieved from the lookup service
+        this.cache = new jassa.util.HashMap();
+
+        this.override = new jassa.util.HashMap();
+
+        this.json = {};
+        //this.combined = new MapUnion([this.override, this.cache]);
+        // values
+        // this.overrides = {};
+
+    },
+
+    prefetch: function(subject) {
+        if(this.cache.containsKey(subject)) {
+            // TODO Do something
+        }
+
+        // TODO Set a loading flag on the resource
+
+        var self = this;
+        var result = this.lookupService.lookup([subject]).then(function(map) {
+            console.log('Successfully prefetched: ', map);
+            var entries = map.entries();
+            entries.forEach(function(entry) {
+                var dataMap = entry.val.data;
+                self.cache.putMap(dataMap);
+
+                var tmp = assembleTalisJsonRdf(dataMap);
+                _(self.json).extend(tmp);
+
+            });
+        });
+
+        return result;
+    },
+
+    combinedMap: function() {
+        var subMaps = [this.override, this.cache].filter(function(item) {
+            return item != null;
+        });
+
+        var result = new MapUnion(subMaps);
+
+        return result;
+    },
+
+    getValue: function(coordinate) {
+        //var subject = rdf.NodeFactory.createUri(coordinate.s);
+
+        //var c = this.cache.get(subject);
+        //var o = this.override.get(subject);
+
+        //console.log('Cache: ', this.cache);
+
+        var map = this.combinedMap();
+
+        var result = map.get(coordinate);
+
+        //console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
+
+        return result;
+    },
+
+    asTalisJsonRdf: function() {
+        var map = this.combinedMap();
+
+        var result = assembleTalisJsonRdf(map);
+        return result;
+    }
+});
+
+
+
+
 /*
 var getModelExpr(attrs, baseAttrName) {
     var result = attrs[baseAttrName];
@@ -446,6 +572,12 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
 
     return result;
 };
+
+
+
+
+
+
 
 
 // TODO Create a util for id allocation

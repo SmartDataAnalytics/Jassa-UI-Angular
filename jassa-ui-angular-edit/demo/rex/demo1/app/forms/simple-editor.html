@@ -1,0 +1,25 @@
+<div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'">
+    <h3>Generic Resource Editor</h3>
+
+    <form role="form">
+        <div class="form-group" >
+            <div class="input-group">
+                <span class="input-group-addon">IRI: </span>
+                <input id="ex05top" type="text" class="form-control" ng-model="ex05.subject" ng-model-options="{ debounce: 300 }" ng-change="scrollTo('ex05top');">
+            </div>
+        </div>
+    </form>
+
+    <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
+        <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
+            {{property}}:
+            <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object ng-init="term={}">
+                <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 500 }"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+            </div>
+        </div>
+    </form>
+
+    <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
+    a full round trip of the data is demonstrated.</i>
+    <div ui-codemirror="editorOptions.ttl" ng-model="ex05.context.talisJson"></div>
+</div>
