@@ -1,5 +1,15 @@
-<div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'">
+<div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.context=createRexContext(); ex05.subject='http://dbpedia.org/resource/Leipzig'" rex-context="ex05.context" >
     <h3>Generic Resource Editor</h3>
+
+    <b>Summary of Types</b>
+    <i>Change them in the form, and they will change here as well</i>:
+    <!-- rex-predicate will be ng-repeated, using an index on rex-object will select a different object for the predicate though -->
+    <div rex-subject="ex05.subject" ng-init="rdfType='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'">
+        <div ng-repeat="(object, objectData) in rexContext.json[rexSubject][rdfType]" rex-predicate="rdfType">
+            <span rex-object="$index" rex-value="val">{{val}}</span>
+        </div>
+    </div>
+
 
     <form role="form">
         <div class="form-group" >
@@ -10,7 +20,7 @@
         </div>
     </form>
 
-    <form role="form" rex-context="ex05.context" rex-subject="ex05.subject">
+    <form role="form" rex-subject="ex05.subject">
         <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
             {{property}}:
             <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object ng-init="term={}">

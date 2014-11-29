@@ -84,13 +84,18 @@
         $scope.createRexContext = function() {
             return new RexContext(lookupService);
         };
+
         // End of REX Setup
 
         // A simple switch to enable / disable demo includes
         $scope.enabled = {
+            'ex06': true,
             'ex04': true,
             'ex05': true
         };
+
+        // Some Utils for geo stuff
+        $scope.PointUtils = PointUtils;
 
 
         // Helper for date parsing / serialization
@@ -169,6 +174,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
+            <div ng-if="enabled['ex06']" ng-include="'forms/geo.html'"></div>
 
             <div ng-if="enabled['ex04']" ng-include="'forms/person-form.html'"></div>
 
