@@ -1,6 +1,6 @@
 angular.module('ui.jassa.rex')
 
-.directive('rexObjectLiteral', ['$parse', '$compile', function($parse, $compile) {
+.directive('rexLiteral', ['$parse', '$compile', function($parse, $compile) {
     return {
         priority: basePriority + 1000,
         restrict: 'A',
@@ -10,7 +10,7 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    var modelExprStr = ele.attr('rex-object-literal');
+                    var modelExprStr = ele.attr('rex-literal');
 
                     if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
                         var name = getModelAttribute(attrs);
@@ -21,7 +21,7 @@ angular.module('ui.jassa.rex')
                         throw new Error('No model provided and found');
                     }
 
-                    ele.removeAttr('rex-object-literal');
+                    ele.removeAttr('rex-literal');
 
                     // TODO: Do not overwrite rex-object if already present
 

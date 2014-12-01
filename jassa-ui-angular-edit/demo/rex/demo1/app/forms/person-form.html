@@ -8,7 +8,7 @@
 
         <!-- TODO: Resetting to the default value on an existing resource does not restore the original URL / need to think of something -->
 
-            <form name="personForm" role="form" rex-context="ex04.context" rex-subject="ex04.subject" rex-typeof="'http://xmlns.com/foaf/0.1/Person'">
+            <form name="personForm" role="form" rex-context="ex04.context" rex-prefix="'dbo: http://dbpedia.org/ontology/'" rex-subject="ex04.subject" rex-typeof="'foaf:Person'">
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">URI: </span>
@@ -28,36 +28,36 @@
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Given Name: </span>
-                        <input name="givenName" type="text" class="form-control" ng-model="ex04.givenName" rex-predicate="'http://xmlns.com/foaf/0.1/givenName'" rex-object-literal="ex04.givenName">
+                        <input name="givenName" type="text" class="form-control" ng-model="ex04.givenName" rex-predicate="'foaf:givenName'" rex-literal="ex04.givenName">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Surname: </span>
-                        <input type="text" class="form-control" ng-model="ex04.surname" rex-predicate="'http://xmlns.com/foaf/0.1/surname'" rex-object-literal>
+                        <input type="text" class="form-control" ng-model="ex04.surname" rex-predicate="'foaf:surname'" rex-literal>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">E-Mail: </span>
-                        <input type="text" class="form-control" ng-model="email" rex-predicate="'http://xmlns.com/foaf/0.1/mbox'" rex-object-literal="email">
+                        <input type="text" class="form-control" ng-model="email" rex-predicate="'foaf:mbox'" rex-literal>
                     </div>
                 </div>
 
                 <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
                     <div class="input-group">
                         <span class="input-group-addon">Gender: </span>
-                        <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'http://xmlns.com/foaf/0.1/gender'" rex-object-iri="gender.uri"></select>
+                        <select type="text" class="form-control" ng-model="gender" ng-options="gender.name for gender in genders" rex-predicate="'foaf:gender'" rex-iri="gender.uri"></select>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group"
-                        rex-predicate="'http://dbpedia.org/ontology/birthDate'"
-                        rex-object-literal="birthDateStr"
-                        rex-datatype="'http://www.w3.org/2001/XMLSchema#date'"
+                        rex-predicate="'dbo:birthDate'"
+                        rex-literal="birthDateStr"
+                        rex-datatype="'xsd:date'"
                     >
                         <span class="input-group-addon">Birthdate: </span>
                         <input

@@ -1,4 +1,4 @@
-<div class="alert alert-info" role="alert" ng-init="ex02={}; ex02.properties=[]; ex02.context=createRexContext(); ex02.subject='http://example.org/resource/MyResource'" rex-context="ex02.context" >
+<div rex-prefix="" class="alert alert-info" role="alert" ng-init="ex02={}; ex02.properties=[]; ex02.context=createRexContext(); ex02.subject='http://example.org/resource/MyResource'" rex-context="ex02.context" >
     <h3>Custom Form</h3>
 
     <form role="form" rex-subject="ex02.subject">
@@ -13,7 +13,7 @@
             </div>
 
             <div class="form-group" ng-repeat="object in property.objects" rex-object ng-init="term={}">
-                <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 100 }"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+                <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="{ debounce: 100 }" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
                 <div class="input-group">
                     <button class="btn btn-default" ng-click="property.objects.splice($index, 1)">Remove</button>
                 </div>

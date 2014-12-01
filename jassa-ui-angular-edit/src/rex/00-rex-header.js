@@ -179,6 +179,7 @@ function capitalize(s)
     return s && s[0].toUpperCase() + s.slice(1);
 }
 
+// TODO We need to expand prefixed values if the termtype is IRI
 
 var createCompileComponent = function($rexComponent$, $component$, $parse) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
@@ -533,11 +534,14 @@ var talisJsonRdfToTurtle = function(data) {
     return result;
 };
 
+var __emptyPrefixMapping = new jassa.rdf.PrefixMappingImpl();
 
 var createCoordinate = function(scope, component) {
+    var pm = scope.rexPrefixMapping || __emptyPrefixMapping;
+
     return {
-        s: scope.rexSubject,
-        p: scope.rexPredicate,
+        s: pm.expandPrefix(scope.rexSubject),
+        p: pm.expandPrefix(scope.rexPredicate),
         i: scope.rexObject,
         c: component
     };
@@ -553,22 +557,23 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
     var attr = attrs[attrName];
     var getterFn = $parse(attr);
 
+    var updateScopeVal = function(val) {
+        var v = transformFn ? transformFn(val) : val;
+
+        $scope[attrName] = v;
+    };
+
     $scope.$watch(function() {
         var r = getterFn($scope);
         return r;
     }, function(newVal, oldVal) {
         //console.log('Syncing: ', attrName, ' to ', newVal, ' in ', $scope);
-
-        if(transformFn) {
-            newVal = transformFn(newVal);
-        }
-
-        $scope[attrName] = newVal;
+        updateScopeVal(newVal);
     }, deep);
 
     var result = getterFn($scope);
     // Also init the value immediately
-    $scope[attrName] = result;
+    updateScopeVal(result);
 
     return result;
 };

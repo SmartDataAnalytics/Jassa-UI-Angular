@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-11-28
+ * Version: 0.1.0 - 2014-12-02
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -36,7 +36,7 @@ angular.module('ui.jassa.rdf-term-input', [])
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
-
+            $scope.ngModelOptions = $scope.ngModelOptions || {};
 
 
             $scope.vocab = vocab;
@@ -780,11 +780,14 @@ var talisJsonRdfToTurtle = function(data) {
     return result;
 };
 
+var __emptyPrefixMapping = new jassa.rdf.PrefixMappingImpl();
 
 var createCoordinate = function(scope, component) {
+    var pm = scope.rexPrefixMapping || __emptyPrefixMapping;
+
     return {
-        s: scope.rexSubject,
-        p: scope.rexPredicate,
+        s: pm.expandPrefix(scope.rexSubject),
+        p: pm.expandPrefix(scope.rexPredicate),
         i: scope.rexObject,
         c: component
     };
@@ -800,22 +803,23 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
     var attr = attrs[attrName];
     var getterFn = $parse(attr);
 
+    var updateScopeVal = function(val) {
+        var v = transformFn ? transformFn(val) : val;
+
+        $scope[attrName] = v;
+    };
+
     $scope.$watch(function() {
         var r = getterFn($scope);
         return r;
     }, function(newVal, oldVal) {
         //console.log('Syncing: ', attrName, ' to ', newVal, ' in ', $scope);
-
-        if(transformFn) {
-            newVal = transformFn(newVal);
-        }
-
-        $scope[attrName] = newVal;
+        updateScopeVal(newVal);
     }, deep);
 
     var result = getterFn($scope);
     // Also init the value immediately
-    $scope[attrName] = result;
+    updateScopeVal(result);
 
     return result;
 };
@@ -1174,31 +1178,14 @@ angular.module('ui.jassa.rex')
 
 angular.module('ui.jassa.rex')
 
-.directive('rexLang', ['$parse', function($parse) {
-    return {
-        priority: 7,
-        restrict: 'A',
-        scope: true,
-        require: ['^rexContext', '^rexObject'],
-        controller: function() {},
-        compile: function(scope, ele, attrs, ctrls) {
-            return createCompileComponent('rexLang', 'lang', $parse);
-        }
-    };
-}])
-
-;
-
-angular.module('ui.jassa.rex')
-
 /**
  * Convenience directive
  *
  * rexObjectIri="model"
  *
- * implies rex-object rex-object-termtype="iri" rex-object-value="model"
+ * implies rex-object rex-termtype="iri" rex-value="model"
  */
-.directive('rexObjectIri', ['$parse', '$compile', function($parse, $compile) {
+.directive('rexIri', ['$parse', '$compile', function($parse, $compile) {
     return {
         priority: basePriority + 1000,
         restrict: 'A',
@@ -1208,9 +1195,19 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    var modelExprStr = ele.attr('rex-object-iri');
+                    var modelExprStr = ele.attr('rex-iri');
 
-                    ele.removeAttr('rex-object-iri');
+                    if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
+                        var name = getModelAttribute(attrs);
+                        modelExprStr = attrs[name];
+                    }
+
+                    if(!modelExprStr) {
+                        throw new Error('No model provided and found');
+                    }
+
+
+                    ele.removeAttr('rex-iri');
 
                     ele.attr('rex-object', ''); //'objectIriObject');
                     ele.attr('rex-termtype', '"uri"');
@@ -1230,7 +1227,24 @@ angular.module('ui.jassa.rex')
 
 angular.module('ui.jassa.rex')
 
-.directive('rexObjectLiteral', ['$parse', '$compile', function($parse, $compile) {
+.directive('rexLang', ['$parse', function($parse) {
+    return {
+        priority: 7,
+        restrict: 'A',
+        scope: true,
+        require: ['^rexContext', '^rexObject'],
+        controller: function() {},
+        compile: function(scope, ele, attrs, ctrls) {
+            return createCompileComponent('rexLang', 'lang', $parse);
+        }
+    };
+}])
+
+;
+
+angular.module('ui.jassa.rex')
+
+.directive('rexLiteral', ['$parse', '$compile', function($parse, $compile) {
     return {
         priority: basePriority + 1000,
         restrict: 'A',
@@ -1240,7 +1254,7 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    var modelExprStr = ele.attr('rex-object-literal');
+                    var modelExprStr = ele.attr('rex-literal');
 
                     if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
                         var name = getModelAttribute(attrs);
@@ -1251,7 +1265,7 @@ angular.module('ui.jassa.rex')
                         throw new Error('No model provided and found');
                     }
 
-                    ele.removeAttr('rex-object-literal');
+                    ele.removeAttr('rex-literal');
 
                     // TODO: Do not overwrite rex-object if already present
 
@@ -1323,7 +1337,7 @@ angular.module('ui.jassa.rex')
 //            ele.removeAttr('rex-typeof');
 //
 //            ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
-//            ele.attr('rex-object-iri', modelExprStr);
+//            ele.attr('rex-iri', modelExprStr);
 
 
             return {
@@ -1381,19 +1395,62 @@ angular.module('ui.jassa.rex')
 angular.module('ui.jassa.rex')
 
 /**
- * TODO Not implemented yet
+ * Prefixes
  */
 .directive('rexPrefix', ['$parse', function($parse) {
     return {
         priority: basePriority + 19,
         restrict: 'A',
         scope: true,
-        // require: '^',
+        //require: '^rexContext',
         controller: function() {},
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncAttr($parse, scope, attrs, 'rexPrefix');
+
+                    var processPrefixDecls = function(val) {
+                        // Set up a prototype chain to an existing
+                        // prefix mapping
+                        var parentRexPrefix = scope.$parent.rexPrefix;
+                        var parentPrefixes = parentRexPrefix ? parentRexPrefix.prefixes : jassa.vocab.InitialContext;
+
+                        var result;
+                        if(parentPrefixes) {
+                            result = Object.create(parentPrefixes);
+                        } else {
+                            result = {};
+                        }
+
+                        var obj = jassa.util.PrefixUtils.parsePrefixDecls(val);
+                        angular.extend(result, obj);
+//                        var keys = Object.keys(obj);
+//                        keys.forEach(function(key) {
+//                            result[key] = obj[key];
+//                        });
+
+                        return result;
+                    };
+
+                    syncAttr($parse, scope, attrs, 'rexPrefix', true, processPrefixDecls);
+
+                    // TODO We may need to watch scope.$parent.rexPrefix as well
+
+                    var updatePrefixMapping = function() {
+//                        for(var key in scope.rexPrefix) {
+//                            console.log('GOT: ', key);
+//                        }
+
+                        scope.rexPrefixMapping = new jassa.rdf.PrefixMappingImpl(scope.rexPrefix);
+                    };
+
+                    // Update the prefixMapping when the prefixes change
+                    scope.$watch(function() {
+                        return scope.rexPrefix;
+                    }, function(rexPrefix) {
+                        updatePrefixMapping();
+                    }, true);
+
+                    updatePrefixMapping();
                 }
             };
         }
@@ -1416,15 +1473,25 @@ angular.module('ui.jassa.rex')
                 pre: function(scope, ele, attrs, contextCtrl) {
                     var subjectUri = syncAttr($parse, scope, attrs, 'rexSubject');
 
-                    var doPrefetch = function(subjectUri) {
-                        var s = jassa.rdf.NodeFactory.createUri(subjectUri);
+                    var doPrefetch = function() {
+                        var subjectUri = scope.rexSubject;
+
+                        var pm = scope.rexPrefixMapping;
+
+                        var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
+
+                        var s = jassa.rdf.NodeFactory.createUri(uri);
                         $q.when(scope.rexContext.prefetch(s)).then(function() {
                             // make sure to apply the scope
                         });
                     };
 
                     scope.$watch('rexSubject', function(newVal) {
-                        doPrefetch(newVal);
+                        doPrefetch();
+                    });
+
+                    scope.$watch('rexPrefixMapping', function(pm) {
+                        doPrefetch();
                     });
 
                     //console.log('Prefetching: ', s);
@@ -1640,7 +1707,7 @@ angular.module('ui.jassa.rex')
 /**
  * Convenience directive
  *
- * implies rex-prediacte="rdf:type" rex-object-iri
+ * implies rex-prediacte="rdf:type" rex-iri
  *
  * !! Important: because rex-predicate is implied, this directive cannot be used on a directive
  * that already hase rex-predicate defined !!
@@ -1663,7 +1730,7 @@ angular.module('ui.jassa.rex')
                     ele.removeAttr('rex-typeof');
 
                     ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
-                    ele.attr('rex-object-iri', modelExprStr);
+                    ele.attr('rex-iri', modelExprStr);
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
