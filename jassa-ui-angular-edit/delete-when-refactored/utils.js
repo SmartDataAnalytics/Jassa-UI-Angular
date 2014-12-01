@@ -131,7 +131,7 @@ var createRexLookupService = function(sparqlService) {
     return lookupService;
 };
 
-
+/* Part of jassa.geo now */
 var PointUtils = {
     lonlatToWkt: function(lonlat) {
         var result = this.pointToWkt(lonlat.lon, lonlat.lat);
@@ -148,7 +148,7 @@ var PointUtils = {
         return result;
     },
 
-    wktPointRegex: /\s*POINT\s*\(([^\s]+)\s*([^)]+)\)\s*/i,
+    wktPointRegex: /^\s*POINT\s*\(\s*([^\s]+)\s+([^)]+)\)\s*$/i,
 
     isWktPoint: function(wktStr) {
         var match = this.wktPointRegex.exec(wktStr);
@@ -173,4 +173,5 @@ var PointUtils = {
         return result;
     }
 };
+
 

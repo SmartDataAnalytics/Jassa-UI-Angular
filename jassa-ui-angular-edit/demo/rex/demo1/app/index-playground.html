@@ -66,6 +66,30 @@
     <script type="text/javascript">
     jassa = new Jassa(Promise, $.ajax);
 
+
+
+    /*
+    var prefixPattern = /\s*([^:]+)\s*:\s*([^\s]*)\s* /mg;
+
+    var prefixStr = ' rdf : http://www.w3.org/1999/02/22-rdf-syntax-ns#   rdfs: http://www.w3.org/2000/01/rdf-schema#  ';
+
+    var parseNamespaces = function(str) {
+        var result = {};
+        while ((match = prefixPattern.exec(str)) != null) {
+            var ns = match[1];
+            var uri = match[2];
+            result[ns] = uri;
+        }
+
+        return result;
+    };
+
+    var pm = new jassa.rdf.PrefixMapping(parseNamespaces(prefixStr));
+
+    alert(JSON.stringify(parseNamespaces(prefixStr)));
+   */
+
+
     var app = angular.module(
         'jassa.ui.edit.demo.widgets',
         ['ngSanitize', 'ui.bootstrap', 'ui.jassa.edit', 'ui.codemirror'])

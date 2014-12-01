@@ -27,7 +27,7 @@ angular.module('ui.jassa.rdf-term-input', [])
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
-
+            $scope.ngModelOptions = $scope.ngModelOptions || {};
 
 
             $scope.vocab = vocab;
@@ -96,7 +96,8 @@ angular.module('ui.jassa.rdf-term-input', [])
                             result = {
                                 type: 'literal',
                                 value: state.value,
-                                lang: state.lang
+                                lang: state.lang,
+                                datatype: ''
                             };
                             break;
                         case vocab.typedLiteral:
