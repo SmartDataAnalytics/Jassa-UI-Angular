@@ -2,10 +2,10 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-11-28
+ * Version: 0.1.0 - 2014-12-01
  * License: BSD
  */
-angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
+angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.datetime","ui.jassa.map","ui.jassa.meta","ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
 angular.module("ui.jassa.edit.tpls", ["template/rdf-term-input/rdf-term-input.html"]);
 angular.module('ui.jassa.rdf-term-input', [])
 
@@ -36,7 +36,7 @@ angular.module('ui.jassa.rdf-term-input', [])
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
-
+            $scope.ngModelOptions = $scope.ngModelOptions || {};
 
 
             $scope.vocab = vocab;
@@ -1808,6 +1808,74 @@ angular.module('ui.jassa.sync')
 }])
 
 ;
+
+angular.module("template/datetime/jassa-edit-datetime.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/datetime/jassa-edit-datetime.html",
+    "<div class=\"input-group\">\n" +
+    "  <!--div class=\"input-group-btn\">\n" +
+    "          <button type=\"button\" class=\"btn btn-default\" tabindex=\"-1\">Date</button>\n" +
+    "  <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" tabindex=\"-1\">\n" +
+    "          <span class=\"caret\"></span>\n" +
+    "  <span class=\"sr-only\">Toggle Dropdown</span>\n" +
+    "  </button>\n" +
+    "  <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "          <li><a href=\"#\">Date</a></li>\n" +
+    "  <li><a href=\"#\">Time</a></li>\n" +
+    "  <li><a href=\"#\">Date & Time</a></li>\n" +
+    "  </ul>\n" +
+    "  </div-->\n" +
+    "  <span class=\"input-group-addon\"><i class=\"icon fa\"></i></span>\n" +
+    "  <div class=\"input-group-btn\">\n" +
+    "    <!--button type=\"button\" class=\"btn btn-default no-border-radius\" tabindex=\"-1\">{{datatype.length === 0 ? \"No Datatype\" : datatype}}</button-->\n" +
+    "    <button type=\"button\" class=\"btn btn-default dropdown-toggle no-border-radius\" data-toggle=\"dropdown\" tabindex=\"-1\">\n" +
+    "      <span>{{datatype.length === 0 ? \"No Datatype\" : datatype}}</span>\n" +
+    "      <span class=\"caret\"></span>\n" +
+    "      <span class=\"sr-only\">Toggle Dropdown</span>\n" +
+    "    </button>\n" +
+    "    <ul class=\"dropdown-menu dropdown-menu-left\" role=\"menu\">\n" +
+    "      <!--li><a ng-click=\"setDatatype()\" href=\"#\">none</a></li-->\n" +
+    "      <li ng-repeat=\"(key,value) in datatypeTags\"><a ng-click=\"setDatatype(key)\" href=\"#\">{{value}}</a></li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
+    "  <input type=\"text\" class=\"form-control margin-left-1\" ng-model=\"typedValue\"></input>\n" +
+    "</div>");
+}]);
+
+angular.module("template/map/jassa-edit-map.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/map/jassa-edit-map.html",
+    "<div id=\"jassa-edit-map\" style=\"height:375px;\">\n" +
+    "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Point</label>\n" +
+    "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Line</label>\n" +
+    "  <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Polygon</label>\n" +
+    "  <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Box</label><input type=\"text\" class=\"form-control\" ng-model=\"wkt\" />\n" +
+    "  <div id=\"openlayers-map\" style=\"width: 100%; height: 300px;\"></div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("template/meta/jassa-edit-meta.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/meta/jassa-edit-meta.html",
+    "<div class=\"input-group {{rdfTermId}}\">\n" +
+    "  <span class=\"input-group-addon\">\n" +
+    "    <i ng-if=\"isPlainTermType(rdfTermType)\" class=\"icon fa fa-file\"></i>\n" +
+    "    <i ng-if=\"isTypedTermType(rdfTermType)\" class=\"icon fa fa-file\"></i>\n" +
+    "    <i ng-if=\"isUriTermType(rdfTermType)\" class=\"icon fa fa-bookmark\"></i>\n" +
+    "  </span>\n" +
+    "  <div class=\"input-group-btn\">\n" +
+    "    <button type=\"button\" class=\"btn btn-default dropdown-toggle no-border-radius\" data-toggle=\"dropdown\" tabindex=\"-1\">\n" +
+    "      <span class=\"currentRdfTermTypeValue\">{{rdfTermTypeValue}}</span>\n" +
+    "      <span class=\"caret\"></span>\n" +
+    "      <span class=\"sr-only\">Toggle Dropdown</span>\n" +
+    "    </button>\n" +
+    "    <ul class=\"dropdown-menu dropdown-menu-left\" role=\"menu\">\n" +
+    "      <li ng-repeat=\"(key,value) in rdfTermTypeTags\"><a ng-click=\"setRdfTermType(key)\" href=\"#\">{{value}}</a></li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
+    "  <jassa-switch-lang ng-if=\"isPlainTermType(rdfTermType)\" ng-model=\"lang\" value-store=\"valueStore\"></jassa-switch-lang>\n" +
+    "  <jassa-switch-type ng-if=\"isTypedTermType(rdfTermType)\" ng-model=\"type\" value-store=\"valueStore\"></jassa-switch-type>\n" +
+    "  <input type=\"text\" class=\"form-control margin-left-1\" ng-model=\"termValue\" ></input>\n" +
+    "</div>");
+}]);
 
 angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/rdf-term-input/rdf-term-input.html",
