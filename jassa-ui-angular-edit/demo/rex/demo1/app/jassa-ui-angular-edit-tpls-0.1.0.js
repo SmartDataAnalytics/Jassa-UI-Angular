@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-02
+ * Version: 0.1.0 - 2014-12-03
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -336,7 +336,7 @@ var RexContext = jassa.ext.Class.create({
                 var dataMap = entry.val.data;
                 self.cache.putMap(dataMap);
 
-                var tmp = assembleTalisJsonRdf(dataMap);
+                var tmp = assembleTalisRdfJson(dataMap);
                 _(self.json).extend(tmp);
 
             });
@@ -375,7 +375,7 @@ var RexContext = jassa.ext.Class.create({
     asTalisJsonRdf: function() {
         var map = this.combinedMap();
 
-        var result = assembleTalisJsonRdf(map);
+        var result = assembleTalisRdfJson(map);
         return result;
     }
 });
@@ -674,7 +674,7 @@ var firstIfEqual = function(oldVal, newVal) {
     return result;
 };
 
-var assembleTalisJsonRdf = function(map) {
+var assembleTalisRdfJson = function(map) {
     var result = {};
 
     var entries = map.entries();
@@ -694,6 +694,7 @@ var assembleTalisJsonRdf = function(map) {
     return result;
 };
 
+/*
 var createTalisJsonObjectWithDefaults = function(o) {
     var result = {
         type: o.type || 'literal',
@@ -704,7 +705,9 @@ var createTalisJsonObjectWithDefaults = function(o) {
 
     return result;
 };
+*/
 
+/*
 var talisJsonRdfToTriples = function(data) {
     var result = [];
 
@@ -744,7 +747,9 @@ var talisJsonRdfToTriples = function(data) {
 
     return result;
 };
+*/
 
+/*
 var talisJsonRdfToTurtle = function(data) {
     var ss = Object.keys(data);
     ss.sort();
@@ -793,6 +798,7 @@ var talisJsonRdfToTurtle = function(data) {
     return result;
 };
 
+*/
 var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
 var createCoordinate = function(scope, component) {
@@ -950,16 +956,16 @@ angular.module('ui.jassa.rex')
 
                     var updateDerivedValues = function(dataMap) {
 
-                        var talis = assembleTalisJsonRdf(dataMap);
+                        var talis = assembleTalisRdfJson(dataMap);
                         //console.log('Talis JSON', talis);
-                        var turtle = talisJsonRdfToTurtle(talis);
+                        var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
 
 
-                        var tmp = assembleTalisJsonRdf(scope.rexContext.cache);
+                        var tmp = assembleTalisRdfJson(scope.rexContext.cache);
 
-                        var before = talisJsonRdfToTriples(tmp).map(function(x) { return '' + x; });
+                        var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
 
-                        var after = talisJsonRdfToTriples(talis).map(function(x) { return '' + x; });
+                        var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
                         var remove = _(before).difference(after);
                         var added = _(after).difference(before);
 
@@ -1115,15 +1121,15 @@ if(false) {
                             //console.log('Override: ', JSON.stringify(override.entries()));
                             //console.log('Override: ', override);
 
-                            var talis = assembleTalisJsonRdf(override);
-                            var turtle = talisJsonRdfToTurtle(talis);
+                            var talis = assembleTalisRdfJson(override);
+                            var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
 
 
-                            var tmp = assembleTalisJsonRdf(scope.rexContext.cache);
+                            var tmp = assembleTalisRdfJson(scope.rexContext.cache);
 
-                            var before = talisJsonRdfToTriples(tmp).map(function(x) { return '' + x; });
+                            var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
 
-                            var after = talisJsonRdfToTriples(talis).map(function(x) { return '' + x; });
+                            var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
                             var remove = _(before).difference(after);
                             var added = _(after).difference(before);
 
