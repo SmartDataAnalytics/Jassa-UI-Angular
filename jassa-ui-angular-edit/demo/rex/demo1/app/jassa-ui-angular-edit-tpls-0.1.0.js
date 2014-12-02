@@ -132,6 +132,10 @@ angular.module('ui.jassa.rdf-term-input', [])
                         //var clone = createTalisJsonObjectWithDefaults(talisJson);
                         var clone = talisJson;
 
+                        if(clone.type != null && clone.value == null) {
+                            clone.value = '';
+                        }
+
                         var node;
                         try {
                             node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
@@ -179,6 +183,14 @@ angular.module('ui.jassa.rdf-term-input', [])
 
                         if(talisJson) {
                             var newState = convertToState(talisJson);
+
+//                            var newState;
+//                            try {
+//                                newState = convertToState(talisJson);
+//                            } catch(err) {
+//                                newState = {};
+//                            }
+
                             scope.state = newState;
                             //console.log('ABSORBED', newState, ' from ', talisJson);
                         }
@@ -426,6 +438,7 @@ function capitalize(s)
     return s && s[0].toUpperCase() + s.slice(1);
 }
 
+// TODO We need to expand prefixed values if the termtype is IRI
 
 var createCompileComponent = function($rexComponent$, $component$, $parse) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
@@ -780,10 +793,10 @@ var talisJsonRdfToTurtle = function(data) {
     return result;
 };
 
-var __emptyPrefixMapping = new jassa.rdf.PrefixMappingImpl();
+var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
 var createCoordinate = function(scope, component) {
-    var pm = scope.rexPrefixMapping || __emptyPrefixMapping;
+    var pm = scope.rexPrefixMapping || __defaultPrefixMapping;
 
     return {
         s: pm.expandPrefix(scope.rexSubject),

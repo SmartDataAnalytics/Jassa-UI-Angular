@@ -534,10 +534,10 @@ var talisJsonRdfToTurtle = function(data) {
     return result;
 };
 
-var __emptyPrefixMapping = new jassa.rdf.PrefixMappingImpl();
+var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
 var createCoordinate = function(scope, component) {
-    var pm = scope.rexPrefixMapping || __emptyPrefixMapping;
+    var pm = scope.rexPrefixMapping || __defaultPrefixMapping;
 
     return {
         s: pm.expandPrefix(scope.rexSubject),
