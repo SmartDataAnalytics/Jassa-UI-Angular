@@ -123,6 +123,10 @@ angular.module('ui.jassa.rdf-term-input', [])
                         //var clone = createTalisJsonObjectWithDefaults(talisJson);
                         var clone = talisJson;
 
+                        if(clone.type != null && clone.value == null) {
+                            clone.value = '';
+                        }
+
                         var node;
                         try {
                             node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
@@ -170,6 +174,14 @@ angular.module('ui.jassa.rdf-term-input', [])
 
                         if(talisJson) {
                             var newState = convertToState(talisJson);
+
+//                            var newState;
+//                            try {
+//                                newState = convertToState(talisJson);
+//                            } catch(err) {
+//                                newState = {};
+//                            }
+
                             scope.state = newState;
                             //console.log('ABSORBED', newState, ' from ', talisJson);
                         }

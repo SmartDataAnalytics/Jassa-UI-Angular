@@ -1,11 +1,11 @@
-<div class="row" ng-init="ex06={}; ex06.context=createRexContext(); ex06.subject='http://dbpedia.org/resource/Leipzig'">
+<div class="row" ng-init="ex06={}; ex06.context=createRexContext(); ex06.subject='dbr:Leipzig'">
     <div class="col-md-6">
 
         <div class="alert alert-info" role="alert">
             <h3>WKT &lt;-&gt; LonLat sync</h3>
             <i>Conditional generation of RDF using hidden fields</i>
 
-            <form role="form" rex-context="ex06.context" rex-subject="ex06.subject" rex-typeof="'http://dbpedia.org/resource/Place'">
+            <form role="form" rex-context="ex06.context" rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-subject="ex06.subject" rex-typeof="'dbo:Place'">
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">URI: </span>
@@ -16,7 +16,7 @@
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">WKT: </span>
-                        <input name="firstName" type="text" class="form-control" ng-model="ex06.wkt" rex-predicate="'http://www.w3.org/2003/01/geo/wgs84_pos#geometry'" rex-object-literal>
+                        <input name="firstName" type="text" class="form-control" ng-model="ex06.wkt" rex-predicate="'geo:geometry'" rex-literal>
                     </div>
                 </div>
 
@@ -29,17 +29,17 @@
                 <input
                     ng-if="PointUtils.isWktPoint(ex06.wkt)"
                     type="hidden"
-                    rex-predicate="'http://www.w3.org/2003/01/geo/wgs84_pos#long'"
-                    rex-object-literal="'' + PointUtils.wktToXy(ex06.wkt).x"
-                    rex-datatype="'http://www.w3.org/2001/XMLSchema#float'"
+                    rex-predicate="'geo:long'"
+                    rex-literal="'' + PointUtils.wktToXy(ex06.wkt).x"
+                    rex-datatype="'xsd:float'"
                 >
 
                 <input
                     ng-if="PointUtils.isWktPoint(ex06.wkt)"
                     type="hidden"
-                    rex-predicate="'http://www.w3.org/2003/01/geo/wgs84_pos#lat'"
-                    rex-object-literal="'' + PointUtils.wktToXy(ex06.wkt).y"
-                    rex-datatype="'http://www.w3.org/2001/XMLSchema#float'"
+                    rex-predicate="'geo:lat'"
+                    rex-literal="'' + PointUtils.wktToXy(ex06.wkt).y"
+                    rex-datatype="'xsd:float'"
                 >
 
             </form>

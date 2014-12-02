@@ -50,7 +50,7 @@ angular.module('ui.jassa.rex')
 //            ele.removeAttr('rex-typeof');
 //
 //            ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
-//            ele.attr('rex-object-iri', modelExprStr);
+//            ele.attr('rex-iri', modelExprStr);
 
 
             return {

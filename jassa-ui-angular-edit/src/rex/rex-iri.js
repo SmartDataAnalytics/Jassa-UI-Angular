@@ -5,9 +5,9 @@ angular.module('ui.jassa.rex')
  *
  * rexObjectIri="model"
  *
- * implies rex-object rex-object-termtype="iri" rex-object-value="model"
+ * implies rex-object rex-termtype="iri" rex-value="model"
  */
-.directive('rexObjectIri', ['$parse', '$compile', function($parse, $compile) {
+.directive('rexIri', ['$parse', '$compile', function($parse, $compile) {
     return {
         priority: basePriority + 1000,
         restrict: 'A',
@@ -17,9 +17,19 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    var modelExprStr = ele.attr('rex-object-iri');
+                    var modelExprStr = ele.attr('rex-iri');
 
-                    ele.removeAttr('rex-object-iri');
+                    if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
+                        var name = getModelAttribute(attrs);
+                        modelExprStr = attrs[name];
+                    }
+
+                    if(!modelExprStr) {
+                        throw new Error('No model provided and found');
+                    }
+
+
+                    ele.removeAttr('rex-iri');
 
                     ele.attr('rex-object', ''); //'objectIriObject');
                     ele.attr('rex-termtype', '"uri"');

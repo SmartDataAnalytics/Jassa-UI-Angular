@@ -3,7 +3,7 @@ angular.module('ui.jassa.rex')
 /**
  * Convenience directive
  *
- * implies rex-prediacte="rdf:type" rex-object-iri
+ * implies rex-prediacte="rdf:type" rex-iri
  *
  * !! Important: because rex-predicate is implied, this directive cannot be used on a directive
  * that already hase rex-predicate defined !!
@@ -26,7 +26,7 @@ angular.module('ui.jassa.rex')
                     ele.removeAttr('rex-typeof');
 
                     ele.attr('rex-predicate', '"http://www.w3.org/1999/02/22-rdf-syntax-ns#type"');
-                    ele.attr('rex-object-iri', modelExprStr);
+                    ele.attr('rex-iri', modelExprStr);
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
