@@ -1900,7 +1900,15 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select>\n" +
+    "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
+    "        <ui-select ng-model=\"state.type\" theme=\"bootstrap\" ng-disabled=\"disabled\" reset-search-input=\"false\" style=\"width: 100px;\">\n" +
+    "          <ui-select-match>\n" +
+    "            {{$select.selected.id}}\n" +
+    "          </ui-select-match>\n" +
+    "          <ui-select-choices repeat=\"item in termTypes\">\n" +
+    "            <span ng-bind-html=\"item.displayLabel\"></span>\n" +
+    "          </ui-select-choices>\n" +
+    "        </ui-select>\n" +
     "    </div>\n" +
     "\n" +
     "    <!-- Datatype selector -->\n" +

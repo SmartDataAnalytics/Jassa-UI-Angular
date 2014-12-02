@@ -7,7 +7,15 @@
 
     <!-- Term type selector -->
     <div class="input-group-addon">
-        <select ng-model="state.type" ng-model-options="ngModelOptions" ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select>
+        <!--select ng-model="state.type" ng-model-options="ngModelOptions" ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select-->
+        <ui-select ng-model="state.type" theme="bootstrap" ng-disabled="disabled" reset-search-input="false" style="width: 100px;">
+          <ui-select-match>
+            {{$select.selected.id}}
+          </ui-select-match>
+          <ui-select-choices repeat="item in termTypes">
+            <span ng-bind-html="item.displayLabel"></span>
+          </ui-select-choices>
+        </ui-select>
     </div>
 
     <!-- Datatype selector -->
