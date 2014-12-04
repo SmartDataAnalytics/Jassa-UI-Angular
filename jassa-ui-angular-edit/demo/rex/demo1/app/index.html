@@ -38,6 +38,7 @@
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
     <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
     <!-- endbower -->
 
     <!-- endbuild -->
@@ -78,6 +79,14 @@
             .http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
             .cache().virtFix().paginate(50000).pageExpand(100).create();
 
+
+        jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [jassa.rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(graph) {
+            //alert(graph);
+            graph.forEach(function(triple) {
+                console.log('Triple: ' + triple);
+            });
+        });
+
         var lookupService = jassa.sponate.RexUtils.createRexLookupService(sparqlService);
 
         $scope.createRexContext = function() {
@@ -104,12 +113,14 @@
         // TODO integrate moment.js
         // Native Javascript Date features seem to be insanely useless when it comes to RDF :/
         $scope.dateToString = function(x) {
-            var r = !x ? null : x.toUTCString();
+            var r = !x ? null : moment(x).toISOString();
+            //var r = !x ? null : x.toUTCString();
             return r;
         };
 
         $scope.parseDate = function(x) {
-            var r = !x ? null : new Date(x);
+            var r = !x ? null : moment(x).toDate();
+            //var r = !x ? null : new Date(x);
             return r;
         };
 

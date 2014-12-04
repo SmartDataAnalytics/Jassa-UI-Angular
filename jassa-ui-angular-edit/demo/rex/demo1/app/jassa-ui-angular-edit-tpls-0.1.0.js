@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-03
+ * Version: 0.1.0 - 2014-12-04
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -258,52 +258,6 @@ angular.module('ui.jassa.rdf-term-input', [])
 
 
 
-var MapUnion = jassa.ext.Class.create({
-    initialize: function(subMaps) {
-        this.subMaps = subMaps;
-    },
-
-    get: function(key) {
-        var map = _(this.subMaps).find(function(subMap) {
-            var r = subMap.containsKey(key);
-            return r;
-        });
-
-        var result = map ? map.get(key) : null;
-        return result;
-    },
-
-    containsKey: function(key) {
-        var result = this.subMaps.some(function(subMap) {
-            var r = subMap.containsKey(key);
-            return r;
-        });
-
-        return result;
-    },
-
-    entries: function() {
-        var keys = new jassa.util.HashSet();
-
-        var result = [];
-        this.subMaps.forEach(function(subMap) {
-            var subEntries = subMap.entries();
-
-            subEntries.forEach(function(subEntry) {
-                var k = subEntry.key;
-                var alreadySeen = keys.contains(k);
-                if(!alreadySeen) {
-                    keys.add(k);
-                    result.push(subEntry);
-                }
-            });
-        });
-
-        return result;
-    }
-});
-
-
 
 var RexContext = jassa.ext.Class.create({
     initialize: function(lookupService) {
@@ -350,7 +304,7 @@ var RexContext = jassa.ext.Class.create({
             return item != null;
         });
 
-        var result = new MapUnion(subMaps);
+        var result = new jassa.util.MapUnion(subMaps);
 
         return result;
     },
@@ -542,138 +496,6 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
     };
 };
 
-//var createCompileComponent = function($rexComponent$, $component$, $parse) {
-//    //var $rexComponent$ = 'rex' + capitalize($component$);
-//
-//    var tag = '[' + $component$ + ']';
-//
-//    return {
-//        pre: function(scope, ele, attrs, ctrls) {
-//
-//
-//            var modelExprStr = attrs[$rexComponent$];
-//            var modelGetter = $parse(modelExprStr);
-//            var modelSetter = modelGetter.assign;
-//
-//            var obj = syncAttr($parse, scope, attrs, $rexComponent$);
-//
-//            var contextCtrl = ctrls[0];
-//            var objectCtrl = ctrls[1];
-//
-//            var slot = contextCtrl.allocSlot();
-//
-//            scope.$on('$destroy', function() {
-//                slot.release();
-//            });
-//
-//            // Backwards: If the referenced value changes, we need to update
-//            // the model
-//
-//            // If the coordinate changes, we need to set the model to the current value at that coordinate*
-//            // Afterwards, if the value at the coordinate changes (though the coordinate is the same then),
-//            // we update the model
-//
-//            // * We do not retain the current value for the new coordinate,
-//            // because when switching resources we would copy the state of the prior resource over
-//
-//            if(false) {
-//            scope.$watch(function() {
-//                var coordinate = createCoordinate(scope, $component$);
-//                return coordinate;
-//            }, function(newCoordinate, oldCoordinate) {
-//                var r = scope.rexContext.getValue(newCoordinate);
-//
-//                if(modelSetter) {
-//                    modelSetter(scope, r);
-//                }
-//
-//                //var r = modelGetter(scope);
-//
-//                // typeof r === 'undefined';
-//                var isUndefined = angular.isUndefined(r);
-//                var msg = isUndefined ? ' however skipping model update due to undefined ' : ' updating coordinate-target with value ';
-//
-//                //console.log(tag + ' Coordinate changed to ', newCoordinate, ' from ', oldCoordinate, msg + '; ', r);
-//
-//                // In any case we need to declare the referenced value
-//                slot.entry = {
-//                    key: newCoordinate,
-//                    val: r
-//                };
-//
-//                if(!isUndefined) {
-//                    contextCtrl.getOverride().putEntries([slot.entry]);
-//                }
-//
-//                // TODO: We need to update the override with the new value before we enter the following $watch below.
-//            }, true);
-//            }
-//
-//
-//             // If the given model is writeable, then we need to update it
-//             // whenever the coordinate's value changes
-//            if(modelSetter) {
-//
-//                scope.$watch(function() {
-//                    var coordinate = createCoordinate(scope, $component$);
-//                    var r = {
-//                        coordinate: coordinate,
-//                        value: scope.rexContext.getValue(coordinate)
-//                    };
-//                    return r;
-//                }, function(newVal, oldVal) {
-//                    var coordinate = newVal.coordinate;//createCoordinate(scope, $component$);
-//                    //console.log(tag + ' Coordinate target value changed to ', newVal, ' from ', oldVal, ' for ', coordinate, ' with scope ', scope, '; updating model');
-//
-//
-//                    var value = newVal.value;
-//                    slot.entry = {
-//                        key: coordinate,
-//                        val: value
-//                    };
-//
-//                    if(value != null) {
-//                        modelSetter(scope, newVal.value);
-//                    }
-//                }, true);
-//
-//            }
-////            else {
-////                var coordinate = createCoordinate(scope, $component$);
-////                console.log('[WARN] No setter for ' + modelExprStr + ' for coordinate ', coordinate);
-////            }
-//
-//
-//            // Forwards: If the model changes, we need to update the
-//            // change object in the scope
-//            scope.$watch(function() {
-//                var r = modelGetter(scope);
-//
-//                return r;
-//            }, function(newVal, oldVal) {
-//                var coordinate = createCoordinate(scope, $component$);
-//                slot.entry = {
-//                    key: coordinate,
-//                    val: newVal
-//                };
-//
-//                contextCtrl.getOverride().putEntries([slot.entry]);
-//
-//                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
-//            }, true);
-//
-//        }
-//    };
-//};
-
-
-// TODO I think we can remove that function
-var firstIfEqual = function(oldVal, newVal) {
-    var isEqual = angular.equals(oldVal, newVal);
-    var result = isEqual ? oldVal : newVal;
-    return result;
-};
-
 var assembleTalisRdfJson = function(map) {
     var result = {};
 
@@ -693,112 +515,6 @@ var assembleTalisRdfJson = function(map) {
 
     return result;
 };
-
-/*
-var createTalisJsonObjectWithDefaults = function(o) {
-    var result = {
-        type: o.type || 'literal',
-        value: o.value || '',
-        lang: o.lang || '',
-        datatype: o.datatype || ''
-    };
-
-    return result;
-};
-*/
-
-/*
-var talisJsonRdfToTriples = function(data) {
-    var result = [];
-
-    var ss = Object.keys(data);
-    ss.sort();
-
-    ss.forEach(function(sStr) {
-
-        var s = jassa.rdf.NodeFactory.createUri(sStr);
-
-        var po = data[sStr];
-        var ps = Object.keys(po);
-        ps.sort();
-
-        ps.forEach(function(pStr) {
-            var p = jassa.rdf.NodeFactory.createUri(pStr);
-
-            var os = po[pStr];
-
-            os.forEach(function(oJson) {
-
-                // Create a clone with defaults applied
-                var clone = createTalisJsonObjectWithDefaults(oJson);
-
-                try {
-                    o = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
-
-                    var triple = new jassa.rdf.Triple(s, p, o);
-                    result.push(triple);
-
-                } catch(err) {
-                  console.log('Error: could not create node from ' + oJson);
-                }
-            });
-        });
-    });
-
-    return result;
-};
-*/
-
-/*
-var talisJsonRdfToTurtle = function(data) {
-    var ss = Object.keys(data);
-    ss.sort();
-
-    var result = '';
-    ss.forEach(function(s) {
-
-        result += '<' + s + '>\n';
-
-        var po = data[s];
-        var ps = Object.keys(po);
-        ps.sort();
-
-        ps.forEach(function(p) {
-            result += '    <' + p + '> ';
-
-            var os = po[p];
-
-            var oStrs = os.map(function(o) {
-
-                var clone = createTalisJsonObjectWithDefaults(o);
-
-                var r;
-                try {
-                    node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
-                    r = '' + node;
-                } catch(err) {
-                    r += '\n';
-
-                    //console.log('Error: could not create node from ' + o);
-                    r += '        // Invalid data for RDF generation:\n';
-                    r += '        // raw: ' + JSON.stringify(o) + '\n';
-                    r += '        // defaults: ' + JSON.stringify(o) + '\n';
-                    r += '        // ' + err + '\n';
-                    r += '\n';
-                }
-
-                return r;
-            });
-
-            result += oStrs.join(', ') + ' ; \n';
-        });
-        result += '    . \n';
-    });
-
-    return result;
-};
-
-*/
 var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
 var createCoordinate = function(scope, component) {
@@ -1057,23 +773,6 @@ angular.module('ui.jassa.rex')
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
-if(false) {
-                    scope.$watch(function() {
-                        var r = createDataMap();
-                        return r;
-                        //var r = scope.rexContext.override.entries();
-                    }, function(dataMap) {
-                        //console.log('override modified', scope.rexContext.override.entries());
-                        //mapDifference(scope.rexContext.override, scope.rexContext.cache);
-
-                        // Remove values from override that are not referenced
-                        cleanupReferences();
-                        cleanupOverride();
-
-                        //var dataMap = createDataMap();
-                        updateDerivedValues(dataMap);
-                    }, true);
-}
 
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
@@ -1092,84 +791,7 @@ if(false) {
                         updateDerivedValues(dataMap);
                     }, true);
 
-                    if(false) {
-                    scope.$watch(function() {
-                        //var entries = scope.rexChangeScopes.map(function(child) {
-                        var ids = Object.keys(scope.rexChangeSlots);
 
-
-                        var entries = ids.map(function(id) {
-                            var child = scope.rexChangeSlots[id];
-                            return child.entry;
-                        });
-
-                        entries = entries.filter(function(entry) {
-                            return entry != null && entry.val != null;
-                        });
-
-                        //console.log('Updating override with ', entries.length, ' remaining entries:', entries);
-                        return entries;
-
-                    }, function(newEntries) {
-                        var override = scope.rexContext.override;
-
-                        override.clear();
-                        if(newEntries) {
-                            override.putEntries(newEntries);
-
-                            //console.log('Override: ', JSON.stringify(newEntries));
-                            //console.log('Override: ', JSON.stringify(override.entries()));
-                            //console.log('Override: ', override);
-
-                            var talis = assembleTalisRdfJson(override);
-                            var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
-
-
-                            var tmp = assembleTalisRdfJson(scope.rexContext.cache);
-
-                            var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
-
-                            var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
-                            var remove = _(before).difference(after);
-                            var added = _(after).difference(before);
-
-                            //console.log('DIFF: Added: ' + added);
-                            //console.log('DIFF: Removed: ' + remove);
-
-                            scope.rexContext.talisJson = turtle;
-
-                            //console.log('Talis: ', talis);
-                        }
-                    }, true);
-                    }
-
-                    //scope.rexChangeScopes = []; // Array of scopes of which each provides a 'getChanges()'
-
-
-                    // TODO Should we keep an array of changes here, which we watch
-                    // in the scope and use it to compute the effective RDF data?
-                    // sounds reasonable i guess
-
-
-
-
-
-
-//                    scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-//                    scope.rexContext.resources = scope.rexContext.resources || [];
-
-//                         scope.$watch(function() {
-//                             return scope.$parent.$eval(attrs.rexContext);
-//                         }, function(val) {
-//                             scope.rexContext = val;
-//                             scope.rexContext.resources = scope.rexContext.resources || [];
-//                         });
-
-                    //scope.$watch()
-                    //var rexContext = scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-                },
-                post: function(scope, ele, attrs, ctrls) {
-//                    console.log('<context>', scope.rexContext);
                 }
             };
         }
@@ -1189,6 +811,27 @@ angular.module('ui.jassa.rex')
         controller: function() {},
         compile: function(scope, ele, attrs, ctrls) {
             return createCompileComponent('rexDatatype', 'datatype', $parse);
+        }
+    };
+}])
+
+;
+
+angular.module('ui.jassa.rex')
+
+/**
+ * Directive to mark triples as deleted
+ *
+ */
+.directive('rexDeleted', ['$parse', function($parse) {
+    return {
+        priority: 379,
+        restrict: 'A',
+        scope: true,
+        require: ['^rexContext', '^rexObject'],
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return createCompileComponent('rexDeleted', 'deleted', $parse);
         }
     };
 }])
@@ -1538,188 +1181,6 @@ angular.module('ui.jassa.rex')
 }])
 
 ;
-
-/*
- * Important: The convenience directives must have a high priority, because
- * any controller with a even higher priority will be compiled again!
- *
- */
-
-
-
-/**
- * This directive (under a predicate) only selects corresponding objects having the specified language tag
- * Conversely, each object will will automatically get the given language assigned (this is needed, otherwise
- * an input would not match the filter)
- */
-/*
-.directive('rex-filter-lang', ['$parse', function($parse) {
-    return {
-        priority: 7,
-        restrict: 'A',
-        scope: true,
-        controller: function() {},
-        compile: function(ele, attrs) {
-            return {
-                pre: function(scope, ele, attrs, ctrls) {
-                    syncAttr($parse, scope, attrs, 'rexFilterLang');
-                }
-            };
-        }
-    };
-}])
-*/
-
-
-/*
-.directive('rexSync', ['$parse', function($parse) {
-    return {
-        priority: 7,
-        restrict: 'A',
-        scope: true,
-        //require: ['^rexContext', '^rexObject'],
-        controller: function() {},
-        compile: function(ele, attrs) {
-            return {
-                pre: function(scope, ele, attrs, ctrls) {
-                    var modelExprStr = ele.attr('rex-sync');
-
-                    ele.removeAttr('rex-object-iri');
-
-                    ele.attr('rex-object', ''); //'objectIriObject');
-                    ele.attr('rex-termtype', '"uri"');
-                    ele.attr('rex-value', modelExprStr);
-
-                    // Continue processing any further directives
-                    $compile(ele)(scope);
-                }
-            };
-        }
-    };
-}])
-*/
-
-
-
-
-/*
-.directive('rexObject', function() {
-    return {
-        priority: 0,
-        restrict: 'A',
-        scope: true,
-        require: '?^ngModel',
-        controller: function() { },
-        link: function(scope, ele, attrs, ngModelCtrl) {
-            scope.rexModelCtrl = ngModelCtrl;
-
-            scope.$watch('[rexResource, rexProperty, rexDatatype, rexLang, ngModel, rexModelCtrl.$viewValue]', function(val) {
-                console.log('STATUS: ', val, scope)
-            }, true);
-        }
-    };
-})
-*/
-
-/*
-.directive('rexType', function() {
-    return {
-        priority: 6,
-        restrict: 'A',
-        scope: true,
-        controller: ['$scope', function($scope) {
-            this.getValue = function() {
-                return $scope.rexLang;
-            };
-        }],
-        link: function(scope, ele, attrs, ctrls) {
-            scope.rexLang = scope.$parent.$eval(attrs.rexLang);
-            //console.log('<lang>', scope.rexLang);
-        }
-    };
-})
-*/
-
-/**
- * A directive that can hold a json object with fields describing an RDF term.
- *
- */
-/*
-.directive('rexTerm', function() {
-    return {
-        priority: 4,
-        restrict: 'A',
-        scope: true,
-        controller: ['$scope', function($scope) {
-        }],
-        compile: function(ele, attrs) {
-            return {
-                pre: function(scope, ele, attrs, resourceCtrl) {
-                },
-                post: function(scope, ele, attrs, resourceCtrl) {
-                    //alert(scope.rexTest);
-
-                }
-            };
-        }
-    };
-})
-
-*/
-
-
-/*
-.directive('rexGraph', function() {
-    return {
-        priority: 6,
-        restrict: 'A',
-        require: ['?^rexResource', '?^rexProperty', '?^rexDatatype', '?^rexRang', '?^rexTypeof'],
-        // '?^about', '?^rel', '?^rev', '?^src', '?^href', '?^content'
-        scope: true,
-        controller: ['$scope', function($scope) {
-            var ctrls = $scope.ctrls;
-
-            if(ctrls) {
-                ctrls.forEach(function(ctrl) {
-                    if(ctrl != null) {
-                        console.log('Value: ', ctrl, ctrl.getValue());
-                    }
-                });
-            }
-
-        }],
-        link: function(scope, ele, attrs, ctrls) {
-
-            scope.ctrls = ctrls;
-
-//                 var resourceCtrl = ctrls[0];
-//                 var propertyCtrl = ctrls[1];
-//                 var datatypeCtrl = ctrls[2];
-//                 var langCtrl = ctrls[3];
-        }
-    };
-})
-*/
-
-// TODO Add rex-object (or-rex-value) (argument is interpreted as the lexical form then, and should be a string)
-// TODO Add rex-object-id to give an object under a subject/property an id
-// TODO Support references to triples/object - Maybe rex-model="some-object-id" could configure an ng-model
-   // Issue: It might be the case that we would need rex-model-val , rex-model-dt, rex-model-lang, etc
-   // Alternatively, modifiers such as rex-model-type="lang" could be used, an the default would refer to the lexical value
-   // If rex-model is used without an argument, a new object will be allocated under given predicate/object contexts
-
-
-// TODO Disconnected ressources: If a resource attribute is below another resource without a property, the resource is disconnected
-// But yet, we could have a resource under a property that should be disconnected
-// Maybe we should create a rex-parent
-//
-
-
-
-
-
-
-
 
 angular.module('ui.jassa.rex')
 

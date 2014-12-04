@@ -8,6 +8,7 @@
     "angular-ui-utils": "",
     "bluebird": "2.3.5",
     "underscore": "1.7.0",
-    "angular-ui-codemirror": "0.1.6"
+    "angular-ui-codemirror": "0.1.6",
+    "moment": "v2.8.4"
   }
 }

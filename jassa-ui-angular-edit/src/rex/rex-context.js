@@ -199,23 +199,6 @@ angular.module('ui.jassa.rex')
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
-if(false) {
-                    scope.$watch(function() {
-                        var r = createDataMap();
-                        return r;
-                        //var r = scope.rexContext.override.entries();
-                    }, function(dataMap) {
-                        //console.log('override modified', scope.rexContext.override.entries());
-                        //mapDifference(scope.rexContext.override, scope.rexContext.cache);
-
-                        // Remove values from override that are not referenced
-                        cleanupReferences();
-                        cleanupOverride();
-
-                        //var dataMap = createDataMap();
-                        updateDerivedValues(dataMap);
-                    }, true);
-}
 
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
@@ -234,84 +217,7 @@ if(false) {
                         updateDerivedValues(dataMap);
                     }, true);
 
-                    if(false) {
-                    scope.$watch(function() {
-                        //var entries = scope.rexChangeScopes.map(function(child) {
-                        var ids = Object.keys(scope.rexChangeSlots);
 
-
-                        var entries = ids.map(function(id) {
-                            var child = scope.rexChangeSlots[id];
-                            return child.entry;
-                        });
-
-                        entries = entries.filter(function(entry) {
-                            return entry != null && entry.val != null;
-                        });
-
-                        //console.log('Updating override with ', entries.length, ' remaining entries:', entries);
-                        return entries;
-
-                    }, function(newEntries) {
-                        var override = scope.rexContext.override;
-
-                        override.clear();
-                        if(newEntries) {
-                            override.putEntries(newEntries);
-
-                            //console.log('Override: ', JSON.stringify(newEntries));
-                            //console.log('Override: ', JSON.stringify(override.entries()));
-                            //console.log('Override: ', override);
-
-                            var talis = assembleTalisRdfJson(override);
-                            var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
-
-
-                            var tmp = assembleTalisRdfJson(scope.rexContext.cache);
-
-                            var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
-
-                            var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
-                            var remove = _(before).difference(after);
-                            var added = _(after).difference(before);
-
-                            //console.log('DIFF: Added: ' + added);
-                            //console.log('DIFF: Removed: ' + remove);
-
-                            scope.rexContext.talisJson = turtle;
-
-                            //console.log('Talis: ', talis);
-                        }
-                    }, true);
-                    }
-
-                    //scope.rexChangeScopes = []; // Array of scopes of which each provides a 'getChanges()'
-
-
-                    // TODO Should we keep an array of changes here, which we watch
-                    // in the scope and use it to compute the effective RDF data?
-                    // sounds reasonable i guess
-
-
-
-
-
-
-//                    scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-//                    scope.rexContext.resources = scope.rexContext.resources || [];
-
-//                         scope.$watch(function() {
-//                             return scope.$parent.$eval(attrs.rexContext);
-//                         }, function(val) {
-//                             scope.rexContext = val;
-//                             scope.rexContext.resources = scope.rexContext.resources || [];
-//                         });
-
-                    //scope.$watch()
-                    //var rexContext = scope.rexContext = scope.$parent.$eval(attrs.rexContext);
-                },
-                post: function(scope, ele, attrs, ctrls) {
-//                    console.log('<context>', scope.rexContext);
                 }
             };
         }
