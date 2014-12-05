@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-04
+ * Version: 0.1.0 - 2014-12-05
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -263,6 +263,8 @@ var RexContext = jassa.ext.Class.create({
     initialize: function(lookupService) {
         this.lookupService = lookupService;
 
+        this.sourceGraph = new jassa.rdf.GraphImpl();
+
         // the status of the resources as retrieved from the lookup service
         this.cache = new jassa.util.HashMap();
 
@@ -426,7 +428,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             }, function(newCoordinate, oldCoordinate) {
                 slot.entry.key = newCoordinate;
 
-                var oldValue = scope.rexContext.getValue(oldCoordinate);
+                var oldValue = getEffectiveValue(scope.rexContext, oldCoordinate); //scope.rexContext.getValue(oldCoordinate);
                 if(oldValue) {
                     var entry = {
                         key: newCoordinate,
@@ -440,7 +442,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
 
             scope.$watch(function() {
                 var coordinate = slot.entry.key;
-                var r = scope.rexContext.getValue(coordinate);
+                var r = getEffectiveValue(scope.rexContext, coordinate); //scope.rexContext.getValue(coordinate);
                 return r;
 
             }, function(value) {
@@ -529,6 +531,26 @@ var createCoordinate = function(scope, component) {
 };
 
 
+var getValueAt = function(talisRdfJson, coordinate) {
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    var i = p ? p[coordinate.i] : null;
+    var result = i ? i[coordinate.c] : null;
+
+    return result;
+};
+
+var getEffectiveValue = function(rexContext, coordinate) {
+    var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+
+    if(result == null) {
+        result = rexContext.json ? getValueAt(rexContext.json, coordinate) : null;
+    }
+
+    return result;
+};
+
+
 /**
  * One way binding of the value of an attribute into scope
  * (possibly via a transformation function)
@@ -574,17 +596,64 @@ var basePriority = 0;
 
 angular.module('ui.jassa.rex')
 
+/**
+ * Directive to attach a rex lookup function to the scope
+ *
+ * Different lookup functions can be used at different HTML regions under a rex-context.
+ *
+ * If present, rex-subject will use the provided function to perform data lookups
+ * on its IRIs and store the content in the scope
+ *
+ */
+.directive('rexBaseGraph', ['$parse', function($parse) {
+    return {
+        priority: basePriority + 28,
+        restrict: 'A',
+        scope: true,
+        require: 'rexContext',
+        controller: function() {},
+        //require: ['^?rexSubject', '^?rexObject']
+//        controller: ['$scope', function($scope) {
+//        }],
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    syncAttr($parse, scope, attrs, 'rexBaseGraph');
+
+                    scope.$watch(function() {
+                        return scope.rexBaseGraph;
+                    }, function() {
+                        scope.rexContext.baseGraph = scope.rexBaseGraph;
+                    });
+                }
+            };
+        }
+    };
+}])
+
+;
+
+angular.module('ui.jassa.rex')
+
 .directive('rexContext', ['$parse', function($parse) {
     return {
-        priority: basePriority + 20,
+        priority: basePriority + 30,
         restrict: 'A',
         scope: true,
         require: 'rexContext',
         controller: ['$scope', function($scope) {
 
+            this.$scope = $scope;
+
+
+            //$scope.override = new jassa.util.HashMap();
+
             //this.rexContext = $scope.rexContext;
             this.getOverride = function() {
-                return $scope.rexContext.override;
+                //return $scope.override;
+                var rexContext = $scope.rexContext;
+                var r = rexContext ? rexContext.override : null;
+                return r;
             };
 
 
@@ -653,7 +722,51 @@ angular.module('ui.jassa.rex')
 
             return {
                 pre: function(scope, ele, attrs, ctrl) {
+                    if(!attrs.rexContext) {
+                        attrs.rexContext = '{}';
+                    }
+
                     syncAttr($parse, scope, attrs, 'rexContext');
+
+                    // Make sure to initialize any provided context object
+                    // TODO: The status should probably be part of the context directive, rather than a context object
+                    scope.$watch(function() {
+                        return scope.rexContext;
+                    }, function(newVal) {
+                        newVal.override = newVal.override || new jassa.util.HashMap();
+                    });
+
+                    if(!scope.rexContext.override) {
+                        scope.rexContext.override = new jassa.util.HashMap();
+                    }
+
+                    // Synchronize the talis json structure with the graph
+                    // TODO Performance-bottleneck: Synchronize via an event API on the Graph object rather than using Angular's watch mechanism
+                    scope.$watch('rexContext.baseGraph.toArray()', function() {
+                        var baseGraph = scope.rexContext.baseGraph;
+                        scope.rexContext.json = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
+                    }, true);
+
+
+                    /*
+                    var getComponentValueForNode = function(node, component) {
+                        var json = jassa.rdf.NodeUtils.toTalisRdfJson(node);
+                        var result = json[compononte];
+                        return result;
+                    };
+
+                    // A hacky function that iterates the graph
+                    getValue: function(graph, coordinate) {
+
+                    }
+                    */
+
+
+
+
+
+
+
 
 
                     // TODO Watch any present sourceGraph attribute
@@ -672,13 +785,13 @@ angular.module('ui.jassa.rex')
 
 
                     // Remove all entries from map that exist in base
-                    var mapDifference = function(map, base) {
+                    var mapDifference = function(map, baseFn) {
                         var mapEntries = map.entries();
                         mapEntries.forEach(function(mapEntry) {
                             var mapKey = mapEntry.key;
                             var mapVal = mapEntry.val;
 
-                            var baseVal = base.get(mapKey);
+                            var baseVal = baseFn(mapKey);
 
                             if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
                                 map.remove(mapKey);
@@ -689,18 +802,20 @@ angular.module('ui.jassa.rex')
                     var createDataMap = function(coordinates) {
                         coordinates = coordinates || ctrl.getReferencedCoordinates();
 
-                        var override = scope.rexContext.override;
+                        //var override = scope.rexContext.override;
+                        var override = ctrl.getOverride();
 
                         //console.log('Override', JSON.stringify(scope.rexContext.override.entries()));
 
-                        var combined = new jassa.util.HashMap();
+                        //var combined = new jassa.util.HashMap();
 
                         //console.log('Coordinates: ', JSON.stringify(coordinates));
                         //var map = new MapUnion([scope.rexContext.override, scope.rex]);
                         var result = new jassa.util.HashMap();
                         coordinates.forEach(function(coordinate) {
-                             var val = scope.rexContext.getValue(coordinate);
-                             result.put(coordinate, val);
+                             //var val = scope.rexContext.getValue(coordinate);
+                            var val = getEffectiveValue(scope.rexContext, coordinate);
+                            result.put(coordinate, val);
                         });
 
                         //console.log('DATA', result.entries());
@@ -711,31 +826,38 @@ angular.module('ui.jassa.rex')
                     var updateDerivedValues = function(dataMap) {
 
                         var talis = assembleTalisRdfJson(dataMap);
+
+                        scope.rexContext.graph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis);
+
                         //console.log('Talis JSON', talis);
-                        var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
+                        //var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
 
 
-                        var tmp = assembleTalisRdfJson(scope.rexContext.cache);
+                        //var tmp = assembleTalisRdfJson(scope.rexContext.cache);
 
-                        var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
+                        //var before = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(tmp).map(function(x) { return '' + x; });
 
-                        var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
-                        var remove = _(before).difference(after);
-                        var added = _(after).difference(before);
+                        //var after = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis).map(function(x) { return '' + x; });
+                        //var remove = _(before).difference(after);
+                        //var added = _(after).difference(before);
 
                         //console.log('DIFF: Added: ' + added);
                         //console.log('DIFF: Removed: ' + remove);
 
-                        scope.rexContext.talisJson = turtle;
+                        //scope.rexContext.talisJson = turtle;
                     };
 
 
                     var cleanupOverride = function()
                     {
-                        var override = scope.rexContext.override;
+                        var override = ctrl.getOverride();
+                        //var override = scope.rexContext.override;
 
                         // Remove values from override that equal the source data
-                        mapDifference(override, scope.rexContext.cache);
+                        mapDifference(override, function(coordinate) {
+                            var r = getValueAt(scope.rexContext.json, coordinate);
+                            return r;
+                        });
 
                         // Remove undefined entries from override
                         var entries = override.entries();
@@ -753,7 +875,8 @@ angular.module('ui.jassa.rex')
                         //console.log('Referenced coordinates', JSON.stringify(coordinates));
                         var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
 
-                        jassa.util.MapUtils.retainKeys(scope.rexContext.override, coordinateSet);
+                        var override = ctrl.getOverride();
+                        jassa.util.MapUtils.retainKeys(override, coordinateSet);
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
@@ -861,8 +984,6 @@ angular.module('ui.jassa.rex')
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
-                },
-                post: function(scope, ele, attrs, ctrls) {
                 }
             };
         }
@@ -921,8 +1042,39 @@ angular.module('ui.jassa.rex')
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
-                },
-                post: function(scope, ele, attrs, ctrls) {
+                }
+            };
+        }
+    };
+}])
+
+;
+
+angular.module('ui.jassa.rex')
+
+/**
+ * Directive to attach a rex lookup function to the scope
+ *
+ * Different lookup functions can be used at different HTML regions under a rex-context.
+ *
+ * If present, rex-subject will use the provided function to perform data lookups
+ * on its IRIs and store the content in the scope
+ *
+ */
+.directive('rexLookup', ['$parse', function($parse) {
+    return {
+        priority: basePriority + 26,
+        restrict: 'A',
+        scope: true,
+        require: '^rexContext',
+        controller: function() {},
+        //require: ['^?rexSubject', '^?rexObject']
+//        controller: ['$scope', function($scope) {
+//        }],
+        compile: function(ele, attrs){
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    syncAttr($parse, scope, attrs, 'rexLookup');
                 }
             };
         }
@@ -1109,7 +1261,7 @@ angular.module('ui.jassa.rex')
 
 .directive('rexSubject', ['$parse', '$q', function($parse, $q) {
     return {
-        priority: basePriority + 18,
+        priority: basePriority + 24,
         restrict: 'A',
         scope: true,
         require: '^rexContext',
@@ -1117,30 +1269,52 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, contextCtrl) {
+
                     var subjectUri = syncAttr($parse, scope, attrs, 'rexSubject');
 
                     var doPrefetch = function() {
+                        var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
-                        var pm = scope.rexPrefixMapping;
+                        if(lookupFn && jassa.util.ObjectUtils.isFunction(lookupFn) && subjectUri) {
 
-                        var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
+                            var pm = scope.rexPrefixMapping;
+                            var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
 
-                        var s = jassa.rdf.NodeFactory.createUri(uri);
-                        $q.when(scope.rexContext.prefetch(s)).then(function() {
-                            // make sure to apply the scope
-                        });
+                            var s = jassa.rdf.NodeFactory.createUri(uri);
+
+                            var promise = scope.rexLookup(s);
+                            $q.when(promise).then(function(graph) {
+                                var contextScope = contextCtrl.$scope.rexContext;
+                                var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();
+
+                                contextScope.baseGraph.addAll(graph);
+                                // TODO Add the data to the context
+                            });
+                        }
+
+//                        $q.when(scope.rexContext.prefetch(s)).then(function() {
+//                            // make sure to apply the scope
+//                        });
                     };
 
-                    scope.$watch('rexSubject', function(newVal) {
+                    scope.$watch(function() {
+                        return scope.rexLookup;
+                    }, function(lookupFn) {
                         doPrefetch();
                     });
 
-                    scope.$watch('rexPrefixMapping', function(pm) {
+                    scope.$watch(function() {
+                        return scope.rexSubject;
+                    }, function(newVal) {
                         doPrefetch();
                     });
 
-                    //console.log('Prefetching: ', s);
+                    scope.$watch(function() {
+                        return scope.rexPrefixMapping;
+                    }, function(pm) {
+                        doPrefetch();
+                    });
                 }
             };
         }
@@ -1198,8 +1372,6 @@ angular.module('ui.jassa.rex')
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
-                },
-                post: function(scope, ele, attrs, ctrls) {
                 }
             };
         }
@@ -1294,6 +1466,60 @@ var syncHelper = function(scope, attrs, $parse, $interpolate, sourceAttr, target
 };
 
 angular.module('ui.jassa.sync', []);
+
+angular.module('ui.jassa.sync')
+
+/**
+ * Convenience directive
+ *
+ * sync-template="templateStr"
+ *
+ * implies sync-source="templateStr" sync-interpolate sync-to-target? sync-target?
+ *
+ * if sync-target is not specified, it will try to detect a target based on model attribute names (e.g. ngModel)
+ */
+.directive('syncTemplate', ['$parse', '$compile', function($parse, $compile) {
+    return {
+        priority: basePriority + 1000,
+        restrict: 'A',
+        scope: true,
+        terminal: true,
+        controller: function() {},
+        compile: function(ele, attrs) {
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    var templateStr = ele.attr('sync-template');
+
+                    ele.removeAttr('sync-template');
+
+                    ele.attr('sync-source', templateStr);
+                    ele.attr('sync-source-interpolate', '');
+
+                    if(ele.attr('sync-target') == null) {
+                        var name = getModelAttribute(attrs);
+                        var modelExprStr = attrs[name];
+
+                        if(!modelExprStr) {
+                            throw new Error('No model provided and found');
+                        }
+
+                        ele.attr('sync-target', modelExprStr);
+                    }
+
+                    // TODO Create a function to set attr default values
+                    if(ele.attr('sync-to-target') == null) {
+                        ele.attr('sync-to-target', '');
+                    }
+
+                    // Continue processing any further directives
+                    $compile(ele)(scope);
+                }
+            };
+        }
+    };
+}])
+
+;
 
 angular.module('ui.jassa.sync')
 

@@ -169,7 +169,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             }, function(newCoordinate, oldCoordinate) {
                 slot.entry.key = newCoordinate;
 
-                var oldValue = scope.rexContext.getValue(oldCoordinate);
+                var oldValue = getEffectiveValue(scope.rexContext, oldCoordinate); //scope.rexContext.getValue(oldCoordinate);
                 if(oldValue) {
                     var entry = {
                         key: newCoordinate,
@@ -183,7 +183,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
 
             scope.$watch(function() {
                 var coordinate = slot.entry.key;
-                var r = scope.rexContext.getValue(coordinate);
+                var r = getEffectiveValue(scope.rexContext, coordinate); //scope.rexContext.getValue(coordinate);
                 return r;
 
             }, function(value) {
@@ -269,6 +269,26 @@ var createCoordinate = function(scope, component) {
         i: scope.rexObject,
         c: component
     };
+};
+
+
+var getValueAt = function(talisRdfJson, coordinate) {
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    var i = p ? p[coordinate.i] : null;
+    var result = i ? i[coordinate.c] : null;
+
+    return result;
+};
+
+var getEffectiveValue = function(rexContext, coordinate) {
+    var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+
+    if(result == null) {
+        result = rexContext.json ? getValueAt(rexContext.json, coordinate) : null;
+    }
+
+    return result;
 };
 
 

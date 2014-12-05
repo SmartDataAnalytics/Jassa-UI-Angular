@@ -9,20 +9,26 @@ angular.module('ui.jassa.rex')
  * on its IRIs and store the content in the scope
  *
  */
-.directive('rexLookup', ['$parse', function($parse) {
+.directive('rexBaseGraph', ['$parse', function($parse) {
     return {
-        priority: basePriority + 26,
+        priority: basePriority + 28,
         restrict: 'A',
         scope: true,
-        require: '^rexContext',
+        require: 'rexContext',
         controller: function() {},
         //require: ['^?rexSubject', '^?rexObject']
 //        controller: ['$scope', function($scope) {
 //        }],
-        compile: function(ele, attrs){
+        compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncAttr($parse, scope, attrs, 'rexLookup');
+                    syncAttr($parse, scope, attrs, 'rexBaseGraph');
+
+                    scope.$watch(function() {
+                        return scope.rexBaseGraph;
+                    }, function() {
+                        scope.rexContext.baseGraph = scope.rexBaseGraph;
+                    });
                 }
             };
         }

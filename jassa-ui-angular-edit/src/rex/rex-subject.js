@@ -2,7 +2,7 @@ angular.module('ui.jassa.rex')
 
 .directive('rexSubject', ['$parse', '$q', function($parse, $q) {
     return {
-        priority: basePriority + 18,
+        priority: basePriority + 24,
         restrict: 'A',
         scope: true,
         require: '^rexContext',
@@ -26,7 +26,10 @@ angular.module('ui.jassa.rex')
 
                             var promise = scope.rexLookup(s);
                             $q.when(promise).then(function(graph) {
-                                context.sourceGraph.addAll(graph);
+                                var contextScope = contextCtrl.$scope.rexContext;
+                                var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();
+
+                                contextScope.baseGraph.addAll(graph);
                                 // TODO Add the data to the context
                             });
                         }

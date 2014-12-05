@@ -80,27 +80,30 @@
             .cache().virtFix().paginate(50000).pageExpand(100).create();
 
 
-        jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [jassa.rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')]).then(function(graph) {
-            //alert(graph);
-            graph.forEach(function(triple) {
-                console.log('Triple: ' + triple);
-            });
-        });
-
-        var lookupService = jassa.sponate.RexUtils.createRexLookupService(sparqlService);
-
-        $scope.createRexContext = function() {
-            return new RexContext(lookupService);
+        $scope.lookupFn = function(node) {
+            var result = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [node]);
+            return result;
         };
 
+        $scope.newGraph = function() {
+            return new jassa.rdf.GraphImpl();
+        };
+
+
+        $scope.graphToTurtle = function(graph, prefixMapping) {
+            var talis = graph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(graph) : null;
+            var r = talis ? jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis, prefixMapping) : '';
+            return r;
+        }
         // End of REX Setup
+
 
         // A simple switch to enable / disable demo includes
         $scope.enabled = {
-            'ex02': true,
+            'ex02': false,
             'ex06': true,
-            'ex04': true,
-            'ex05': true
+            'ex04': false,
+            'ex05': false
         };
 
         // Some Utils for geo stuff
@@ -185,13 +188,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <div ng-if="enabled['ex02']" ng-include="'forms/dynamic.html'"></div>
+<!--             <div ng-if="enabled['ex02']" ng-include="'forms/dynamic.html'"></div> -->
 
             <div ng-if="enabled['ex06']" ng-include="'forms/geo.html'"></div>
 
-            <div ng-if="enabled['ex04']" ng-include="'forms/person-form.html'"></div>
+<!--             <div ng-if="enabled['ex04']" ng-include="'forms/person-form.html'"></div> -->
 
-            <div ng-if="enabled['ex05']" ng-include="'forms/simple-editor.html'"></div>
+<!--             <div ng-if="enabled['ex05']" ng-include="'forms/simple-editor.html'"></div> -->
 
         </div>
     </div>
