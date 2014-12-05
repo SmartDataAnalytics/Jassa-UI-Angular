@@ -4,6 +4,8 @@ var RexContext = jassa.ext.Class.create({
     initialize: function(lookupService) {
         this.lookupService = lookupService;
 
+        this.sourceGraph = new jassa.rdf.GraphImpl();
+
         // the status of the resources as retrieved from the lookup service
         this.cache = new jassa.util.HashMap();
 

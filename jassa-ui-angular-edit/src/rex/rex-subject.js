@@ -10,30 +10,49 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, contextCtrl) {
+
                     var subjectUri = syncAttr($parse, scope, attrs, 'rexSubject');
 
                     var doPrefetch = function() {
+                        var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
-                        var pm = scope.rexPrefixMapping;
+                        if(lookupFn && jassa.util.ObjectUtils.isFunction(lookupFn) && subjectUri) {
 
-                        var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
+                            var pm = scope.rexPrefixMapping;
+                            var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
 
-                        var s = jassa.rdf.NodeFactory.createUri(uri);
-                        $q.when(scope.rexContext.prefetch(s)).then(function() {
-                            // make sure to apply the scope
-                        });
+                            var s = jassa.rdf.NodeFactory.createUri(uri);
+
+                            var promise = scope.rexLookup(s);
+                            $q.when(promise).then(function(graph) {
+                                context.sourceGraph.addAll(graph);
+                                // TODO Add the data to the context
+                            });
+                        }
+
+//                        $q.when(scope.rexContext.prefetch(s)).then(function() {
+//                            // make sure to apply the scope
+//                        });
                     };
 
-                    scope.$watch('rexSubject', function(newVal) {
+                    scope.$watch(function() {
+                        return scope.rexLookup;
+                    }, function(lookupFn) {
                         doPrefetch();
                     });
 
-                    scope.$watch('rexPrefixMapping', function(pm) {
+                    scope.$watch(function() {
+                        return scope.rexSubject;
+                    }, function(newVal) {
                         doPrefetch();
                     });
 
-                    //console.log('Prefetching: ', s);
+                    scope.$watch(function() {
+                        return scope.rexPrefixMapping;
+                    }, function(pm) {
+                        doPrefetch();
+                    });
                 }
             };
         }

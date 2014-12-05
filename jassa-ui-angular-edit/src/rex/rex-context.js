@@ -5,6 +5,7 @@ angular.module('ui.jassa.rex')
         priority: basePriority + 20,
         restrict: 'A',
         scope: true,
+        require: 'rexContext',
         controller: ['$scope', function($scope) {
 
             //this.rexContext = $scope.rexContext;
@@ -46,6 +47,27 @@ angular.module('ui.jassa.rex')
                 return result;
             };
 
+
+            this.getReferencedCoordinates = function() {
+                var slots = $scope.rexChangeSlots;
+                var slotIds = Object.keys(slots);
+
+                var result = slotIds.map(function(slotId) {
+                    var slot = slots[slotId];
+                    var entry = slot.entry;
+
+                    return entry ? entry.key : null;
+                });
+
+                result = result.filter(function(key) {
+                    return key != null;
+                });
+
+                //console.log('rcs:', scope.rexChangeSlots, ' SlotIds: ', slotIds, ' Coordinates: ', JSON.stringify(result), ' Slots: ', slots);
+
+                return result;
+            };
+
 //            this.releaseSlot = function(slot) {
 //                delete this.changeSlots[slot.id];
 //            }
@@ -56,8 +78,24 @@ angular.module('ui.jassa.rex')
 
 
             return {
-                pre: function(scope, ele, attrs, ctrls) {
+                pre: function(scope, ele, attrs, ctrl) {
                     syncAttr($parse, scope, attrs, 'rexContext');
+
+
+                    // TODO Watch any present sourceGraph attribute
+                    // And create the talis-json structure
+
+                    // The issue is, that the source graph might become quite large
+                    // (e.g. consider storing a whole DBpedia Data ID in it)
+                    // Would it be sufficient to only convert the subset of the graph
+                    // to RDF which is referenced by the form?
+
+//                    scope.$watch(function() {
+//                        return scope.rexSourceGraph;
+//                    }, function(sourceGraph) {
+//                        scope.rexJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(sourceGraph);
+//                    }, true);
+
 
                     // Remove all entries from map that exist in base
                     var mapDifference = function(map, base) {
@@ -75,7 +113,7 @@ angular.module('ui.jassa.rex')
                     };
 
                     var createDataMap = function(coordinates) {
-                        coordinates = coordinates || getReferencedCoordinates();
+                        coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         var override = scope.rexContext.override;
 
@@ -118,60 +156,6 @@ angular.module('ui.jassa.rex')
                     };
 
 
-                    /*
-                    var mapKeySet = function(map) {
-                        var result = new jassa.util.HashSet();
-
-                        var keys = map.keys();
-                        keys.forEach(function(key) {
-                            result.add(key);
-                        });
-                        return result;
-                    };*/
-
-                    var arrayToSet = function(arr) {
-                        var result = new jassa.util.HashSet();
-
-                        arr.forEach(function(item) {
-                            result.add(item);
-                        });
-                        return result;
-                    };
-
-
-
-                    var mapRetainKeys = function(map, keySet) {
-                        var mapKeys = map.keys();
-
-                        mapKeys.forEach(function(mapKey) {
-                            var isContained = keySet.contains(mapKey);
-                            if(!isContained) {
-                                map.remove(mapKey);
-                            }
-                        });
-                    };
-
-
-                    var getReferencedCoordinates = function() {
-                        var slots = scope.rexChangeSlots;
-                        var slotIds = Object.keys(slots);
-
-                        var result = slotIds.map(function(slotId) {
-                            var slot = slots[slotId];
-                            var entry = slot.entry;
-
-                            return entry ? entry.key : null;
-                        });
-
-                        result = result.filter(function(key) {
-                            return key != null;
-                        });
-
-                        //console.log('rcs:', scope.rexChangeSlots, ' SlotIds: ', slotIds, ' Coordinates: ', JSON.stringify(result), ' Slots: ', slots);
-
-                        return result;
-                    };
-
                     var cleanupOverride = function()
                     {
                         var override = scope.rexContext.override;
@@ -190,19 +174,19 @@ angular.module('ui.jassa.rex')
 
 
                     var cleanupReferences = function(coordinates) {
-                        coordinates = coordinates || getReferencedCoordinates();
+                        coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         //console.log('Referenced coordinates', JSON.stringify(coordinates));
-                        var coordinateSet = arrayToSet(coordinates);
+                        var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
 
-                        mapRetainKeys(scope.rexContext.override, coordinateSet);
+                        jassa.util.MapUtils.retainKeys(scope.rexContext.override, coordinateSet);
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
 
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
-                        return getReferencedCoordinates();
+                        return ctrl.getReferencedCoordinates();
                     }, function(coordinates) {
                         //console.log('Override', scope.rexContext.override);
                         cleanupReferences(coordinates);
@@ -210,7 +194,7 @@ angular.module('ui.jassa.rex')
                     }, true);
 
                     scope.$watch(function() {
-                        var coordinates = getReferencedCoordinates();
+                        var coordinates = ctrl.getReferencedCoordinates();
                         var r = createDataMap(coordinates);
                         return r;
                     }, function(dataMap) {
