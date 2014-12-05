@@ -28,7 +28,7 @@ cp bower.json "$targetFolder"
 #cp css/jassa-ui-angular.css "$targetFolder"
 
 for source in `cd "$sourceFolder" && ls -1`; do
-    target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?||g'`
+    target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?\.|\.|g'`
  
     cp -v "$sourceFolder/$source" "$targetFolder/$target"
 done

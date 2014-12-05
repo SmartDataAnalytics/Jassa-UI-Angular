@@ -1,6 +1,6 @@
 {
-  "name": "jassa-ui-rex",
-  "version": "0.0.1",
+  "name": "jassa-ui-angular-edit",
+  "version": "0.1.0",
   "dependencies": {
     "angular": "v1.3.5-build.3630+sha.30694c8",
     "moment": "v2.8.4",
