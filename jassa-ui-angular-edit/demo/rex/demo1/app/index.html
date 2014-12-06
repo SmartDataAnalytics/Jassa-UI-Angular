@@ -74,6 +74,15 @@
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
 
         // Begin of REX Setup
+
+        $scope.defaultNgModelOptions = {
+            //updateOn: 'default blur',
+            debounce: {
+                'default': 100,
+                'blur': 0
+            }
+        };
+
         var sparqlService = jassa.service.SparqlServiceBuilder
             //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
             .http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
@@ -96,15 +105,6 @@
             return r;
         }
         // End of REX Setup
-
-
-        // A simple switch to enable / disable demo includes
-        $scope.enabled = {
-            'ex02': false,
-            'ex06': true,
-            'ex04': false,
-            'ex05': false
-        };
 
         // Some Utils for geo stuff
         $scope.PointUtils = jassa.geo.PointUtils;
@@ -188,13 +188,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-<!--             <div ng-if="enabled['ex02']" ng-include="'forms/dynamic.html'"></div> -->
+            <div ng-include="'forms/dynamic.html'"></div>
 
-            <div ng-if="enabled['ex06']" ng-include="'forms/geo.html'"></div>
+            <div ng-include="'forms/geo.html'"></div>
 
-<!--             <div ng-if="enabled['ex04']" ng-include="'forms/person-form.html'"></div> -->
+            <div ng-include="'forms/person-form.html'"></div>
 
-<!--             <div ng-if="enabled['ex05']" ng-include="'forms/simple-editor.html'"></div> -->
+            <div ng-include="'forms/simple-editor.html'"></div>
 
         </div>
     </div>

@@ -323,6 +323,17 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
 };
 
 
+var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
+    var result = ele.attr(attrName);
+    if(!result) { // includes empty string
+        result = defaultValue;
+        ele.attr(attrName, result);
+
+        var an = attrs.$normalize(attrName);
+        attrs[an] = result;
+    }
+    return result;
+};
 
 
 

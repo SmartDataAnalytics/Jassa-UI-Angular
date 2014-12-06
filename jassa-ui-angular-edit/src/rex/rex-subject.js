@@ -17,7 +17,7 @@ angular.module('ui.jassa.rex')
                         var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
-                        if(lookupFn && jassa.util.ObjectUtils.isFunction(lookupFn) && subjectUri) {
+                        if(lookupFn && angular.isFunction(lookupFn) && subjectUri) {
 
                             var pm = scope.rexPrefixMapping;
                             var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;

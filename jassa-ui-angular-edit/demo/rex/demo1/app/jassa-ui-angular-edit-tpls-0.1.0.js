@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-05
+ * Version: 0.1.0 - 2014-12-06
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -582,6 +582,17 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
 };
 
 
+var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
+    var result = ele.attr(attrName);
+    if(!result) { // includes empty string
+        result = defaultValue;
+        ele.attr(attrName, result);
+
+        var an = attrs.$normalize(attrName);
+        attrs[an] = result;
+    }
+    return result;
+};
 
 
 
@@ -642,6 +653,8 @@ angular.module('ui.jassa.rex')
         scope: true,
         require: 'rexContext',
         controller: ['$scope', function($scope) {
+
+            $scope.rexContext = $scope.rexContext || {};
 
             this.$scope = $scope;
 
@@ -717,14 +730,17 @@ angular.module('ui.jassa.rex')
 
         }],
         compile: function(ele, attrs) {
-            //console.log('DA FUQ ON', ele, attrs);
 
+            setEleAttrDefaultValue(ele, attrs, 'rex-context', 'rexContext');
 
             return {
                 pre: function(scope, ele, attrs, ctrl) {
-                    if(!attrs.rexContext) {
-                        attrs.rexContext = '{}';
-                    }
+
+                    // If no context object is provided, we create a new one
+//                    if(!attrs.rexContext) {
+//                        scope.rexContextAnonymous = {};
+//                        //attrs.rexContext = 'rexContextAnonymous';
+//                    }
 
                     syncAttr($parse, scope, attrs, 'rexContext');
 
@@ -1276,7 +1292,7 @@ angular.module('ui.jassa.rex')
                         var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
-                        if(lookupFn && jassa.util.ObjectUtils.isFunction(lookupFn) && subjectUri) {
+                        if(lookupFn && angular.isFunction(lookupFn) && subjectUri) {
 
                             var pm = scope.rexPrefixMapping;
                             var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;

@@ -8,6 +8,8 @@ angular.module('ui.jassa.rex')
         require: 'rexContext',
         controller: ['$scope', function($scope) {
 
+            $scope.rexContext = $scope.rexContext || {};
+
             this.$scope = $scope;
 
 
@@ -82,14 +84,17 @@ angular.module('ui.jassa.rex')
 
         }],
         compile: function(ele, attrs) {
-            //console.log('DA FUQ ON', ele, attrs);
 
+            setEleAttrDefaultValue(ele, attrs, 'rex-context', 'rexContext');
 
             return {
                 pre: function(scope, ele, attrs, ctrl) {
-                    if(!attrs.rexContext) {
-                        attrs.rexContext = '{}';
-                    }
+
+                    // If no context object is provided, we create a new one
+//                    if(!attrs.rexContext) {
+//                        scope.rexContextAnonymous = {};
+//                        //attrs.rexContext = 'rexContextAnonymous';
+//                    }
 
                     syncAttr($parse, scope, attrs, 'rexContext');
 
