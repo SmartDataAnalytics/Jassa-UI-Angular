@@ -9,8 +9,13 @@ angular.module('ui.jassa.rex')
         restrict: 'A',
         scope: true,
         //require: '^rexContext',
-        controller: function() {},
+        controller: ['$scope', function($scope) {
+            $scope.rexPrefix = $scope.rexPrefix || {};
+        }],
         compile: function(ele, attrs) {
+
+            setEleAttrDefaultValue(ele, attrs, 'rex-prefix', 'rexPrefix');
+
             return {
                 pre: function(scope, ele, attrs, ctrls) {
 

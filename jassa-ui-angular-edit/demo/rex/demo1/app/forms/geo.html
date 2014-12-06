@@ -18,14 +18,14 @@
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">URI: </span>
-                        <input name="uri" type="text" class="form-control" ng-model="ex06.subject">
+                        <input name="uri" type="text" class="form-control" ng-model="ex06.subject" ng-model-options="defaultNgModelOptions">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">WKT: </span>
-                        <input name="firstName" type="text" class="form-control" ng-model="ex06.wkt" rex-predicate="'geo:geometry'" rex-literal>
+                        <input name="geometry" type="text" class="form-control" ng-model="ex06.wkt" ng-model-options="defaultNgModelOptions" rex-predicate="'geo:geometry'" rex-literal>
                     </div>
                 </div>
 
