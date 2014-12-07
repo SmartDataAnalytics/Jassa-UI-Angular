@@ -37,4 +37,21 @@
         ng-model="turtle"
         sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}"
     ></div>
+
+    <hr />
+    Added:
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{graphToTurtle(rexContext.diff.added, rexPrefixMapping)}}"
+    ></div>
+
+    <hr />
+    Removed:
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{graphToTurtle(rexContext.diff.removed, rexPrefixMapping)}}"
+    ></div>
+
 </div>

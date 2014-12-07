@@ -197,7 +197,35 @@ angular.module('ui.jassa.rex')
 
                         var talis = assembleTalisRdfJson(dataMap);
 
-                        scope.rexContext.graph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis);
+                        // Update the final RDF graph
+                        var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
+                        scope.rexContext.graph = targetGraph;
+
+
+                        // Update the referenced sub graph
+                        var refGraph = new jassa.rdf.GraphImpl();
+                        var coordinates = ctrl.getReferencedCoordinates();
+
+                        var srcJson = scope.rexContext.json;
+
+                        coordinates.forEach(function(coordinate) {
+                            var obj = getObjectAt(srcJson, coordinate);
+                            if(obj != null) {
+                                var o = jassa.rdf.NodeFactory.createFromTalisRdfJson(obj);
+
+                                var s = jassa.rdf.NodeFactory.createUri(coordinate.s);
+                                var p = jassa.rdf.NodeFactory.createUri(coordinate.p);
+
+                                var t = new jassa.rdf.Triple(s, p, o);
+                                refGraph.add(t);
+                            }
+                        });
+
+                        scope.rexContext.srcGraph = refGraph;
+
+                        scope.rexContext.diff = setDiff(refGraph, targetGraph);
+
+
 
                         //console.log('Talis JSON', talis);
                         //var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);

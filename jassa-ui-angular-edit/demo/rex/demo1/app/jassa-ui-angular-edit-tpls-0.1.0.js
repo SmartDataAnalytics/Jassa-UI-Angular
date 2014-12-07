@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-06
+ * Version: 0.1.0 - 2014-12-07
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -259,96 +259,6 @@ angular.module('ui.jassa.rdf-term-input', [])
 
 
 
-var RexContext = jassa.ext.Class.create({
-    initialize: function(lookupService) {
-        this.lookupService = lookupService;
-
-        this.sourceGraph = new jassa.rdf.GraphImpl();
-
-        // the status of the resources as retrieved from the lookup service
-        this.cache = new jassa.util.HashMap();
-
-        this.override = new jassa.util.HashMap();
-
-        this.json = {};
-        //this.combined = new MapUnion([this.override, this.cache]);
-        // values
-        // this.overrides = {};
-
-    },
-
-    prefetch: function(subject) {
-        if(this.cache.containsKey(subject)) {
-            // TODO Do something
-        }
-
-        // TODO Set a loading flag on the resource
-
-        var self = this;
-        var result = this.lookupService.lookup([subject]).then(function(map) {
-            console.log('Successfully prefetched: ', map);
-            var entries = map.entries();
-            entries.forEach(function(entry) {
-                var dataMap = entry.val.data;
-                self.cache.putMap(dataMap);
-
-                var tmp = assembleTalisRdfJson(dataMap);
-                _(self.json).extend(tmp);
-
-            });
-        });
-
-        return result;
-    },
-
-    combinedMap: function() {
-        var subMaps = [this.override, this.cache].filter(function(item) {
-            return item != null;
-        });
-
-        var result = new jassa.util.MapUnion(subMaps);
-
-        return result;
-    },
-
-    getValue: function(coordinate) {
-        //var subject = rdf.NodeFactory.createUri(coordinate.s);
-
-        //var c = this.cache.get(subject);
-        //var o = this.override.get(subject);
-
-        //console.log('Cache: ', this.cache);
-
-        var map = this.combinedMap();
-
-        var result = map.get(coordinate);
-
-        //console.log('Retrieved value: ', result, ' for coordinate ', coordinate);
-
-        return result;
-    },
-
-    asTalisJsonRdf: function() {
-        var map = this.combinedMap();
-
-        var result = assembleTalisRdfJson(map);
-        return result;
-    }
-});
-
-
-
-
-/*
-var getModelExpr(attrs, baseAttrName) {
-    var result = attrs[baseAttrName];
-
-    if(!result) {
-
-    }
-
-}
-*/
 
 
 // Prefix str:
@@ -531,11 +441,43 @@ var createCoordinate = function(scope, component) {
 };
 
 
-var getValueAt = function(talisRdfJson, coordinate) {
+var getObjectAt = function(talisRdfJson, coordinate) {
     var s = talisRdfJson[coordinate.s];
     var p = s ? s[coordinate.p] : null;
-    var i = p ? p[coordinate.i] : null;
+    var result = p ? p[coordinate.i] : null;
+
+    return result;
+};
+
+// TODO Rename to getComponentAt
+var getValueAt = function(talisRdfJson, coordinate) {
+    var i = getObjectAt(talisRdfJson, coordinate);
     var result = i ? i[coordinate.c] : null;
+
+    return result;
+};
+
+
+var diff = function(before, after) {
+    var result = new jassa.util.HashSet();
+
+    after.forEach(function(item) {
+        var isContained = before.contains(item);
+        if(!isContained) {
+            result.add(item);
+        }
+    });
+
+    return result;
+};
+
+
+var setDiff = function(before, after) {
+
+    var result = {
+        added: diff(before, after),
+        removed: diff(after, before)
+    };
 
     return result;
 };
@@ -843,7 +785,35 @@ angular.module('ui.jassa.rex')
 
                         var talis = assembleTalisRdfJson(dataMap);
 
-                        scope.rexContext.graph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTriples(talis);
+                        // Update the final RDF graph
+                        var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
+                        scope.rexContext.graph = targetGraph;
+
+
+                        // Update the referenced sub graph
+                        var refGraph = new jassa.rdf.GraphImpl();
+                        var coordinates = ctrl.getReferencedCoordinates();
+
+                        var srcJson = scope.rexContext.json;
+
+                        coordinates.forEach(function(coordinate) {
+                            var obj = getObjectAt(srcJson, coordinate);
+                            if(obj != null) {
+                                var o = jassa.rdf.NodeFactory.createFromTalisRdfJson(obj);
+
+                                var s = jassa.rdf.NodeFactory.createUri(coordinate.s);
+                                var p = jassa.rdf.NodeFactory.createUri(coordinate.p);
+
+                                var t = new jassa.rdf.Triple(s, p, o);
+                                refGraph.add(t);
+                            }
+                        });
+
+                        scope.rexContext.srcGraph = refGraph;
+
+                        scope.rexContext.diff = setDiff(refGraph, targetGraph);
+
+
 
                         //console.log('Talis JSON', talis);
                         //var turtle = jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis);
