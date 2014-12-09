@@ -37,8 +37,6 @@ angular.module('ui.jassa.rex')
 
                     // Continue processing any further directives
                     $compile(ele)(scope);
-                },
-                post: function(scope, ele, attrs, ctrls) {
                 }
             };
         }

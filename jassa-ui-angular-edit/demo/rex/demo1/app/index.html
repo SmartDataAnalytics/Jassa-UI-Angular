@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
+    <link rel="stylesheet" href="bower_components/selectize/dist/css/selectize.css" />
     <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
     <!-- endbower -->
 
@@ -36,10 +37,14 @@
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/angular-ui-select/dist/select.js"></script>
+    <script src="bower_components/sifter/sifter.js"></script>
+    <script src="bower_components/microplugin/src/microplugin.js"></script>
+    <script src="bower_components/selectize/dist/js/selectize.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
     <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
     <!-- endbower -->
 
     <!-- endbuild -->
@@ -72,29 +77,95 @@
         'jassa.ui.edit.demo.widgets',
         ['ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror'])
 
-    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
+    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
         // Begin of REX Setup
+
+        $scope.defaultNgModelOptions = {
+            //updateOn: 'default blur',
+            debounce: {
+                'default': 300,
+                'blur': 0
+            }
+        };
+
+
         var sparqlService = jassa.service.SparqlServiceBuilder
             //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            .http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            .cache().virtFix().paginate(50000).pageExpand(100).create();
+            .http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
+            .virtFix().paginate(50000).pageExpand(100).create();
 
-        var lookupService = jassa.sponate.RexUtils.createRexLookupService(sparqlService);
+        // TODO Somehow update .cache() on update
 
-        $scope.createRexContext = function() {
-            return new RexContext(lookupService);
+        var updateService = new jassa.service.SparqlUpdateHttp('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org']);
+
+        $scope.performUpdate = function(diff, prefixMapping) {
+            var str;
+            str = $scope.createDeleteRequest(diff.removed, prefixMapping);
+            var p1 = updateService.createUpdateExecution(str).execUpdate();
+
+            str = $scope.createInsertRequest(diff.added, prefixMapping);
+            var p2 = updateService.createUpdateExecution(str).execUpdate();
+
+            Promise.all([p1, p2]).then(function() {
+                alert('Success - I will now refresh - ya, will make that nicer soon');
+                location.reload();
+            }, function() {
+                alert('Failed');
+            });
+
+            /*
+            var request = $http({
+                method: 'post',
+                url: "api/index.cfm",
+                params: {
+                action: "get"
+                }
+            });*/
+
+            //$http
+
         };
 
+        $scope.createInsertRequest = function(graph, prefixMapping) {
+            var result;
+            if(graph) {
+                var quads = jassa.sparql.QuadUtils.triplesToQuads(graph);
+                result = '' + new jassa.sparql.UpdateDataInsert(quads);
+            } else {
+                result = '';
+            }
+            return result;
+        };
+
+        $scope.createDeleteRequest = function(graph, prefixMapping) {
+            var result;
+            if(graph) {
+                var quads = jassa.sparql.QuadUtils.triplesToQuads(graph);
+                result = '' + new jassa.sparql.UpdateDataDelete(quads);
+            } else {
+                result = '';
+            }
+            return result;
+        };
+
+
+        $scope.lookupFn = function(node) {
+            var result = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [node]);
+            return result;
+        };
+
+        $scope.newGraph = function() {
+            return new jassa.rdf.GraphImpl();
+        };
+
+
+        $scope.graphToTurtle = function(graph, prefixMapping) {
+            var talis = graph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(graph) : null;
+            var r = talis ? jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis, prefixMapping) : '';
+            return r;
+        }
         // End of REX Setup
-
-        // A simple switch to enable / disable demo includes
-        $scope.enabled = {
-            'ex02': false,
-            'ex06': false,
-            'ex04': false,
-            'ex05': true
-        };
 
         // Some Utils for geo stuff
         $scope.PointUtils = jassa.geo.PointUtils;
@@ -106,12 +177,14 @@
         // TODO integrate moment.js
         // Native Javascript Date features seem to be insanely useless when it comes to RDF :/
         $scope.dateToString = function(x) {
-            var r = !x ? null : x.toUTCString();
+            var r = !x ? null : moment(x).toISOString();
+            //var r = !x ? null : x.toUTCString();
             return r;
         };
 
         $scope.parseDate = function(x) {
-            var r = !x ? null : new Date(x);
+            var r = !x ? null : moment(x).toDate();
+            //var r = !x ? null : new Date(x);
             return r;
         };
 
@@ -176,13 +249,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <div ng-if="enabled['ex02']" ng-include="'forms/dynamic.html'"></div>
+<!--             <div ng-include="'forms/dynamic.html'"></div> -->
 
-            <div ng-if="enabled['ex06']" ng-include="'forms/geo.html'"></div>
+<!--             <div ng-include="'forms/geo.html'"></div> -->
 
-            <div ng-if="enabled['ex04']" ng-include="'forms/person-form.html'"></div>
+<!--             <div ng-include="'forms/person-form.html'"></div> -->
 
-            <div ng-if="enabled['ex05']" ng-include="'forms/simple-editor.html'"></div>
+            <div ng-include="'forms/simple-editor.html'"></div>
 
         </div>
     </div>

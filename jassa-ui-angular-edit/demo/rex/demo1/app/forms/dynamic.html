@@ -1,4 +1,10 @@
-<div rex-prefix="" class="alert alert-info" role="alert" ng-init="ex02={}; ex02.properties=[]; ex02.context=createRexContext(); ex02.subject='http://example.org/resource/MyResource'" rex-context="ex02.context" >
+<div
+    class="alert alert-info"
+    role="alert"
+    ng-init="ex02={}; ex02.properties=[]; ex02.context={}; ex02.subject='http://example.org/resource/MyResource'"
+    rex-context="ex02.context"
+    rex-prefix
+    >
     <h3>Custom Form</h3>
 
     <form role="form" rex-subject="ex02.subject">
@@ -35,5 +41,9 @@
         </div>
     </form>
 
-    <div ui-codemirror="editorOptions.ttl" ng-model="ex02.context.talisJson"></div>
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+    </div>
 </div>

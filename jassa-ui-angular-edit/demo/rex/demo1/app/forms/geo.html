@@ -1,22 +1,31 @@
-<div class="row" ng-init="ex06={}; ex06.context=createRexContext(); ex06.subject='dbr:Leipzig'">
+<div
+    class="row"
+    ng-init="ex06={}; ex06.context={}; ex06.subject='dbr:Leipzig'; ex06.baseGraph=newGraph()"
+    rex-context="ex06.context"
+    rex-base-graph="ex06.baseGraph"
+    rex-lookup="lookupFn"
+    rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
+    rex-subject="ex06.subject"
+    rex-typeof="'dbo:Place'">
+
     <div class="col-md-6">
 
         <div class="alert alert-info" role="alert">
             <h3>WKT &lt;-&gt; LonLat sync</h3>
             <i>Conditional generation of RDF using hidden fields</i>
 
-            <form role="form" rex-context="ex06.context" rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-subject="ex06.subject" rex-typeof="'dbo:Place'">
+            <form role="form">
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">URI: </span>
-                        <input name="uri" type="text" class="form-control" ng-model="ex06.subject">
+                        <input name="uri" type="text" class="form-control" ng-model="ex06.subject" ng-model-options="defaultNgModelOptions">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">WKT: </span>
-                        <input name="firstName" type="text" class="form-control" ng-model="ex06.wkt" rex-predicate="'geo:geometry'" rex-literal>
+                        <input name="geometry" type="text" class="form-control" ng-model="ex06.wkt" ng-model-options="defaultNgModelOptions" rex-predicate="'geo:geometry'" rex-literal>
                     </div>
                 </div>
 
@@ -52,7 +61,11 @@
         <div class="alert alert-success" role="alert">
             <h3>Output</h3>
 
-            <div ui-codemirror="editorOptions.ttl" ng-model="ex06.context.talisJson"></div>
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+            </div>
         </div>
     </div>
 
