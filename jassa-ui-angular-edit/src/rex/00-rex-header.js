@@ -19,9 +19,6 @@ var parsePrefixes = function(prefixMapping) {
 };
 
 
-
-
-
 var getModelAttribute = function(attrs) {
     var modelAttrNames = ['ngModel', 'model'];
 

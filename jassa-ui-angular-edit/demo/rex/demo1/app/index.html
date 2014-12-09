@@ -71,7 +71,7 @@
         'jassa.ui.edit.demo.widgets',
         ['ngSanitize', 'ui.bootstrap', 'ui.jassa.edit', 'ui.codemirror'])
 
-    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', function($scope, $location, $anchorScroll, $timeout) {
+    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
         // Begin of REX Setup
 
@@ -83,11 +83,65 @@
             }
         };
 
-        var sparqlService = jassa.service.SparqlServiceBuilder
-            .http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            //.http('http://akswnc3.informatik.uni-leipzig.de/data/dbpedia/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            .cache().virtFix().paginate(50000).pageExpand(100).create();
 
+        var sparqlService = jassa.service.SparqlServiceBuilder
+            //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+            .http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
+            .virtFix().paginate(50000).pageExpand(100).create();
+
+        // TODO Somehow update .cache() on update
+
+        var updateService = new jassa.service.SparqlUpdateHttp('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org']);
+
+        $scope.performUpdate = function(diff, prefixMapping) {
+            var str;
+            str = $scope.createDeleteRequest(diff.removed, prefixMapping);
+            var p1 = updateService.createUpdateExecution(str).execUpdate();
+
+            str = $scope.createInsertRequest(diff.added, prefixMapping);
+            var p2 = updateService.createUpdateExecution(str).execUpdate();
+
+            Promise.all([p1, p2]).then(function() {
+                alert('Success - I will now refresh - ya, will make that nicer soon');
+                location.reload();
+            }, function() {
+                alert('Failed');
+            });
+
+            /*
+            var request = $http({
+                method: 'post',
+                url: "api/index.cfm",
+                params: {
+                action: "get"
+                }
+            });*/
+
+            //$http
+
+        };
+
+        $scope.createInsertRequest = function(graph, prefixMapping) {
+            var result;
+            if(graph) {
+                var quads = jassa.sparql.QuadUtils.triplesToQuads(graph);
+                result = '' + new jassa.sparql.UpdateDataInsert(quads);
+            } else {
+                result = '';
+            }
+            return result;
+        };
+
+        $scope.createDeleteRequest = function(graph, prefixMapping) {
+            var result;
+            if(graph) {
+                var quads = jassa.sparql.QuadUtils.triplesToQuads(graph);
+                result = '' + new jassa.sparql.UpdateDataDelete(quads);
+            } else {
+                result = '';
+            }
+            return result;
+        };
 
         $scope.lookupFn = function(node) {
             var result = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [node]);

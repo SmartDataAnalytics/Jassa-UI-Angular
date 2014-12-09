@@ -43,7 +43,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{graphToTurtle(rexContext.diff.added, rexPrefixMapping)}}"
+        sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
     ></div>
 
     <hr />
@@ -51,7 +51,10 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{graphToTurtle(rexContext.diff.removed, rexPrefixMapping)}}"
+        sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
     ></div>
+
+
+    <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.length && !rexContext.diff.added.length }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
 
 </div>
