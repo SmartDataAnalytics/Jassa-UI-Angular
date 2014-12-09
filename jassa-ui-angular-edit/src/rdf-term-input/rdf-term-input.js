@@ -243,14 +243,14 @@ angular.module('ui.jassa.rdf-term-input', [])
                             }
                           }
 
-                          // if the datatype is not in hashmap add them
+                          // if the language is not in hashmap add them
                           if (!matchedLang) {
                             // create new datatype set
                             var newLang = {
                               id: scope.state.lang,
                               displayLabel: scope.state.lang
                             };
-                            // add new datatype to datatypes
+                            // add new language to langs
                             scope.langs.push(newLang);
                             // set datatype as selected
                             scope.langs.selected = newLang;
