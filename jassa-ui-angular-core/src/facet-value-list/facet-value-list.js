@@ -14,6 +14,17 @@ angular.module('ui.jassa.facet-value-list', [])
         currentPage: 1,
         maxSize: 5
     };
+<<<<<<< HEAD
+=======
+
+    $scope.loading = {
+		data: false,
+        pageCount: false
+	};
+    
+    //$scope.path = null;
+    
+>>>>>>> origin
 
     $scope.path = null;
     var facetValueService = null;
@@ -108,8 +119,39 @@ angular.module('ui.jassa.facet-value-list', [])
         var constraintManager = $scope.facetTreeConfig.getFacetConfig().getConstraintManager();
 
         var path = $scope.path;
+<<<<<<< HEAD
         var node = item.node;
         var constraint = new jassa.facete.ConstraintEquals(path, node);
+=======
+        
+        if(!facetValueService || !path) {
+            $scope.totalItems = 0;
+            $scope.facetValues = [];
+            return;
+        }
+        
+        var fetcher = facetValueService.createFacetValueFetcher($scope.path, $scope.filterText);
+
+        var countPromise = fetcher.fetchCount();
+        
+        var pageSize = 10;
+        var offset = ($scope.pagination.currentPage - 1) * pageSize;
+        
+        var dataPromise = fetcher.fetchData(offset, pageSize);
+
+        $scope.loading.pageCount = true;
+        $scope.loading.data = true;
+
+        jassa.sponate.angular.bridgePromise(countPromise, $q.defer(), $scope.$root, function(countInfo) {
+            $scope.pagination.totalItems = countInfo.count;
+            $scope.loading.pageCount = false;
+        });
+        
+        jassa.sponate.angular.bridgePromise(dataPromise, $q.defer(), $scope.$root, function(items) {
+            $scope.facetValues = items;
+            $scope.loading.data = false;
+        });
+>>>>>>> origin
 
         // TODO Integrate a toggle constraint method into the filterManager
         constraintManager.toggleConstraint(constraint);

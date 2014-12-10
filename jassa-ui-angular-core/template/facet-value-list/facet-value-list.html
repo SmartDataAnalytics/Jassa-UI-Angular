@@ -1,4 +1,5 @@
 <div class="frame">
+<<<<<<< HEAD
     <form ng-submit="filterTable(filterText)">
         <input type="text" ng-model="filterText" />
         <input class="btn-primary" type="submit" value="Filter" />
@@ -19,4 +20,27 @@
 <!--               </tr> -->
 <!--           </table> -->
           <pagination class="pagination-small" total-items="pagination.totalItems" page="pagination.currentPage" max-size="pagination.maxSize" boundary-links="true" rotate="false" num-pages="pagination.numPages" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+=======
+	<form ng-submit="filterTable(filterText)">
+	    <input type="text" ng-model="filterText" />
+		<input class="btn-primary" type="submit" value="Filter" />
+	</form>
+
+	<span ng-show="loading.data || loading.pageCount">
+		Loading... 
+	    <span ng-show="loading.data">(data)</span>
+	    <span ng-show="loading.pageCount">(page count)</span>
+	</span>
+
+	<table>
+              <tr><th>Value</th><th>Constrained</th></tr>
+<!-- <th>Count</th> -->
+	    <tr ng-repeat="item in facetValues">
+                  <td><span title="{{item.node.toString()}}">{{item.displayLabel}}</span></td>
+<!--                    <td>todo</td> -->
+                  <td><input type="checkbox" ng-model="item.tags.isConstrainedEqual" ng-change="toggleConstraint(item)" /></td>
+              </tr>
+      	</table>
+  		<pagination class="pagination-small" total-items="pagination.totalItems" page="pagination.currentPage" max-size="pagination.maxSize" boundary-links="true" rotate="false" num-pages="pagination.numPages" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+>>>>>>> origin
 </div>

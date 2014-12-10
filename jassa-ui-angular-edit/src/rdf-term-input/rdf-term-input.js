@@ -75,15 +75,30 @@ angular.module('ui.jassa.rdf-term-input', [])
             });
             //$scope.
 
+            $scope.onSelectTermType = function(item, model) {
+              $scope.state.type = model.id;
+            };
+
+            $scope.onSelectDatatype = function(item, model) {
+              $scope.state.datatype = model.id;
+            };
+
+            $scope.onSelectLanguage = function(item, model) {
+              $scope.state.lang = model.id;
+            };
+
         }],
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ngModel) {
 
+
+
                     var getValidState = function() {
                         var result;
 
                         var state = scope.state;
+                        // {"type":{"id":"http://typedLiteral","displayLabel":"typed"},"value":"297.6","datatype":"http://dbpedia.org/datatype/squareKilometre"}
                         var type = state.type;
                         switch(type) {
                         case vocab.iri:
@@ -172,19 +187,77 @@ angular.module('ui.jassa.rdf-term-input', [])
                     }, function(talisJson) {
                         //console.log('Got outside change: ', talisJson);
 
-                        if(talisJson) {
-                            var newState = convertToState(talisJson);
+                      if (!talisJson) {
+                      } else {
+                          var newState = convertToState(talisJson);
 
-//                            var newState;
-//                            try {
-//                                newState = convertToState(talisJson);
-//                            } catch(err) {
-//                                newState = {};
-//                            }
+  //                            var newState;
+  //                            try {
+  //                                newState = convertToState(talisJson);
+  //                            } catch(err) {
+  //                                newState = {};
+  //                            }
 
-                            scope.state = newState;
-                            //console.log('ABSORBED', newState, ' from ', talisJson);
-                        }
+                          scope.state = newState;
+
+                          // init value of ui-select-box termtype
+                          for (var i in scope.termTypes) {
+                            if (scope.termTypes[i].id === scope.state.type) {
+                              scope.termTypes.selected = scope.termTypes[i];
+                              break;
+                            }
+                          }
+
+                          // init value of ui-select-box datatype
+                          var matchedDatatype = false;
+                          for (var j in scope.datatypes) {
+                            if (scope.datatypes[j].id === scope.state.datatype) {
+                              scope.datatypes.selected = scope.datatypes[j];
+                              matchedDatatype = true;
+                              break;
+                            }
+                          }
+
+                          // if the datatype is not in hashmap add them
+                          if (!matchedDatatype) {
+                            //TODO: short uri for displayLabel
+                            var prefixMapping = new jassa.rdf.PrefixMappingImpl();
+                            // create new datatype set
+                            var newDatatype = {
+                              id: scope.state.datatype,
+                              displayLabel:  prefixMapping.shortForm(scope.state.datatype)
+                            };
+                            // add new datatype to datatypes
+                            scope.datatypes.push(newDatatype);
+                            // set datatype as selected
+                            scope.datatypes.selected = newDatatype;
+                          }
+
+                          // init value of ui-select-box languages
+                          var matchedLang = false;
+                          for (var k in scope.langs) {
+                            if (scope.langs[k].id === scope.state.lang) {
+                              scope.langs.selected = scope.langs[k];
+                              matchedLang = true;
+                              break;
+                            }
+                          }
+
+                          // if the datatype is not in hashmap add them
+                          if (!matchedLang) {
+                            // create new datatype set
+                            var newLang = {
+                              id: scope.state.lang,
+                              displayLabel: scope.state.lang
+                            };
+                            // add new datatype to datatypes
+                            scope.langs.push(newLang);
+                            // set datatype as selected
+                            scope.langs.selected = newLang;
+                          }
+
+                        //console.log('ABSORBED', newState, ' from ', talisJson);
+                      }
                     }, true);
 
                     //if(modelSetter) {

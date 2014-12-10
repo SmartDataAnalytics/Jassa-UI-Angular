@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-07
+ * Version: 0.1.0 - 2014-12-09
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -84,15 +84,30 @@ angular.module('ui.jassa.rdf-term-input', [])
             });
             //$scope.
 
+            $scope.onSelectTermType = function(item, model) {
+              $scope.state.type = model.id;
+            };
+
+            $scope.onSelectDatatype = function(item, model) {
+              $scope.state.datatype = model.id;
+            };
+
+            $scope.onSelectLanguage = function(item, model) {
+              $scope.state.lang = model.id;
+            };
+
         }],
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ngModel) {
 
+
+
                     var getValidState = function() {
                         var result;
 
                         var state = scope.state;
+                        // {"type":{"id":"http://typedLiteral","displayLabel":"typed"},"value":"297.6","datatype":"http://dbpedia.org/datatype/squareKilometre"}
                         var type = state.type;
                         switch(type) {
                         case vocab.iri:
@@ -181,19 +196,77 @@ angular.module('ui.jassa.rdf-term-input', [])
                     }, function(talisJson) {
                         //console.log('Got outside change: ', talisJson);
 
-                        if(talisJson) {
-                            var newState = convertToState(talisJson);
+                      if (!talisJson) {
+                      } else {
+                          var newState = convertToState(talisJson);
 
-//                            var newState;
-//                            try {
-//                                newState = convertToState(talisJson);
-//                            } catch(err) {
-//                                newState = {};
-//                            }
+  //                            var newState;
+  //                            try {
+  //                                newState = convertToState(talisJson);
+  //                            } catch(err) {
+  //                                newState = {};
+  //                            }
 
-                            scope.state = newState;
-                            //console.log('ABSORBED', newState, ' from ', talisJson);
-                        }
+                          scope.state = newState;
+
+                          // init value of ui-select-box termtype
+                          for (var i in scope.termTypes) {
+                            if (scope.termTypes[i].id === scope.state.type) {
+                              scope.termTypes.selected = scope.termTypes[i];
+                              break;
+                            }
+                          }
+
+                          // init value of ui-select-box datatype
+                          var matchedDatatype = false;
+                          for (var j in scope.datatypes) {
+                            if (scope.datatypes[j].id === scope.state.datatype) {
+                              scope.datatypes.selected = scope.datatypes[j];
+                              matchedDatatype = true;
+                              break;
+                            }
+                          }
+
+                          // if the datatype is not in hashmap add them
+                          if (!matchedDatatype) {
+                            //TODO: short uri for displayLabel
+                            var prefixMapping = new jassa.rdf.PrefixMappingImpl();
+                            // create new datatype set
+                            var newDatatype = {
+                              id: scope.state.datatype,
+                              displayLabel:  prefixMapping.shortForm(scope.state.datatype)
+                            };
+                            // add new datatype to datatypes
+                            scope.datatypes.push(newDatatype);
+                            // set datatype as selected
+                            scope.datatypes.selected = newDatatype;
+                          }
+
+                          // init value of ui-select-box languages
+                          var matchedLang = false;
+                          for (var k in scope.langs) {
+                            if (scope.langs[k].id === scope.state.lang) {
+                              scope.langs.selected = scope.langs[k];
+                              matchedLang = true;
+                              break;
+                            }
+                          }
+
+                          // if the datatype is not in hashmap add them
+                          if (!matchedLang) {
+                            // create new datatype set
+                            var newLang = {
+                              id: scope.state.lang,
+                              displayLabel: scope.state.lang
+                            };
+                            // add new datatype to datatypes
+                            scope.langs.push(newLang);
+                            // set datatype as selected
+                            scope.langs.selected = newLang;
+                          }
+
+                        //console.log('ABSORBED', newState, ' from ', talisJson);
+                      }
                     }, true);
 
                     //if(modelSetter) {
@@ -276,9 +349,6 @@ var parsePrefixes = function(prefixMapping) {
 
     return result;
 };
-
-
-
 
 
 var getModelAttribute = function(attrs) {
@@ -1568,20 +1638,48 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select>\n" +
+    "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
+    "        <ui-select ng-model=\"termTypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
+    "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "          <ui-select-choices repeat=\"item in termTypes | filter: $select.search\">\n" +
+    "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
+    "          </ui-select-choices>\n" +
+    "        </ui-select>\n" +
     "    </div>\n" +
     "\n" +
     "    <!-- Datatype selector -->\n" +
-    "    <span ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\">\n" +
+    "    <!--span ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\">\n" +
     "        <select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in datatypes\"></select>\n" +
-    "    </span>\n" +
+    "    </span-->\n" +
+    "\n" +
+    "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
+    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectDatatype($item, $model)\" style=\"width: 100px;\" >\n" +
+    "        <ui-select-match placeholder=\"Datatype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "        <ui-select-choices repeat=\"item in datatypes | filter: $select.search\">\n" +
+    "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
+    "        </ui-select-choices>\n" +
+    "      </ui-select>\n" +
+    "    </div>\n" +
+    "\n" +
     "\n" +
     "    <!-- Language selector -->\n" +
-    "    <span ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\">\n" +
+    "    <!--span ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\">\n" +
     "        <select ng-model=\"state.lang\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in langs\"></select>\n" +
-    "    </span>\n" +
+    "    </span-->\n" +
     "\n" +
-    "    <input type=\"text\" class=\"form-control margin-left-1\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
+    "    <div ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
+    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectLanguage($item, $model)\" style=\"width: 100px;\" >\n" +
+    "        <ui-select-match placeholder=\"Language\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "        <ui-select-choices repeat=\"item in langs | filter: $select.search\">\n" +
+    "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
+    "        </ui-select-choices>\n" +
+    "      </ui-select>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <!--div class=\"input-group-addon\">\n" +
+    "\n" +
+    "    </div-->\n" +
+    "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"height:52px; margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
     "</div>\n" +
     "\n" +
     "");

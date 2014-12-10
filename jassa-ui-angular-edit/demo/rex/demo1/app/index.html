@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
+    <link rel="stylesheet" href="bower_components/selectize/dist/css/selectize.css" />
     <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
     <!-- endbower -->
 
@@ -34,6 +36,10 @@
     <script src="bower_components/angular-ui-sortable/sortable.js"></script>
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/angular-ui-select/dist/select.js"></script>
+    <script src="bower_components/sifter/sifter.js"></script>
+    <script src="bower_components/microplugin/src/microplugin.js"></script>
+    <script src="bower_components/selectize/dist/js/selectize.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
@@ -69,7 +75,7 @@
 
     var app = angular.module(
         'jassa.ui.edit.demo.widgets',
-        ['ngSanitize', 'ui.bootstrap', 'ui.jassa.edit', 'ui.codemirror'])
+        ['ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror'])
 
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
@@ -142,6 +148,7 @@
             }
             return result;
         };
+
 
         $scope.lookupFn = function(node) {
             var result = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [node]);
