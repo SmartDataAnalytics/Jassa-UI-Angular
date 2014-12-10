@@ -22,11 +22,15 @@
     </form>
 
     <form role="form" rex-subject="ex05.subject">
-        <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject]" rex-predicate="property">
+        <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
             {{property}}:
-            <div class="form-group" ng-repeat="(object, objectData) in propertyData" rex-object ng-init="term={}">
-                <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions"  rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+            <div ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}">
+                <div class="form-group">
+                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+                    <input class="form-control" type="checkbox" ng-model="deleted" rex-deleted="deleted">
+                </div>
             </div>
+            <button class="btn btn-primary" ng-click="propertyData.push({type: 'uri', value: ''})">Add Object</button>
         </div>
     </form>
 
