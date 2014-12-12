@@ -10,8 +10,8 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
     "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
-    "        <ui-select ng-model=\"termTypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
-    "          <ui-select-match placeholder=\"Select or search in the list...\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "        <ui-select ng-model=\"termTypes.selected\" theme=\"selectize\" reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
+    "          <ui-select-match readonly placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "          <ui-select-choices repeat=\"item in termTypes | filter: $select.search\">\n" +
     "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "          </ui-select-choices>\n" +
@@ -26,7 +26,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
     "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectDatatype($item, $model)\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Datatype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
-    "        <ui-select-choices repeat=\"item in datatypes | filter: $select.search\">\n" +
+    "        <ui-select-choices repeat=\"item in datatypes | filter: $select.search\" refresh=\"refreshDatatype($select.search)\" refresh-delay=\"100\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "        </ui-select-choices>\n" +
     "      </ui-select>\n" +
@@ -51,6 +51,9 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    </div-->\n" +
     "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"height:52px; margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
+    "    <span ng-show=\"rightButton\" class=\"input-group-btn\">\n" +
+    "      <button class=\"btn btn-default\" type=\"button\">Map</button>\n" +
+    "    </span>\n" +
     "</div>\n" +
     "\n" +
     "");

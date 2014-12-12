@@ -8,8 +8,8 @@
     <!-- Term type selector -->
     <div class="input-group-addon">
         <!--select ng-model="state.type" ng-model-options="ngModelOptions" ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select-->
-        <ui-select ng-model="termTypes.selected" ng-disabled="disabled" theme="selectize"  reset-search-input="false" on-select="onSelectTermType($item, $model)" style="width: 100px;" >
-          <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
+        <ui-select ng-model="termTypes.selected" theme="selectize" reset-search-input="false" on-select="onSelectTermType($item, $model)" style="width: 100px;" >
+          <ui-select-match readonly placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
           <ui-select-choices repeat="item in termTypes | filter: $select.search">
             <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
           </ui-select-choices>
@@ -24,7 +24,7 @@
     <div ng-show="state.type===vocab.typedLiteral" class="input-group-addon" style="border-left: 0px;">
       <ui-select ng-model="datatypes.selected" ng-disabled="disabled" theme="selectize"  reset-search-input="false" on-select="onSelectDatatype($item, $model)" style="width: 100px;" >
         <ui-select-match placeholder="Datatype">{{$select.selected.displayLabel}}</ui-select-match>
-        <ui-select-choices repeat="item in datatypes | filter: $select.search">
+        <ui-select-choices repeat="item in datatypes | filter: $select.search" refresh="refreshDatatype($select.search)" refresh-delay="100">
           <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
         </ui-select-choices>
       </ui-select>
@@ -49,5 +49,8 @@
 
     </div-->
     <input type="text" class="form-control margin-left-1" style="height:52px; margin-left: -1px !important;" ng-model="state.value" ng-model-options="ngModelOptions">
+    <span ng-show="rightButton" class="input-group-btn">
+      <button class="btn btn-default" type="button">Map</button>
+    </span>
 </div>
 
