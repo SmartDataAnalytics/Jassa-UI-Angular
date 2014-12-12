@@ -83,7 +83,8 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                         val: oldValue
                     };
 
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
             }, true);
 
@@ -104,7 +105,8 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 //console.log('Value at coordinate ')
 
                 if(value != null) {
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
 
                 slot.entry.value = value;
@@ -113,9 +115,9 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     // If the given model is writeable, then we need to update it
                     // whenever the coordinate's value changes
 
-                    if(value != null) {
+                    //if(value != null) {
                         modelSetter(scope, value);
-                    }
+                    //}
                 }
 
             }, true);
@@ -136,8 +138,14 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 slot.entry.val = newVal;
 
                 if(newVal != null) {
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
+//                else {
+//                    // Remove null values
+//                    // TODO Can this happen?
+//                    contextCtrl.getOverride().remove(coordinate);
+//                }
 
                 //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
@@ -153,15 +161,29 @@ var assembleTalisRdfJson = function(map) {
 
     entries.forEach(function(entry) {
         var coordinate = entry.key;
-        var str = entry.val;
 
-        var s = result;
-        var p = s[coordinate.s] = s[coordinate.s] || {};
-        var x = p[coordinate.p] = p[coordinate.p] || [];
-        var o = x[coordinate.i] = x[coordinate.i] || {};
+        var check = {
+            s: coordinate.s,
+            p: coordinate.p,
+            i: coordinate.i,
+            c: 'deleted'
+        };
 
-        o[coordinate.c] = str;
+        var isDeleted = map.get(check);
+
+        if(!isDeleted) {
+            var str = entry.val;
+
+            var s = result;
+            var p = s[coordinate.s] = s[coordinate.s] || {};
+            var x = p[coordinate.p] = p[coordinate.p] || [];
+            var o = x[coordinate.i] = x[coordinate.i] || {};
+
+            o[coordinate.c] = str;
+        }
     });
+
+
 
     return result;
 };
@@ -179,12 +201,178 @@ var createCoordinate = function(scope, component) {
 };
 
 
-var getObjectAt = function(talisRdfJson, coordinate) {
+//var _array = {
+//    create: function() {
+//        return [];
+//    },
+//    put: function(arr, index, value) {
+//        data[index] = value;
+//    },
+//    get: function(arr, index) {
+//        return data[index];
+//    },
+//    remove: function(arr, index) {
+//        arr.splice(index, 1);
+//    }
+//};
+//
+//var _obj = {
+//    create: function() {
+//        return {};
+//    },
+//    put: function(obj, key, value) {
+//        obj[key] = value;
+//    },
+//    get: function(obj, key) {
+//        return obj[key];
+//    },
+//    remove: function(arr, key) {
+//        delete obj[key];
+//    }
+//};
+//
+//var rdfSchema = [{
+//    id: 's',
+//    type: _obj
+//}, {
+//    id: 'p'
+//    type: _obj
+//}, {
+//    id: 'i',
+//    type: _array
+//}, {
+//    id: 'c',
+//    type: _obj
+//}
+//];
+//
+//var NestedMap = jassa.ext.Class.create({
+//    /**
+//     * schema: []
+//     */
+//    initialize: function(schema) {
+//        this.schema = schema;
+//    },
+//
+//    put: function(coordinate, value) {
+//
+//    },
+//
+//    get: function(coordinate, value) {
+//
+//    },
+//
+//    remove: function(coordinate) {
+//
+//    }
+//})
+
+
+var talisRdfJsonToEntries = function(talisRdfJson) {
+    var result = [];
+
+    var sMap = talisRdfJson;
+    var ss = Object.keys(sMap);
+    ss.forEach(function(s) {
+        var pMap = sMap[s];
+        var ps = Object.keys(pMap);
+
+        ps.forEach(function(p) {
+           var iArr = pMap[p];
+
+           //for(var i = 0; i < iArr.length; ++i) {
+           var i = 0;
+           iArr.forEach(function(cMap) {
+               var cs = Object.keys(cMap);
+
+               cs.forEach(function(c) {
+                   var val = cMap[c];
+
+                   var coordinate = {
+                       s: s,
+                       p: p,
+                       i: i,
+                       c: c
+                   };
+
+                   result.push({
+                       key: coordinate,
+                       val: val
+                   });
+               });
+               ++i;
+           });
+
+        });
+
+    });
+
+    return result;
+};
+
+
+
+// Returns the object array at a given predicate
+var getObjectsAt = function(talisRdfJson, coordinate) {
     var s = talisRdfJson[coordinate.s];
-    var p = s ? s[coordinate.p] : null;
+    var result = s ? s[coordinate.p] : null;
+    return result;
+};
+
+// Returns the object at a given index
+var getObjectAt = function(talisRdfJson, coordinate) {
+    var p = getObjectsAt(talisRdfJson, coordinate);
     var result = p ? p[coordinate.i] : null;
 
     return result;
+};
+
+var getOrCreateObjectAt = function(talisRdfJson, coordinate, obj) {
+    var s = talisRdfJson[coordinate.s] = talisRdfJson[coordinate.s] || {};
+    var p = s[coordinate.p] = s[coordinate.p] || [];
+    var result = p[coordinate.i] = p[coordinate.i] || obj || {};
+    return result;
+};
+
+var removeObjectAt = function(talisRdfJson, coordinate) {
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    //var i = p ? p[coordinate.i] : null;
+
+    if(p) {
+        p.splice(coordinate.i, 1);
+
+        if(p.length === 0) {
+            delete s[coordinate.p];
+        }
+    }
+};
+
+var removeValueAt = function(talisRdfJson, coordinate) {
+
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    var i = p ? p[coordinate.i] : null;
+    //var c = i ? i[coordinate.c] : null;
+
+    if(i) {
+        delete i[coordinate.c];
+
+        if(i.length === 0) {
+            delete p[coordinate.p];
+
+            if(Object.keys(p).length === 0) {
+                delete s[coordinate.s];
+            }
+        }
+    }
+};
+
+var setValueAt = function(talisRdfJson, coordinate, value) {
+    if(value != null) {
+        var o = getOrCreateObjectAt(talisRdfJson, coordinate);
+        o[coordinate.c] = value;
+    }
 };
 
 // TODO Rename to getComponentAt
@@ -221,7 +409,8 @@ var setDiff = function(before, after) {
 };
 
 var getEffectiveValue = function(rexContext, coordinate) {
-    var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+    //var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+    var result = rexContext.override ? getValueAt(rexContext.override, coordinate) : null;
 
     if(result == null) {
         result = rexContext.json ? getValueAt(rexContext.json, coordinate) : null;

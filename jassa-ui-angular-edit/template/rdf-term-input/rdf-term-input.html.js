@@ -11,7 +11,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <div class=\"input-group-addon\">\n" +
     "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
     "        <ui-select ng-model=\"termTypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
-    "          <ui-select-match placeholder=\"Select or search in the list...\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "          <ui-select-choices repeat=\"item in termTypes | filter: $select.search\">\n" +
     "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "          </ui-select-choices>\n" +

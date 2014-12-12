@@ -98,17 +98,35 @@ angular.module('ui.jassa.rex')
 
                     syncAttr($parse, scope, attrs, 'rexContext');
 
+
+                    var initContext = function(rexContext) {
+                        rexContext.override = rexContext.override || {};//  new jassa.util.HashMap();
+
+                        rexContext.remove = rexContext.remove || function(coordinate) {
+                            // Removes an object
+                            var objs = getObjectsAt(rexContext.json, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+
+                            objs = getObjectsAt(rexContext.override, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+                        };
+
+                    };
+
                     // Make sure to initialize any provided context object
                     // TODO: The status should probably be part of the context directive, rather than a context object
                     scope.$watch(function() {
                         return scope.rexContext;
                     }, function(newVal) {
-                        newVal.override = newVal.override || new jassa.util.HashMap();
+                        initContext(newVal);
                     });
 
-                    if(!scope.rexContext.override) {
-                        scope.rexContext.override = new jassa.util.HashMap();
-                    }
+                    initContext(scope.rexContext);
+
 
                     // Synchronize the talis json structure with the graph
                     // TODO Performance-bottleneck: Synchronize via an event API on the Graph object rather than using Angular's watch mechanism
@@ -201,6 +219,7 @@ angular.module('ui.jassa.rex')
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
                         scope.rexContext.graph = targetGraph;
 
+                        scope.rexContext.targetJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(targetGraph);
 
                         // Update the referenced sub graph
                         var refGraph = new jassa.rdf.GraphImpl();
@@ -248,22 +267,36 @@ angular.module('ui.jassa.rex')
 
                     var cleanupOverride = function()
                     {
+                        var json = scope.rexContext.json;
                         var override = ctrl.getOverride();
                         //var override = scope.rexContext.override;
 
                         // Remove values from override that equal the source data
+                        var entries = talisRdfJsonToEntries(override);
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var val = entry.val;
+
+                            var sourceVal = getValueAt(json, coordinate);
+                            if(sourceVal === val || val == null) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
+                        /*
                         mapDifference(override, function(coordinate) {
                             var r = getValueAt(scope.rexContext.json, coordinate);
                             return r;
                         });
+                        */
 
                         // Remove undefined entries from override
-                        var entries = override.entries();
-                        entries.forEach(function(entry) {
-                            if(entry.val == null) {
-                                override.remove(entry.key);
-                            }
-                        });
+//                        var entries = override.entries();
+//                        entries.forEach(function(entry) {
+//                            if(entry.val == null) {
+//                                override.remove(entry.key);
+//                            }
+//                        });
                     };
 
 
@@ -274,7 +307,17 @@ angular.module('ui.jassa.rex')
                         var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
 
                         var override = ctrl.getOverride();
-                        jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        //jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        var entries = talisRdfJsonToEntries(override);
+
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var isContained = coordinateSet.contains(coordinate);
+                            if(!isContained) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
