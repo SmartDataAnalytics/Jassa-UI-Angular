@@ -9,8 +9,8 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
-    "        <ui-select ng-model=\"termTypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
+    "        <!--select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
+    "        <ui-select ng-model=\"termTypes.selected\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
     "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "          <ui-select-choices repeat=\"item in termTypes | filter: $select.search\">\n" +
     "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
@@ -24,7 +24,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    </span-->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
-    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectDatatype($item, $model)\" style=\"width: 100px;\" >\n" +
+    "      <ui-select ng-model=\"datatypes.selected\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectDatatype($item, $model)\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Datatype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "        <ui-select-choices repeat=\"item in datatypes | filter: $select.search\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
@@ -39,7 +39,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    </span-->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
-    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectLanguage($item, $model)\" style=\"width: 100px;\" >\n" +
+    "      <ui-select ng-model=\"datatypes.selected\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectLanguage($item, $model)\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Language\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "        <ui-select-choices repeat=\"item in langs | filter: $select.search\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +

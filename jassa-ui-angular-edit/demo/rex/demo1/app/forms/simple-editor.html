@@ -2,14 +2,14 @@
 
     <h3>Generic Resource Editor</h3>
 
-    <b>Summary of Types</b>
-    <i>Change them in the form, and they will change here as well</i>:
+<!--     <b>Summary of Types</b> -->
+<!--     <i>Change them in the form, and they will change here as well</i>: -->
+<!--     <div rex-subject="ex05.subject" ng-init="rdfType='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'"> -->
+<!--         <div ng-repeat="(object, objectData) in rexContext.json[rexSubject][rdfType]" rex-predicate="rdfType"> -->
+<!--             <span rex-object="$index" rex-value="val">{{val}}</span> -->
+<!--         </div> -->
+<!--     </div> -->
     <!-- rex-predicate will be ng-repeated, using an index on rex-object will select a different object for the predicate though -->
-    <div rex-subject="ex05.subject" ng-init="rdfType='http://www.w3.org/1999/02/22-rdf-syntax-ns#type'">
-        <div ng-repeat="(object, objectData) in rexContext.json[rexSubject][rdfType]" rex-predicate="rdfType">
-            <span rex-object="$index" rex-value="val">{{val}}</span>
-        </div>
-    </div>
 
 
     <form role="form">
@@ -21,23 +21,21 @@
         </div>
     </form>
 
-            {{rexContext.targetJson}}
-
     <form role="form" rex-subject="ex05.subject">
         <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
+<div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'">
             {{property}}:
-
             <div ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
                 Deleted? {{deleted}}
                 <div class="form-group">
                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
                     <input ng-show="objectData != null" class="form-control" type="checkbox" ng-model="deleted">
                     <button ng-if="objectData == null" class="btn btn-primary" ng-click="rexContext.remove(rexRef)">Remove {{$index}}</button>
-<!-- propertyData.splice($index, 1) -->
                 </div>
             </div>
             <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
         </div>
+</div>
     </form>
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that

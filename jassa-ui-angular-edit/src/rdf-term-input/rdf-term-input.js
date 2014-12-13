@@ -122,6 +122,12 @@ angular.module('ui.jassa.rdf-term-input', [])
                                 datatype: state.datatype || jassa.vocab.xsd.xstring.getUri()
                             };
                             break;
+                        default:
+                            result = {
+                                type: 'uri',
+                                value: state.value
+                            };
+                            break;
                         }
 
                         return result;
