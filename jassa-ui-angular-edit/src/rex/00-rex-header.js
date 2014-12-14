@@ -1,6 +1,35 @@
 
 
+var Coordinate = jassa.ext.Class.create({
+    initialize: function(s, p, i, c) {
+        this.s = s;
+        this.p = p;
+        this.i = i;
+        this.c = c;
+    },
 
+    equals: function(that) {
+        var result = this.s === that.s && this.p === that.p && this.i === that.i && this.c === that.c;
+        return result;
+    },
+
+    hashCode: function() {
+        if(this.hash == null) {
+            this.hash =
+                jassa.util.ObjectUtils.hashCodeStr(this.s) +
+                3 * jassa.util.ObjectUtils.hashCodeStr(this.p) +
+                7 * this.i +
+                11 * jassa.util.ObjectUtils.hashCodeStr(this.c);
+        }
+
+        return this.hash;
+    },
+
+    toString: function() {
+        var result = this.s + ' ' + this.p + ' ' + this.i + ' ' + this.c;
+        return result;
+    },
+});
 
 // Prefix str:
 var parsePrefixStr = function(str) {
@@ -46,6 +75,7 @@ function capitalize(s)
 
 var createCompileComponent = function($rexComponent$, $component$, $parse) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
+//if(true) { return; }
 
     var tag = '[' + $component$ + ']';
 
@@ -66,8 +96,12 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             slot.entry = {};
 
             scope.$on('$destroy', function() {
+//console.log('Destroying compile component ' + tag);
+
                 slot.release();
             });
+
+//console.log('Start: Creating compile component ' + tag);
 
             // If the coordinate changes, we copy the value at the override's old coordinate to the new coordinate
             scope.$watch(function() {
@@ -115,9 +149,9 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                     // If the given model is writeable, then we need to update it
                     // whenever the coordinate's value changes
 
-                    //if(value != null) {
+                    if(value != null) {
                         modelSetter(scope, value);
-                    //}
+                    }
                 }
 
             }, true);
@@ -149,12 +183,15 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
 
                 //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
+//console.log('Done: Creating compile component ' + tag);
 
         }
+
     };
 };
 
 var assembleTalisRdfJson = function(map) {
+    //console.log('Assembling talis rdf json');
     var result = {};
 
     var entries = map.entries();
@@ -162,12 +199,12 @@ var assembleTalisRdfJson = function(map) {
     entries.forEach(function(entry) {
         var coordinate = entry.key;
 
-        var check = {
-            s: coordinate.s,
-            p: coordinate.p,
-            i: coordinate.i,
-            c: 'deleted'
-        };
+        var check = new Coordinate(
+            coordinate.s,
+            coordinate.p,
+            coordinate.i,
+            'deleted'
+        );
 
         var isDeleted = map.get(check);
 
@@ -192,12 +229,12 @@ var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.Initial
 var createCoordinate = function(scope, component) {
     var pm = scope.rexPrefixMapping || __defaultPrefixMapping;
 
-    return {
-        s: pm.expandPrefix(scope.rexSubject),
-        p: pm.expandPrefix(scope.rexPredicate),
-        i: scope.rexObject,
-        c: component
-    };
+    return new Coordinate(
+        pm.expandPrefix(scope.rexSubject),
+        pm.expandPrefix(scope.rexPredicate),
+        scope.rexObject,
+        component
+    );
 };
 
 
@@ -288,12 +325,7 @@ var talisRdfJsonToEntries = function(talisRdfJson) {
                cs.forEach(function(c) {
                    var val = cMap[c];
 
-                   var coordinate = {
-                       s: s,
-                       p: p,
-                       i: i,
-                       c: c
-                   };
+                   var coordinate = new Coordinate(s, p, i, c);
 
                    result.push({
                        key: coordinate,

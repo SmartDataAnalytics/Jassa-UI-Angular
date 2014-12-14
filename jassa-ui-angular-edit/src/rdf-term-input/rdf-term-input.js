@@ -75,17 +75,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             });
             //$scope.
 
-            $scope.onSelectTermType = function(item, model) {
-              $scope.state.type = model.id;
-            };
+//            $scope.onSelectTermType = function(item, model) {
+//              $scope.state.type = model.id;
+//            };
 
-            $scope.onSelectDatatype = function(item, model) {
-              $scope.state.datatype = model.id;
-            };
-
-            $scope.onSelectLanguage = function(item, model) {
-              $scope.state.lang = model.id;
-            };
+//            $scope.onSelectDatatype = function(item, model) {
+//              $scope.state.datatype = model.id;
+//            };
+//
+//            $scope.onSelectLanguage = function(item, model) {
+//              $scope.state.lang = model.id;
+//            };
 
         }],
         compile: function(ele, attrs) {

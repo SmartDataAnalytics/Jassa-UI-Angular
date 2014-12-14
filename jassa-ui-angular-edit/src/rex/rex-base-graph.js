@@ -24,6 +24,7 @@ angular.module('ui.jassa.rex')
                 pre: function(scope, ele, attrs, ctrls) {
                     syncAttr($parse, scope, attrs, 'rexBaseGraph');
 
+                    // Watch the reference
                     scope.$watch(function() {
                         return scope.rexBaseGraph;
                     }, function() {
