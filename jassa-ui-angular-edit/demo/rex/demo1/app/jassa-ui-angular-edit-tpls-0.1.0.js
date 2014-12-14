@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-12
+ * Version: 0.1.0 - 2014-12-15
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.geometry","ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -347,13 +347,7 @@ angular.module('ui.jassa.geometry', [])
               return r;
             }, function(newValue) {
               if(newValue) {
-                //modelSetter(scope, newValue);
-                //scope.bindModel = newValue;
                 angular.copy(newValue, scope.bindModel);
-
-
-                //if(!scope.$phase) { scope.$apply(); }
-                //console.log('EXPOSED', scope.bindModel);
               }
             }, true);
 
@@ -442,20 +436,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             });
             //$scope.
 
-            $scope.onSelectTermType = function(item, model) {
-              $scope.state.type = model.id;
-            };
+//            $scope.onSelectTermType = function(item, model) {
+//              $scope.state.type = model.id;
+//            };
 
-            $scope.onSelectDatatype = function(item, model) {
-              console.log('model', model);
-              console.log('select', $scope);
-              $scope.state.datatype = model.id;
-            };
-
-            $scope.onSelectLanguage = function(item, model) {
-              console.log('model', model);
-              $scope.state.lang = model.id;
-            };
+//            $scope.onSelectDatatype = function(item, model) {
+//              $scope.state.datatype = model.id;
+//            };
+//
+//            $scope.onSelectLanguage = function(item, model) {
+//              $scope.state.lang = model.id;
+//            };
 
             $scope.refreshDatatype = function(newDatatypeValue) {
               console.log('new Datatype', newDatatypeValue);
@@ -505,6 +496,12 @@ angular.module('ui.jassa.rdf-term-input', [])
                                 type: 'literal',
                                 value: state.value,
                                 datatype: state.datatype || jassa.vocab.xsd.xstring.getUri()
+                            };
+                            break;
+                        default:
+                            result = {
+                                type: 'uri',
+                                value: state.value
                             };
                             break;
                         }
@@ -708,7 +705,36 @@ angular.module('ui.jassa.rdf-term-input', [])
 
 
 
+var Coordinate = jassa.ext.Class.create({
+    initialize: function(s, p, i, c) {
+        this.s = s;
+        this.p = p;
+        this.i = i;
+        this.c = c;
+    },
 
+    equals: function(that) {
+        var result = this.s === that.s && this.p === that.p && this.i === that.i && this.c === that.c;
+        return result;
+    },
+
+    hashCode: function() {
+        if(this.hash == null) {
+            this.hash =
+                jassa.util.ObjectUtils.hashCodeStr(this.s) +
+                3 * jassa.util.ObjectUtils.hashCodeStr(this.p) +
+                7 * this.i +
+                11 * jassa.util.ObjectUtils.hashCodeStr(this.c);
+        }
+
+        return this.hash;
+    },
+
+    toString: function() {
+        var result = this.s + ' ' + this.p + ' ' + this.i + ' ' + this.c;
+        return result;
+    },
+});
 
 // Prefix str:
 var parsePrefixStr = function(str) {
@@ -754,6 +780,7 @@ function capitalize(s)
 
 var createCompileComponent = function($rexComponent$, $component$, $parse) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
+//if(true) { return; }
 
     var tag = '[' + $component$ + ']';
 
@@ -774,8 +801,12 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             slot.entry = {};
 
             scope.$on('$destroy', function() {
+//console.log('Destroying compile component ' + tag);
+
                 slot.release();
             });
+
+//console.log('Start: Creating compile component ' + tag);
 
             // If the coordinate changes, we copy the value at the override's old coordinate to the new coordinate
             scope.$watch(function() {
@@ -791,7 +822,8 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                         val: oldValue
                     };
 
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
             }, true);
 
@@ -812,7 +844,8 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 //console.log('Value at coordinate ')
 
                 if(value != null) {
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
 
                 slot.entry.value = value;
@@ -844,32 +877,55 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
                 slot.entry.val = newVal;
 
                 if(newVal != null) {
-                    contextCtrl.getOverride().putEntries([entry]);
+                    //contextCtrl.getOverride().putEntries([entry]);
+                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                 }
+//                else {
+//                    // Remove null values
+//                    // TODO Can this happen?
+//                    contextCtrl.getOverride().remove(coordinate);
+//                }
 
                 //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
+//console.log('Done: Creating compile component ' + tag);
 
         }
+
     };
 };
 
 var assembleTalisRdfJson = function(map) {
+    //console.log('Assembling talis rdf json');
     var result = {};
 
     var entries = map.entries();
 
     entries.forEach(function(entry) {
         var coordinate = entry.key;
-        var str = entry.val;
 
-        var s = result;
-        var p = s[coordinate.s] = s[coordinate.s] || {};
-        var x = p[coordinate.p] = p[coordinate.p] || [];
-        var o = x[coordinate.i] = x[coordinate.i] || {};
+        var check = new Coordinate(
+            coordinate.s,
+            coordinate.p,
+            coordinate.i,
+            'deleted'
+        );
 
-        o[coordinate.c] = str;
+        var isDeleted = map.get(check);
+
+        if(!isDeleted) {
+            var str = entry.val;
+
+            var s = result;
+            var p = s[coordinate.s] = s[coordinate.s] || {};
+            var x = p[coordinate.p] = p[coordinate.p] || [];
+            var o = x[coordinate.i] = x[coordinate.i] || {};
+
+            o[coordinate.c] = str;
+        }
     });
+
+
 
     return result;
 };
@@ -878,21 +934,182 @@ var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.Initial
 var createCoordinate = function(scope, component) {
     var pm = scope.rexPrefixMapping || __defaultPrefixMapping;
 
-    return {
-        s: pm.expandPrefix(scope.rexSubject),
-        p: pm.expandPrefix(scope.rexPredicate),
-        i: scope.rexObject,
-        c: component
-    };
+    return new Coordinate(
+        pm.expandPrefix(scope.rexSubject),
+        pm.expandPrefix(scope.rexPredicate),
+        scope.rexObject,
+        component
+    );
 };
 
 
-var getObjectAt = function(talisRdfJson, coordinate) {
+//var _array = {
+//    create: function() {
+//        return [];
+//    },
+//    put: function(arr, index, value) {
+//        data[index] = value;
+//    },
+//    get: function(arr, index) {
+//        return data[index];
+//    },
+//    remove: function(arr, index) {
+//        arr.splice(index, 1);
+//    }
+//};
+//
+//var _obj = {
+//    create: function() {
+//        return {};
+//    },
+//    put: function(obj, key, value) {
+//        obj[key] = value;
+//    },
+//    get: function(obj, key) {
+//        return obj[key];
+//    },
+//    remove: function(arr, key) {
+//        delete obj[key];
+//    }
+//};
+//
+//var rdfSchema = [{
+//    id: 's',
+//    type: _obj
+//}, {
+//    id: 'p'
+//    type: _obj
+//}, {
+//    id: 'i',
+//    type: _array
+//}, {
+//    id: 'c',
+//    type: _obj
+//}
+//];
+//
+//var NestedMap = jassa.ext.Class.create({
+//    /**
+//     * schema: []
+//     */
+//    initialize: function(schema) {
+//        this.schema = schema;
+//    },
+//
+//    put: function(coordinate, value) {
+//
+//    },
+//
+//    get: function(coordinate, value) {
+//
+//    },
+//
+//    remove: function(coordinate) {
+//
+//    }
+//})
+
+
+var talisRdfJsonToEntries = function(talisRdfJson) {
+    var result = [];
+
+    var sMap = talisRdfJson;
+    var ss = Object.keys(sMap);
+    ss.forEach(function(s) {
+        var pMap = sMap[s];
+        var ps = Object.keys(pMap);
+
+        ps.forEach(function(p) {
+           var iArr = pMap[p];
+
+           //for(var i = 0; i < iArr.length; ++i) {
+           var i = 0;
+           iArr.forEach(function(cMap) {
+               var cs = Object.keys(cMap);
+
+               cs.forEach(function(c) {
+                   var val = cMap[c];
+
+                   var coordinate = new Coordinate(s, p, i, c);
+
+                   result.push({
+                       key: coordinate,
+                       val: val
+                   });
+               });
+               ++i;
+           });
+
+        });
+
+    });
+
+    return result;
+};
+
+
+
+// Returns the object array at a given predicate
+var getObjectsAt = function(talisRdfJson, coordinate) {
     var s = talisRdfJson[coordinate.s];
-    var p = s ? s[coordinate.p] : null;
+    var result = s ? s[coordinate.p] : null;
+    return result;
+};
+
+// Returns the object at a given index
+var getObjectAt = function(talisRdfJson, coordinate) {
+    var p = getObjectsAt(talisRdfJson, coordinate);
     var result = p ? p[coordinate.i] : null;
 
     return result;
+};
+
+var getOrCreateObjectAt = function(talisRdfJson, coordinate, obj) {
+    var s = talisRdfJson[coordinate.s] = talisRdfJson[coordinate.s] || {};
+    var p = s[coordinate.p] = s[coordinate.p] || [];
+    var result = p[coordinate.i] = p[coordinate.i] || obj || {};
+    return result;
+};
+
+var removeObjectAt = function(talisRdfJson, coordinate) {
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    //var i = p ? p[coordinate.i] : null;
+
+    if(p) {
+        p.splice(coordinate.i, 1);
+
+        if(p.length === 0) {
+            delete s[coordinate.p];
+        }
+    }
+};
+
+var removeValueAt = function(talisRdfJson, coordinate) {
+
+    var s = talisRdfJson[coordinate.s];
+    var p = s ? s[coordinate.p] : null;
+    var i = p ? p[coordinate.i] : null;
+    //var c = i ? i[coordinate.c] : null;
+
+    if(i) {
+        delete i[coordinate.c];
+
+        if(i.length === 0) {
+            delete p[coordinate.p];
+
+            if(Object.keys(p).length === 0) {
+                delete s[coordinate.s];
+            }
+        }
+    }
+};
+
+var setValueAt = function(talisRdfJson, coordinate, value) {
+    if(value != null) {
+        var o = getOrCreateObjectAt(talisRdfJson, coordinate);
+        o[coordinate.c] = value;
+    }
 };
 
 // TODO Rename to getComponentAt
@@ -929,7 +1146,8 @@ var setDiff = function(before, after) {
 };
 
 var getEffectiveValue = function(rexContext, coordinate) {
-    var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+    //var result = rexContext.override ? rexContext.override.get(coordinate) : null;
+    var result = rexContext.override ? getValueAt(rexContext.override, coordinate) : null;
 
     if(result == null) {
         result = rexContext.json ? getValueAt(rexContext.json, coordinate) : null;
@@ -1019,6 +1237,7 @@ angular.module('ui.jassa.rex')
                 pre: function(scope, ele, attrs, ctrls) {
                     syncAttr($parse, scope, attrs, 'rexBaseGraph');
 
+                    // Watch the reference
                     scope.$watch(function() {
                         return scope.rexBaseGraph;
                     }, function() {
@@ -1096,18 +1315,17 @@ angular.module('ui.jassa.rex')
                 var slots = $scope.rexChangeSlots;
                 var slotIds = Object.keys(slots);
 
-                var result = slotIds.map(function(slotId) {
+                var result = new jassa.util.HashSet();
+
+                slotIds.forEach(function(slotId) {
                     var slot = slots[slotId];
                     var entry = slot.entry;
 
-                    return entry ? entry.key : null;
+                    var coordinate = entry ? entry.key : null;
+                    if(coordinate != null) {
+                        result.add(coordinate);
+                    }
                 });
-
-                result = result.filter(function(key) {
-                    return key != null;
-                });
-
-                //console.log('rcs:', scope.rexChangeSlots, ' SlotIds: ', slotIds, ' Coordinates: ', JSON.stringify(result), ' Slots: ', slots);
 
                 return result;
             };
@@ -1132,24 +1350,51 @@ angular.module('ui.jassa.rex')
 
                     syncAttr($parse, scope, attrs, 'rexContext');
 
+
+                    var initContext = function(rexContext) {
+                        rexContext.override = rexContext.override || {};//  new jassa.util.HashMap();
+
+                        rexContext.remove = rexContext.remove || function(coordinate) {
+                            // Removes an object
+                            var objs = getObjectsAt(rexContext.json, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+
+                            objs = getObjectsAt(rexContext.override, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+                        };
+
+                    };
+
                     // Make sure to initialize any provided context object
                     // TODO: The status should probably be part of the context directive, rather than a context object
                     scope.$watch(function() {
                         return scope.rexContext;
                     }, function(newVal) {
-                        newVal.override = newVal.override || new jassa.util.HashMap();
+                        initContext(newVal);
                     });
 
-                    if(!scope.rexContext.override) {
-                        scope.rexContext.override = new jassa.util.HashMap();
-                    }
+                    initContext(scope.rexContext);
+
+                    var getBaseGraph = function() {
+                        var rexContext = scope.rexContext;
+                        var r = rexContext ? rexContext.baseGraph : null;
+                        return r;
+                    };
 
                     // Synchronize the talis json structure with the graph
                     // TODO Performance-bottleneck: Synchronize via an event API on the Graph object rather than using Angular's watch mechanism
-                    scope.$watch('rexContext.baseGraph.toArray()', function() {
-                        var baseGraph = scope.rexContext.baseGraph;
+                    scope.$watch(function() {
+                        var baseGraph = getBaseGraph();
+                        var r = baseGraph ? baseGraph.hashCode() : null;
+                        return r;
+                    }, function() {
+                        var baseGraph = getBaseGraph();
                         scope.rexContext.json = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
-                    }, true);
+                    });
 
 
                     /*
@@ -1189,22 +1434,21 @@ angular.module('ui.jassa.rex')
 
 
                     // Remove all entries from map that exist in base
-                    var mapDifference = function(map, baseFn) {
-                        var mapEntries = map.entries();
-                        mapEntries.forEach(function(mapEntry) {
-                            var mapKey = mapEntry.key;
-                            var mapVal = mapEntry.val;
-
-                            var baseVal = baseFn(mapKey);
-
-                            if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
-                                map.remove(mapKey);
-                            }
-                        });
-                    };
+//                    var mapDifference = function(map, baseFn) {
+//                        var mapEntries = map.entries();
+//                        mapEntries.forEach(function(mapEntry) {
+//                            var mapKey = mapEntry.key;
+//                            var mapVal = mapEntry.val;
+//
+//                            var baseVal = baseFn(mapKey);
+//
+//                            if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
+//                                map.remove(mapKey);
+//                            }
+//                        });
+//                    };
 
                     var createDataMap = function(coordinates) {
-                        coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         //var override = scope.rexContext.override;
                         var override = ctrl.getOverride();
@@ -1228,13 +1472,14 @@ angular.module('ui.jassa.rex')
                     };
 
                     var updateDerivedValues = function(dataMap) {
-
+//console.log('Start update derived');
                         var talis = assembleTalisRdfJson(dataMap);
 
                         // Update the final RDF graph
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
                         scope.rexContext.graph = targetGraph;
 
+                        scope.rexContext.targetJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(targetGraph);
 
                         // Update the referenced sub graph
                         var refGraph = new jassa.rdf.GraphImpl();
@@ -1258,7 +1503,7 @@ angular.module('ui.jassa.rex')
                         scope.rexContext.srcGraph = refGraph;
 
                         scope.rexContext.diff = setDiff(refGraph, targetGraph);
-
+//console.log('End update derived');
 
 
                         //console.log('Talis JSON', talis);
@@ -1282,52 +1527,103 @@ angular.module('ui.jassa.rex')
 
                     var cleanupOverride = function()
                     {
+                        var json = scope.rexContext.json;
                         var override = ctrl.getOverride();
                         //var override = scope.rexContext.override;
 
                         // Remove values from override that equal the source data
+                        var entries = talisRdfJsonToEntries(override);
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var val = entry.val;
+
+                            var sourceVal = getValueAt(json, coordinate);
+                            if(sourceVal === val || val == null) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
+                        /*
                         mapDifference(override, function(coordinate) {
                             var r = getValueAt(scope.rexContext.json, coordinate);
                             return r;
                         });
+                        */
 
                         // Remove undefined entries from override
-                        var entries = override.entries();
-                        entries.forEach(function(entry) {
-                            if(entry.val == null) {
-                                override.remove(entry.key);
-                            }
-                        });
+//                        var entries = override.entries();
+//                        entries.forEach(function(entry) {
+//                            if(entry.val == null) {
+//                                override.remove(entry.key);
+//                            }
+//                        });
                     };
 
 
-                    var cleanupReferences = function(coordinates) {
-                        coordinates = coordinates || ctrl.getReferencedCoordinates();
+                    var cleanupReferences = function(coordinateSet) {
+                        //coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         //console.log('Referenced coordinates', JSON.stringify(coordinates));
-                        var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
+                        //var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
 
                         var override = ctrl.getOverride();
-                        jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        //jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        var entries = talisRdfJsonToEntries(override);
+
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var isContained = coordinateSet.contains(coordinate);
+                            if(!isContained) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
 
+                    var currentCoordinateSet = new jassa.util.HashSet();
+                    /*
+                    var hashCodeArr = function(arr) {
+                        var result = 0;
+                        var l = arr ? arr.length : 0;
+                        for (var i = 0; i < l; i++) {
+                            var item = arr[i];
+                            var hashCode = item.hashCode ? item.hashCode : 127;
+                            result = result * 31 + hashCode;
+                            res = res & res;
+                        }
+
+                        return result;
+                    };
+                    */
+
+                    // TODO The following two $watch's have linear complexity but
+                    // could be optimized if we managed references in a more
+                    // clever way
+
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
-                        return ctrl.getReferencedCoordinates();
-                    }, function(coordinates) {
+                        currentCoordinateSet = ctrl.getReferencedCoordinates();
+
+                        var r = currentCoordinateSet.hashCode();
+                        //console.log('coordinateSetHash: ', r);
+                        return r;
+                    }, function() {
                         //console.log('Override', scope.rexContext.override);
-                        cleanupReferences(coordinates);
+                        cleanupReferences(currentCoordinateSet);
                         cleanupOverride();
                     }, true);
 
+                    var currentDataMap = new jassa.util.HashMap();
+
                     scope.$watch(function() {
-                        var coordinates = ctrl.getReferencedCoordinates();
-                        var r = createDataMap(coordinates);
+                        currentDataMap = createDataMap(currentCoordinateSet);
+                        var r = currentDataMap.hashCode();
+                        //console.log('dataMapHash: ', r);
                         return r;
                     }, function(dataMap) {
-                        updateDerivedValues(dataMap);
+                        updateDerivedValues(currentDataMap);
                     }, true);
 
 
@@ -1576,6 +1872,8 @@ angular.module('ui.jassa.rex')
                     if(!attrs['rexObject']) {
                         attrs['rexObject'] = '' + i;
                     }
+
+
                     //console.log('FOOO', attrs);
 
 //console.log('rexObject index: ' + i);
@@ -1590,6 +1888,28 @@ angular.module('ui.jassa.rex')
                     scope.$on('$destroy', function() {
                         jassa.util.ArrayUtils.removeItemStrict(predicateCtrl.rexObjectScopes, scope);
                     });
+
+
+
+                    // If rexObject is present, we also create a rexRef attribute
+                    var rexRef = function() {
+                        var result = {
+                            s: scope.rexSubject,
+                            p: scope.rexPredicate,
+                            i: scope.rexObject
+                        };
+
+                        return result;
+                    };
+
+                    scope.$watch(function() {
+                        var r = rexRef();
+                        return r;
+                    }, function(newRef) {
+                        scope.rexRef = newRef;
+                    }, true);
+
+                    scope.rexRef = rexRef();
 
                 }
             };
@@ -1710,6 +2030,8 @@ angular.module('ui.jassa.rex')
                     var subjectUri = syncAttr($parse, scope, attrs, 'rexSubject');
 
                     var doPrefetch = function() {
+                        //console.log('doPrefetch');
+
                         var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
@@ -1735,23 +2057,29 @@ angular.module('ui.jassa.rex')
 //                        });
                     };
 
-                    scope.$watch(function() {
-                        return scope.rexLookup;
-                    }, function(lookupFn) {
+                    scope.$watchGroup([
+                        function() {
+                            return scope.rexLookup;
+                        }, function() {
+                            return scope.rexSubject;
+                        }, function() {
+                            return scope.rexPrefixMapping;
+                        }
+                    ], function() {
                         doPrefetch();
                     });
 
-                    scope.$watch(function() {
-                        return scope.rexSubject;
-                    }, function(newVal) {
-                        doPrefetch();
-                    });
-
-                    scope.$watch(function() {
-                        return scope.rexPrefixMapping;
-                    }, function(pm) {
-                        doPrefetch();
-                    });
+//                    scope.$watch(function() {
+//                        return scope.rexSubject;
+//                    }, function(newVal) {
+//                        doPrefetch();
+//                    });
+//
+//                    scope.$watch(function() {
+//                        return scope.rexPrefixMapping;
+//                    }, function(pm) {
+//                        doPrefetch();
+//                    });
                 }
             };
         }
@@ -2026,10 +2354,10 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <!--select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
-    "        <ui-select ng-model=\"termTypes.selected\" theme=\"selectize\" reset-search-input=\"false\" on-select=\"onSelectTermType($item, $model)\" style=\"width: 100px;\" >\n" +
-    "          <ui-select-match readonly placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
-    "          <ui-select-choices repeat=\"item in termTypes | filter: $select.search\">\n" +
+    "        <!--select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
+    "        <ui-select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
+    "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "          <ui-select-choices repeat=\"item.id as item in termTypes | filter: $select.search\">\n" +
     "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "          </ui-select-choices>\n" +
     "        </ui-select>\n" +
@@ -2041,9 +2369,10 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    </span-->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
-    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectDatatype($item, $model)\" style=\"width: 100px;\" >\n" +
+    "      <ui-select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Datatype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
-    "        <ui-select-choices repeat=\"item in datatypes | filter: $select.search\" refresh=\"refreshDatatype($select.search)\" refresh-delay=\"100\">\n" +
+    "        <!--ui-select-choices repeat=\"item in datatypes | filter: $select.search\" refresh=\"refreshDatatype($select.search)\" refresh-delay=\"100\"-->\n" +
+    "        <ui-select-choices repeat=\"item.id as item in datatypes | filter: $select.search\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "        </ui-select-choices>\n" +
     "      </ui-select>\n" +
@@ -2056,9 +2385,9 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    </span-->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
-    "      <ui-select ng-model=\"datatypes.selected\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" on-select=\"onSelectLanguage($item, $model)\" style=\"width: 100px;\" >\n" +
+    "      <ui-select ng-model=\"state.lang\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Language\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
-    "        <ui-select-choices repeat=\"item in langs | filter: $select.search\">\n" +
+    "        <ui-select-choices repeat=\"item.id as item in langs | filter: $select.search\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "        </ui-select-choices>\n" +
     "      </ui-select>\n" +

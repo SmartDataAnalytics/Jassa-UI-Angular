@@ -62,18 +62,17 @@ angular.module('ui.jassa.rex')
                 var slots = $scope.rexChangeSlots;
                 var slotIds = Object.keys(slots);
 
-                var result = slotIds.map(function(slotId) {
+                var result = new jassa.util.HashSet();
+
+                slotIds.forEach(function(slotId) {
                     var slot = slots[slotId];
                     var entry = slot.entry;
 
-                    return entry ? entry.key : null;
+                    var coordinate = entry ? entry.key : null;
+                    if(coordinate != null) {
+                        result.add(coordinate);
+                    }
                 });
-
-                result = result.filter(function(key) {
-                    return key != null;
-                });
-
-                //console.log('rcs:', scope.rexChangeSlots, ' SlotIds: ', slotIds, ' Coordinates: ', JSON.stringify(result), ' Slots: ', slots);
 
                 return result;
             };
@@ -98,24 +97,51 @@ angular.module('ui.jassa.rex')
 
                     syncAttr($parse, scope, attrs, 'rexContext');
 
+
+                    var initContext = function(rexContext) {
+                        rexContext.override = rexContext.override || {};//  new jassa.util.HashMap();
+
+                        rexContext.remove = rexContext.remove || function(coordinate) {
+                            // Removes an object
+                            var objs = getObjectsAt(rexContext.json, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+
+                            objs = getObjectsAt(rexContext.override, coordinate);
+                            if(objs) {
+                                objs.splice(coordinate.i, 1);
+                            }
+                        };
+
+                    };
+
                     // Make sure to initialize any provided context object
                     // TODO: The status should probably be part of the context directive, rather than a context object
                     scope.$watch(function() {
                         return scope.rexContext;
                     }, function(newVal) {
-                        newVal.override = newVal.override || new jassa.util.HashMap();
+                        initContext(newVal);
                     });
 
-                    if(!scope.rexContext.override) {
-                        scope.rexContext.override = new jassa.util.HashMap();
-                    }
+                    initContext(scope.rexContext);
+
+                    var getBaseGraph = function() {
+                        var rexContext = scope.rexContext;
+                        var r = rexContext ? rexContext.baseGraph : null;
+                        return r;
+                    };
 
                     // Synchronize the talis json structure with the graph
                     // TODO Performance-bottleneck: Synchronize via an event API on the Graph object rather than using Angular's watch mechanism
-                    scope.$watch('rexContext.baseGraph.toArray()', function() {
-                        var baseGraph = scope.rexContext.baseGraph;
+                    scope.$watch(function() {
+                        var baseGraph = getBaseGraph();
+                        var r = baseGraph ? baseGraph.hashCode() : null;
+                        return r;
+                    }, function() {
+                        var baseGraph = getBaseGraph();
                         scope.rexContext.json = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
-                    }, true);
+                    });
 
 
                     /*
@@ -155,22 +181,21 @@ angular.module('ui.jassa.rex')
 
 
                     // Remove all entries from map that exist in base
-                    var mapDifference = function(map, baseFn) {
-                        var mapEntries = map.entries();
-                        mapEntries.forEach(function(mapEntry) {
-                            var mapKey = mapEntry.key;
-                            var mapVal = mapEntry.val;
-
-                            var baseVal = baseFn(mapKey);
-
-                            if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
-                                map.remove(mapKey);
-                            }
-                        });
-                    };
+//                    var mapDifference = function(map, baseFn) {
+//                        var mapEntries = map.entries();
+//                        mapEntries.forEach(function(mapEntry) {
+//                            var mapKey = mapEntry.key;
+//                            var mapVal = mapEntry.val;
+//
+//                            var baseVal = baseFn(mapKey);
+//
+//                            if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
+//                                map.remove(mapKey);
+//                            }
+//                        });
+//                    };
 
                     var createDataMap = function(coordinates) {
-                        coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         //var override = scope.rexContext.override;
                         var override = ctrl.getOverride();
@@ -194,13 +219,14 @@ angular.module('ui.jassa.rex')
                     };
 
                     var updateDerivedValues = function(dataMap) {
-
+//console.log('Start update derived');
                         var talis = assembleTalisRdfJson(dataMap);
 
                         // Update the final RDF graph
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
                         scope.rexContext.graph = targetGraph;
 
+                        scope.rexContext.targetJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(targetGraph);
 
                         // Update the referenced sub graph
                         var refGraph = new jassa.rdf.GraphImpl();
@@ -224,7 +250,7 @@ angular.module('ui.jassa.rex')
                         scope.rexContext.srcGraph = refGraph;
 
                         scope.rexContext.diff = setDiff(refGraph, targetGraph);
-
+//console.log('End update derived');
 
 
                         //console.log('Talis JSON', talis);
@@ -248,52 +274,103 @@ angular.module('ui.jassa.rex')
 
                     var cleanupOverride = function()
                     {
+                        var json = scope.rexContext.json;
                         var override = ctrl.getOverride();
                         //var override = scope.rexContext.override;
 
                         // Remove values from override that equal the source data
+                        var entries = talisRdfJsonToEntries(override);
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var val = entry.val;
+
+                            var sourceVal = getValueAt(json, coordinate);
+                            if(sourceVal === val || val == null) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
+                        /*
                         mapDifference(override, function(coordinate) {
                             var r = getValueAt(scope.rexContext.json, coordinate);
                             return r;
                         });
+                        */
 
                         // Remove undefined entries from override
-                        var entries = override.entries();
-                        entries.forEach(function(entry) {
-                            if(entry.val == null) {
-                                override.remove(entry.key);
-                            }
-                        });
+//                        var entries = override.entries();
+//                        entries.forEach(function(entry) {
+//                            if(entry.val == null) {
+//                                override.remove(entry.key);
+//                            }
+//                        });
                     };
 
 
-                    var cleanupReferences = function(coordinates) {
-                        coordinates = coordinates || ctrl.getReferencedCoordinates();
+                    var cleanupReferences = function(coordinateSet) {
+                        //coordinates = coordinates || ctrl.getReferencedCoordinates();
 
                         //console.log('Referenced coordinates', JSON.stringify(coordinates));
-                        var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
+                        //var coordinateSet = jassa.util.SetUtils.arrayToSet(coordinates);
 
                         var override = ctrl.getOverride();
-                        jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        //jassa.util.MapUtils.retainKeys(override, coordinateSet);
+                        var entries = talisRdfJsonToEntries(override);
+
+                        entries.forEach(function(entry) {
+                            var coordinate = entry.key;
+                            var isContained = coordinateSet.contains(coordinate);
+                            if(!isContained) {
+                                removeValueAt(override, coordinate);
+                            }
+                        });
+
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 
 
+                    var currentCoordinateSet = new jassa.util.HashSet();
+                    /*
+                    var hashCodeArr = function(arr) {
+                        var result = 0;
+                        var l = arr ? arr.length : 0;
+                        for (var i = 0; i < l; i++) {
+                            var item = arr[i];
+                            var hashCode = item.hashCode ? item.hashCode : 127;
+                            result = result * 31 + hashCode;
+                            res = res & res;
+                        }
+
+                        return result;
+                    };
+                    */
+
+                    // TODO The following two $watch's have linear complexity but
+                    // could be optimized if we managed references in a more
+                    // clever way
+
                     // TODO Remove unreferenced values from the override
                     scope.$watch(function() {
-                        return ctrl.getReferencedCoordinates();
-                    }, function(coordinates) {
+                        currentCoordinateSet = ctrl.getReferencedCoordinates();
+
+                        var r = currentCoordinateSet.hashCode();
+                        //console.log('coordinateSetHash: ', r);
+                        return r;
+                    }, function() {
                         //console.log('Override', scope.rexContext.override);
-                        cleanupReferences(coordinates);
+                        cleanupReferences(currentCoordinateSet);
                         cleanupOverride();
                     }, true);
 
+                    var currentDataMap = new jassa.util.HashMap();
+
                     scope.$watch(function() {
-                        var coordinates = ctrl.getReferencedCoordinates();
-                        var r = createDataMap(coordinates);
+                        currentDataMap = createDataMap(currentCoordinateSet);
+                        var r = currentDataMap.hashCode();
+                        //console.log('dataMapHash: ', r);
                         return r;
                     }, function(dataMap) {
-                        updateDerivedValues(dataMap);
+                        updateDerivedValues(currentDataMap);
                     }, true);
 
 

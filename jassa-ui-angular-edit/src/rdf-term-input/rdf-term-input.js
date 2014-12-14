@@ -75,20 +75,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             });
             //$scope.
 
-            $scope.onSelectTermType = function(item, model) {
-              $scope.state.type = model.id;
-            };
+//            $scope.onSelectTermType = function(item, model) {
+//              $scope.state.type = model.id;
+//            };
 
-            $scope.onSelectDatatype = function(item, model) {
-              console.log('model', model);
-              console.log('select', $scope);
-              $scope.state.datatype = model.id;
-            };
-
-            $scope.onSelectLanguage = function(item, model) {
-              console.log('model', model);
-              $scope.state.lang = model.id;
-            };
+//            $scope.onSelectDatatype = function(item, model) {
+//              $scope.state.datatype = model.id;
+//            };
+//
+//            $scope.onSelectLanguage = function(item, model) {
+//              $scope.state.lang = model.id;
+//            };
 
             $scope.refreshDatatype = function(newDatatypeValue) {
               console.log('new Datatype', newDatatypeValue);
@@ -138,6 +135,12 @@ angular.module('ui.jassa.rdf-term-input', [])
                                 type: 'literal',
                                 value: state.value,
                                 datatype: state.datatype || jassa.vocab.xsd.xstring.getUri()
+                            };
+                            break;
+                        default:
+                            result = {
+                                type: 'uri',
+                                value: state.value
                             };
                             break;
                         }

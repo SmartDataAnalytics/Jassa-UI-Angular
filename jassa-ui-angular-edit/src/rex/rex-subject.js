@@ -14,6 +14,8 @@ angular.module('ui.jassa.rex')
                     var subjectUri = syncAttr($parse, scope, attrs, 'rexSubject');
 
                     var doPrefetch = function() {
+                        //console.log('doPrefetch');
+
                         var lookupFn = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
@@ -39,23 +41,29 @@ angular.module('ui.jassa.rex')
 //                        });
                     };
 
-                    scope.$watch(function() {
-                        return scope.rexLookup;
-                    }, function(lookupFn) {
+                    scope.$watchGroup([
+                        function() {
+                            return scope.rexLookup;
+                        }, function() {
+                            return scope.rexSubject;
+                        }, function() {
+                            return scope.rexPrefixMapping;
+                        }
+                    ], function() {
                         doPrefetch();
                     });
 
-                    scope.$watch(function() {
-                        return scope.rexSubject;
-                    }, function(newVal) {
-                        doPrefetch();
-                    });
-
-                    scope.$watch(function() {
-                        return scope.rexPrefixMapping;
-                    }, function(pm) {
-                        doPrefetch();
-                    });
+//                    scope.$watch(function() {
+//                        return scope.rexSubject;
+//                    }, function(newVal) {
+//                        doPrefetch();
+//                    });
+//
+//                    scope.$watch(function() {
+//                        return scope.rexPrefixMapping;
+//                    }, function(pm) {
+//                        doPrefetch();
+//                    });
                 }
             };
         }

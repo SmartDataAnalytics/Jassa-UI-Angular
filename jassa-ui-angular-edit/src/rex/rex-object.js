@@ -59,6 +59,8 @@ angular.module('ui.jassa.rex')
                     if(!attrs['rexObject']) {
                         attrs['rexObject'] = '' + i;
                     }
+
+
                     //console.log('FOOO', attrs);
 
 //console.log('rexObject index: ' + i);
@@ -73,6 +75,28 @@ angular.module('ui.jassa.rex')
                     scope.$on('$destroy', function() {
                         jassa.util.ArrayUtils.removeItemStrict(predicateCtrl.rexObjectScopes, scope);
                     });
+
+
+
+                    // If rexObject is present, we also create a rexRef attribute
+                    var rexRef = function() {
+                        var result = {
+                            s: scope.rexSubject,
+                            p: scope.rexPredicate,
+                            i: scope.rexObject
+                        };
+
+                        return result;
+                    };
+
+                    scope.$watch(function() {
+                        var r = rexRef();
+                        return r;
+                    }, function(newRef) {
+                        scope.rexRef = newRef;
+                    }, true);
+
+                    scope.rexRef = rexRef();
 
                 }
             };

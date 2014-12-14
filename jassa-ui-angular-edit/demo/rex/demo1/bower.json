@@ -12,6 +12,7 @@
     "underscore": "1.7.0",
     "angular-ui-codemirror": "0.1.6",
     "moment": "v2.8.4",
-    "openlayers": "release-2.13.1"
+    "openlayers": "release-2.13.1",
+    "ng-stats": ""
   }
 }
