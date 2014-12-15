@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-14
+ * Version: 0.1.0 - 2014-12-15
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -340,10 +340,10 @@ angular.module('ui.jassa.rdf-term-input', [])
 
 var Coordinate = jassa.ext.Class.create({
     initialize: function(s, p, i, c) {
-        this.s = s;
-        this.p = p;
-        this.i = i;
-        this.c = c;
+        this.s = s || '';
+        this.p = p || '';
+        this.i = i || 0;
+        this.c = c || '';
     },
 
     equals: function(that) {
@@ -1973,9 +1973,12 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "<!--     <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-link\"></span></span> -->\n" +
     "    <span class=\"input-group-addon\" ng-bind-html=\"logo\"></span>\n" +
     "\n" +
+    "<!--     <div class=\"input-group-addon\"> -->\n" +
+    "<!--         <select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select> -->\n" +
+    "<!--     </div> -->\n" +
+    "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <!--select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
     "        <ui-select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
     "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
     "          <ui-select-choices repeat=\"item.id as item in termTypes | filter: $select.search\">\n" +
@@ -1985,9 +1988,9 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    </div>\n" +
     "\n" +
     "    <!-- Datatype selector -->\n" +
-    "    <!--span ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\">\n" +
-    "        <select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in datatypes\"></select>\n" +
-    "    </span-->\n" +
+    "<!--     <span ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\"> -->\n" +
+    "<!--         <select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in datatypes\"></select> -->\n" +
+    "<!--     </span> -->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
     "      <ui-select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
@@ -2000,9 +2003,9 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "\n" +
     "    <!-- Language selector -->\n" +
-    "    <!--span ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\">\n" +
-    "        <select ng-model=\"state.lang\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in langs\"></select>\n" +
-    "    </span-->\n" +
+    "<!--     <span ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\"> -->\n" +
+    "<!--         <select ng-model=\"state.lang\" ng-model-options=\"ngModelOptions\" ng-options=\"item.id as item.displayLabel for item in langs\"></select> -->\n" +
+    "<!--     </span> -->\n" +
     "\n" +
     "    <div ng-show=\"state.type===vocab.plainLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
     "      <ui-select ng-model=\"state.lang\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +

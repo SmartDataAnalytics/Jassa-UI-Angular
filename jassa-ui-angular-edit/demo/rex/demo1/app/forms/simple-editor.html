@@ -22,10 +22,10 @@
     </form>
 
     <form role="form" rex-subject="ex05.subject">
-        <div ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
+        <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
             {{rexPrefixMapping.shortForm(property)}}:
-            <div ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
+            <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
                 <div class="form-group">
                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
 

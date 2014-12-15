@@ -1,4 +1,4 @@
-<div class="row" ng-init="ex04={}; ex04.context={}; ex04.baseIri='dbr:'" rex-context rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'">
+<div class="row" ng-init="ex04={}; ex04.context={}; ex04.baseIri='dbr:'" rex-context rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-lookup="lookupFn">
     <div class="col-md-6">
 
 
@@ -46,7 +46,7 @@
                 <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
                     <div class="input-group">
                         <span class="input-group-addon">Gender: </span>
-                        <select type="text" class="form-control" ng-model="gender" ng-model-options="defaultNgModelOptions" ng-options="gender.name for gender in genders" rex-predicate="'foaf:gender'" rex-iri="gender.uri"></select>
+                        <select type="text" class="form-control" ng-model="selectedGenderUri" ng-model-options="defaultNgModelOptions" ng-options="gender.uri as gender.name for gender in genders" rex-predicate="'foaf:gender'" rex-iri="selectedGenderUri"></select>
                     </div>
                 </div>
 
@@ -89,6 +89,26 @@
                 ng-model="turtle"
                 sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
             </div>
+
+            <hr />
+            Added:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+            ></div>
+
+            <hr />
+            Removed:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+            ></div>
+
+
+            <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.length && !rexContext.diff.added.length }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
+
         </div>
     </div>
 
