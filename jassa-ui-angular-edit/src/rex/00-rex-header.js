@@ -1,11 +1,13 @@
 
-
+/**
+ * Falsy valued arguments will be replaced with empty strings or 0
+ */
 var Coordinate = jassa.ext.Class.create({
     initialize: function(s, p, i, c) {
-        this.s = s;
-        this.p = p;
-        this.i = i;
-        this.c = c;
+        this.s = s || '';
+        this.p = p || '';
+        this.i = i || 0;
+        this.c = c || '';
     },
 
     equals: function(that) {

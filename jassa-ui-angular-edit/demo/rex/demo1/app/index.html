@@ -27,6 +27,7 @@
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
@@ -61,6 +62,27 @@
         min-width:100px;
         text-align:left;
     }
+
+    .repeat-item.ng-enter,
+    .repeat-item.ng-leave {
+      -webkit-transition:0.5s linear all;
+      transition:0.5s linear all;
+    }
+
+    .repeat-item.ng-enter,
+    .repeat-item.ng-leave.ng-leave-active {
+      opacity:0;
+    }
+    .repeat-item.ng-leave,
+    .repeat-item.ng-enter.ng-enter-active {
+      opacity:1;
+    }
+    .repeat-item {
+    }
+    .delete {
+      float: right;
+    }
+*/
     </style>
 
     <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
@@ -79,7 +101,7 @@
 
     var app = angular.module(
         'jassa.ui.edit.demo.widgets',
-        ['ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror'])
+        ['ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
 
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
@@ -255,11 +277,11 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-<!--             <div ng-include="'forms/dynamic.html'"></div> -->
+            <div ng-include="'forms/dynamic.html'"></div>
 
-<!--             <div ng-include="'forms/geo.html'"></div> -->
+            <div ng-include="'forms/geo.html'"></div>
 
-<!--             <div ng-include="'forms/person-form.html'"></div> -->
+            <div ng-include="'forms/person-form.html'"></div>
 
             <div ng-include="'forms/simple-editor.html'"></div>
 

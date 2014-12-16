@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "angular": "v1.3.5-build.3630+sha.30694c8",
+    "angular-animate": "v1.3.5-build.3630+sha.30694c8",
     "angular-ui-bootstrap-bower": "0.12.0",
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
     "angular-ui-select": "0.9.4",
