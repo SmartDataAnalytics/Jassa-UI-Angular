@@ -12,6 +12,7 @@ angular.module('ui.jassa.rdf-term-input', [])
     return {
         restrict: 'EA',
         priority: 4,
+        transclude: true,
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
         replace: true,
@@ -22,13 +23,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             ngModelOptions: '=?',
             logo: '@?',
             langs: '=?', // suggestions of available languages
-            datatypes: '=?' // suggestions of available datatypes
+            datatypes: '=?', // suggestions of available datatypes
+            rightButton: '=?'
         },
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
             $scope.ngModelOptions = $scope.ngModelOptions || {};
-            $scope.rightButton = false;
+
+            this.setRightButton = function() {
+              $scope.rightButton = true;
+            };
 
             $scope.vocab = vocab;
 
@@ -107,7 +112,13 @@ angular.module('ui.jassa.rdf-term-input', [])
             return {
                 pre: function(scope, ele, attrs, ngModel) {
 
+                    scope.rightButton = false;
 
+
+
+                    scope.setRightButton = function() {
+                      scope.rightButton = true;
+                    };
 
                     var getValidState = function() {
                         var result;

@@ -1,19 +1,20 @@
-<div class="input-group">
+<div>
+  <div class="input-group">
 
     <!-- First input addon -->
     <!-- TODO Make content configurable -->
-<!--     <span class="input-group-addon"><span class="glyphicon glyphicon-link"></span></span> -->
+    <!--     <span class="input-group-addon"><span class="glyphicon glyphicon-link"></span></span> -->
     <span class="input-group-addon" ng-bind-html="logo"></span>
 
     <!-- Term type selector -->
     <div class="input-group-addon">
-        <!--select ng-model="state.type"  ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select-->
-        <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
-          <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
-          <ui-select-choices repeat="item.id as item in termTypes | filter: $select.search">
-            <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
-          </ui-select-choices>
-        </ui-select>
+      <!--select ng-model="state.type"  ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select-->
+      <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
+        <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
+        <ui-select-choices repeat="item.id as item in termTypes | filter: $select.search">
+          <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
+        </ui-select-choices>
+      </ui-select>
     </div>
 
     <!-- Datatype selector -->
@@ -53,5 +54,6 @@
     <span ng-show="rightButton" class="input-group-btn">
       <button class="btn btn-default" type="button">Map</button>
     </span>
+  </div>
+  <div ng-transclude></div>
 </div>
-

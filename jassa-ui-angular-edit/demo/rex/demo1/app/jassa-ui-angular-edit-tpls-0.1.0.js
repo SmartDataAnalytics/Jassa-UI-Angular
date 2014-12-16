@@ -2,7 +2,7 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-15
+ * Version: 0.1.0 - 2014-12-16
  * License: BSD
  */
 angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.geometry","ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
@@ -11,85 +11,46 @@ angular.module('ui.jassa.geometry', [])
 
   .directive('geometry', ['$parse', function($parse) {
 
-    // Some vocab - later we could fetch labels on-demand based on the uris.
-    var vocab = {
-      iri: 'http://iri',
-      plainLiteral: 'http://plainLiteral',
-      typedLiteral: 'http://typedLiteral'
-    };
-
     return {
       restrict: 'EA',
       priority: 4,
-      require: '^ngModel',
+      require: ['^ngModel'],
       templateUrl: 'template/geometry/geometry.html',
       replace: true,
-      //scope: true,
       scope: {
-        //ngModel: '=',
         bindModel: '=ngModel',
-        ngModelOptions: '=?',
-        logo: '@?',
-        langs: '=?', // suggestions of available languages
-        datatypes: '=?', // suggestions of available datatypes,
-        righButton: '=?'
+        ngModelOptions: '=?'
       },
       controller: ['$scope', function($scope) {
-
-        $scope.state = $scope.$state || {};
         $scope.ngModelOptions = $scope.ngModelOptions || {};
-        console.log('rightButton', $scope.rightButton);
-
+        $scope.geometry = 'point';
       }],
       compile: function(ele, attrs) {
         return {
-          pre: function (scope, ele, attrs, ngModel) {
-
+          pre: function (scope, ele, attrs) {
             var map, drawControls, polygonLayer, panel, wkt, vectors;
-            //console.log('geometry', scope.geometry);
-            //console.log('mapConfig', scope.config);
-            //console.log('valueStoreMap', scope.valueStore);
-
-            scope.wkt = scope.state.value || '';
-            //scope.chooseGeometry = scope.geometry;
-            scope.geometry = 'point';
-            scope.chooseGeometry = 'point';
-
 
             scope.$watch(function () {
-              return scope.wkt;
+              return scope.bindModel;
             }, function (newValue, oldValue) {
-              console.log('old value of input', oldValue);
+              //console.log('old value of input', oldValue);
               // clear layer
               vectors.destroyFeatures();
               // set config data with changed input value ...
-              scope.state.value = scope.wkt;
+              scope.bindModel = newValue;
               // ... then call parseWKT to redraw the feature
-              parseWKT();
+              if (scope.bindModel != null) {
+                parseWKT();
+              }
             });
 
             scope.$watch(function () {
-              return scope.state.value;
+              return scope.geometry;
             }, function (newValue) {
-              console.log('map data changed: ', newValue);
-              //scope.valueStore.setData(newValue);
-            });
-
-            scope.$watch(function () {
-              //return scope.valueStore.getData();
-            }, function (newValue) {
-              console.log('data reset for map value: ', newValue);
-              scope.wkt = scope.state.value;
-            });
-
-            scope.$watch(function () {
-              return scope.chooseGeometry;
-            }, function (newValue) {
-              console.log('radio', scope.chooseGeometry);
-              scope.geometry = newValue;
+              //console.log('radio', scope.geometry);
+              //scope.geometry = newValue;
               toggleControl();
             });
-
 
             function init() {
               map = new OpenLayers.Map('openlayers-map');
@@ -167,7 +128,7 @@ angular.module('ui.jassa.geometry', [])
                 displayWKT(polygonLayer.features[i]);
               }*/
               var wktValue = generateWKT(drawnGeometry.feature);
-              scope.state.value = wktValue;
+              scope.bindModel = wktValue;
               scope.$apply();
             }
 
@@ -178,8 +139,8 @@ angular.module('ui.jassa.geometry', [])
             }
 
             function parseWKT() {
-              console.log('parseWKT', scope.state.value);
-              var features = wkt.read(scope.state.value);
+              //console.log('parseWKT', scope.bindModel);
+              var features = wkt.read(scope.bindModel);
               var bounds;
               if (features) {
                 if (features.constructor != Array) {
@@ -196,18 +157,18 @@ angular.module('ui.jassa.geometry', [])
                 vectors.addFeatures(features);
                 map.zoomToExtent(bounds);
                 var plural = (features.length > 1) ? 's' : '';
-                console.log('Added WKT-String. Feature' + plural + ' added');
+                //console.log('Added WKT-String. Feature' + plural + ' added');
               } else {
                 console.log('Bad WKT');
               }
             }
 
             function toggleControl() {
-              console.log('toggleControl', scope.geometry);
+              //console.log('toggleControl', scope.geometry);
               var control = drawControls[scope.geometry];
               for (var key in drawControls) {
                 control = drawControls[key];
-                if (scope.geometry == key && scope.chooseGeometry) {
+                if (scope.geometry == key) {
                   control.activate();
                 } else {
                   control.deactivate();
@@ -216,23 +177,22 @@ angular.module('ui.jassa.geometry', [])
             }
 
             function onModificationStart(feature) {
-              console.log(feature.id + ' is ready to be modified');
+              //console.log(feature.id + ' is ready to be modified');
               drawControls[scope.geometry].deactivate();
 
             }
 
             function onModification(feature) {
-              console.log(feature.id + ' has been modified');
+              //console.log(feature.id + ' has been modified');
               var wktValue = generateWKT(feature);
-              scope.state.value = wktValue;
+              scope.bindModel = wktValue;
               scope.$apply();
             }
 
             function onModificationEnd(feature) {
-              console.log(feature.id + ' is finished to be modified');
+              //console.log(feature.id + ' is finished to be modified');
               drawControls[scope.geometry].activate();
             }
-
 
             // init openlayers
             init();
@@ -240,125 +200,11 @@ angular.module('ui.jassa.geometry', [])
             // set geometry
             var control = drawControls[scope.geometry];
             control.activate();
-
-            var getValidState = function() {
-              var result;
-
-              var state = scope.state;
-              // {"type":{"id":"http://typedLiteral","displayLabel":"typed"},"value":"297.6","datatype":"http://dbpedia.org/datatype/squareKilometre"}
-              var type = state.type;
-              switch(type) {
-                case vocab.iri:
-                  result = {
-                    type: 'uri',
-                    value: state.value
-                  };
-                  break;
-                case vocab.plainLiteral:
-                  result = {
-                    type: 'literal',
-                    value: state.value,
-                    lang: state.lang,
-                    datatype: ''
-                  };
-                  break;
-                case vocab.typedLiteral:
-                  result = {
-                    type: 'literal',
-                    value: state.value,
-                    datatype: state.datatype || jassa.vocab.xsd.xstring.getUri()
-                  };
-                  break;
-              }
-
-              return result;
-            };
-
-            var convertToState = function(talisJson) {
-              // IMPORTANT: We cannot apply defaults here on the value taken from the model,
-              // because otherwise
-              // we would expose the state based on the defaults, which could
-              // in turn update the model again and modify its value
-              // Put differently: The model must not be changed unless there is user interaction
-              // with this widget!
-
-              //var clone = createTalisJsonObjectWithDefaults(talisJson);
-              var clone = talisJson;
-
-              if(clone.type != null && clone.value == null) {
-                clone.value = '';
-              }
-
-              var node;
-              try {
-                node = jassa.rdf.NodeFactory.createFromTalisRdfJson(clone);
-              } catch(err) {
-                // Ignore invalid model values, and just wait for them to become valid
-                //console.log(err);
-              }
-
-
-              var result;
-              if(!node) {
-                result = {};
-              } else if(node.isUri()) {
-                result = {
-                  type: vocab.iri,
-                  value: node.getUri()
-                };
-              } else if(node.isLiteral()) {
-                var dt = node.getLiteralDatatypeUri();
-                var hasDatatype = !jassa.util.ObjectUtils.isEmptyString(dt);
-
-                if(hasDatatype) {
-                  result = {
-                    type: vocab.typedLiteral,
-                    value: node.getLiteralLexicalForm(),
-                    datatype: dt
-                  };
-                } else {
-                  result = {
-                    type: vocab.plainLiteral,
-                    value: node.getLiteralLexicalForm(),
-                    lang: node.getLiteralLanguage()
-                  };
-                }
-              }
-
-              return result;
-            };
-
-
-            scope.$watch(function () {
-              var r = scope.bindModel;
-              return r;
-            }, function(talisJson) {
-              //console.log('Got outside change: ', talisJson);
-              if (!talisJson) {
-              } else {
-                var newState = convertToState(talisJson);
-                scope.state = newState;
-                scope.wkt = newState.value;
-              }
-            }, true);
-
-            scope.$watch(function () {
-              var r = getValidState();
-              return r;
-            }, function(newValue) {
-              if(newValue) {
-                angular.copy(newValue, scope.bindModel);
-              }
-            }, true);
-
           }
         };
       }
     };
   }]);
-
-
-
 angular.module('ui.jassa.rdf-term-input', [])
 
 .directive('rdfTermInput', ['$parse', function($parse) {
@@ -373,6 +219,7 @@ angular.module('ui.jassa.rdf-term-input', [])
     return {
         restrict: 'EA',
         priority: 4,
+        transclude: true,
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
         replace: true,
@@ -383,13 +230,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             ngModelOptions: '=?',
             logo: '@?',
             langs: '=?', // suggestions of available languages
-            datatypes: '=?' // suggestions of available datatypes
+            datatypes: '=?', // suggestions of available datatypes
+            rightButton: '=?'
         },
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
             $scope.ngModelOptions = $scope.ngModelOptions || {};
-            $scope.rightButton = false;
+
+            this.setRightButton = function() {
+              $scope.rightButton = true;
+            };
 
             $scope.vocab = vocab;
 
@@ -468,7 +319,13 @@ angular.module('ui.jassa.rdf-term-input', [])
             return {
                 pre: function(scope, ele, attrs, ngModel) {
 
+                    scope.rightButton = false;
 
+
+
+                    scope.setRightButton = function() {
+                      scope.rightButton = true;
+                    };
 
                     var getValidState = function() {
                         var result;
@@ -2334,10 +2191,10 @@ angular.module('ui.jassa.sync')
 angular.module("template/geometry/geometry.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/geometry/geometry.html",
     "<div id=\"jassa-edit-map\" style=\"height:375px;\">\n" +
-    "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Point</label>\n" +
-    "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Line</label>\n" +
-    "  <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Polygon</label>\n" +
-    "  <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"chooseGeometry\" /><label>Box</label>\n" +
+    "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
+    "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +
+    "  <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"geometry\" /><label>Polygon</label>\n" +
+    "  <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
     "  <!--input type=\"text\" class=\"form-control\" ng-model=\"wkt\" /-->\n" +
     "  <div id=\"openlayers-map\" style=\"width: 100%; height: 300px;\"></div>\n" +
     "</div>");
@@ -2345,22 +2202,23 @@ angular.module("template/geometry/geometry.html", []).run(["$templateCache", fun
 
 angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/rdf-term-input/rdf-term-input.html",
-    "<div class=\"input-group\">\n" +
+    "<div>\n" +
+    "  <div class=\"input-group\">\n" +
     "\n" +
     "    <!-- First input addon -->\n" +
     "    <!-- TODO Make content configurable -->\n" +
-    "<!--     <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-link\"></span></span> -->\n" +
+    "    <!--     <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-link\"></span></span> -->\n" +
     "    <span class=\"input-group-addon\" ng-bind-html=\"logo\"></span>\n" +
     "\n" +
     "    <!-- Term type selector -->\n" +
     "    <div class=\"input-group-addon\">\n" +
-    "        <!--select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
-    "        <ui-select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
-    "          <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
-    "          <ui-select-choices repeat=\"item.id as item in termTypes | filter: $select.search\">\n" +
-    "            <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
-    "          </ui-select-choices>\n" +
-    "        </ui-select>\n" +
+    "      <!--select ng-model=\"state.type\"  ng-options=\"item.id as item.displayLabel for item in termTypes\" ng-change=\"ensureValidity()\"></select-->\n" +
+    "      <ui-select ng-model=\"state.type\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
+    "        <ui-select-match placeholder=\"Termtype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "        <ui-select-choices repeat=\"item.id as item in termTypes | filter: $select.search\">\n" +
+    "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
+    "        </ui-select-choices>\n" +
+    "      </ui-select>\n" +
     "    </div>\n" +
     "\n" +
     "    <!-- Datatype selector -->\n" +
@@ -2400,7 +2258,8 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <span ng-show=\"rightButton\" class=\"input-group-btn\">\n" +
     "      <button class=\"btn btn-default\" type=\"button\">Map</button>\n" +
     "    </span>\n" +
+    "  </div>\n" +
+    "  <div ng-transclude></div>\n" +
     "</div>\n" +
-    "\n" +
     "");
 }]);

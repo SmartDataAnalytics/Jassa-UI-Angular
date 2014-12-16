@@ -35,8 +35,12 @@
             {{rexPrefixMapping.shortForm(property)}}:
             <div ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
                 <div class="form-group">
-                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang">
 
+                    </rdf-term-input>
+                  <div ng-if="property === 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry'">
+                    <geometry ng-model="term.value" ng-model-options="defaultNgModelOptions"></geometry>
+                  </div>
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.type" ng-model-options="defaultNgModelOptions" rex-termtype="term.type"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.value" ng-model-options="defaultNgModelOptions" rex-value="term.value"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.lang" ng-model-options="defaultNgModelOptions" rex-lang="term.lang"> -->
@@ -44,9 +48,7 @@
 
                     <input ng-show="objectData != null" class="form-control" type="checkbox" ng-model="deleted">
                     <button ng-if="objectData == null" class="btn btn-primary" ng-click="rexContext.remove(rexRef)">Remove {{$index}}</button>
-                    <div ng-if="property === 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry'">
-                      <geometry ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype"></geometry>
-                    </div>
+
                 </div>
             </div>
             <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
