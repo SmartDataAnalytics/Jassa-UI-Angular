@@ -11,6 +11,8 @@ angular.module('ui.jassa.geometry-input', [])
 
   .directive('geometryInput', ['$parse', function($parse) {
 
+    var uniqueId = 1;
+
     return {
       restrict: 'EA',
       priority: 4,
@@ -53,7 +55,12 @@ angular.module('ui.jassa.geometry-input', [])
             });
 
             function init() {
-              map = new OpenLayers.Map('openlayers-map');
+              // generate custom map id
+              var mapId = 'openlayers-map-' + uniqueId++;
+              // set custom map id
+              ele.find('.map').attr('id', mapId);
+              // init openlayers map with custom map id
+              map = new OpenLayers.Map(mapId);
 
               var wmsLayer = new OpenLayers.Layer.WMS('OpenLayers WMS',
                 'http://vmap0.tiles.osgeo.org/wms/vmap0?', {layers: 'basic'});
@@ -2192,13 +2199,13 @@ angular.module('ui.jassa.sync')
 
 angular.module("template/geometry-input/geometry-input.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/geometry-input/geometry-input.html",
-    "<div id=\"jassa-edit-map\" style=\"height:375px;\">\n" +
+    "<div class=\"geometry-input\" style=\"height:375px;\">\n" +
     "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
     "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +
     "  <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"geometry\" /><label>Polygon</label>\n" +
     "  <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
     "  <!--input type=\"text\" class=\"form-control\" ng-model=\"wkt\" /-->\n" +
-    "  <div id=\"openlayers-map\" style=\"width: 100%; height: 300px;\"></div>\n" +
+    "  <div class=\"map\" style=\"width: 100%; height: 300px;\"></div>\n" +
     "</div>");
 }]);
 

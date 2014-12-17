@@ -2,6 +2,8 @@ angular.module('ui.jassa.geometry-input', [])
 
   .directive('geometryInput', ['$parse', function($parse) {
 
+    var uniqueId = 1;
+
     return {
       restrict: 'EA',
       priority: 4,
@@ -44,7 +46,12 @@ angular.module('ui.jassa.geometry-input', [])
             });
 
             function init() {
-              map = new OpenLayers.Map('openlayers-map');
+              // generate custom map id
+              var mapId = 'openlayers-map-' + uniqueId++;
+              // set custom map id
+              ele.find('.map').attr('id', mapId);
+              // init openlayers map with custom map id
+              map = new OpenLayers.Map(mapId);
 
               var wmsLayer = new OpenLayers.Layer.WMS('OpenLayers WMS',
                 'http://vmap0.tiles.osgeo.org/wms/vmap0?', {layers: 'basic'});
