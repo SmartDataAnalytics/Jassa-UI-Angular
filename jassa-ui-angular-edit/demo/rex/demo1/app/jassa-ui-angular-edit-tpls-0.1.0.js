@@ -2,20 +2,20 @@
  * jassa-ui-angular-edit
  * https://github.com/GeoKnow/Jassa-UI-Angular
 
- * Version: 0.1.0 - 2014-12-16
+ * Version: 0.1.0 - 2014-12-17
  * License: BSD
  */
-angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.geometry","ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
-angular.module("ui.jassa.edit.tpls", ["template/geometry/geometry.html","template/rdf-term-input/rdf-term-input.html"]);
-angular.module('ui.jassa.geometry', [])
+angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.geometry-input","ui.jassa.rdf-term-input","ui.jassa.rex","ui.jassa.sync"]);
+angular.module("ui.jassa.edit.tpls", ["template/geometry-input/geometry-input.html","template/rdf-term-input/rdf-term-input.html"]);
+angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometry', ['$parse', function($parse) {
+  .directive('geometryInput', ['$parse', function($parse) {
 
     return {
       restrict: 'EA',
       priority: 4,
       require: ['^ngModel'],
-      templateUrl: 'template/geometry/geometry.html',
+      templateUrl: 'template/geometry-input/geometry-input.html',
       replace: true,
       scope: {
         bindModel: '=ngModel',
@@ -47,8 +47,8 @@ angular.module('ui.jassa.geometry', [])
             scope.$watch(function () {
               return scope.geometry;
             }, function (newValue) {
-              //console.log('radio', scope.geometry);
-              //scope.geometry = newValue;
+              //console.log('radio', scope.geometry-input-input);
+              //scope.geometry-input-input = newValue;
               toggleControl();
             });
 
@@ -124,7 +124,7 @@ angular.module('ui.jassa.geometry', [])
             function GeometryWasDrawn(drawnGeometry) {
               /*var ft = polygonLayer.features;
               for(var i=0; i< ft.length; i++){
-                console.log(polygonLayer.features[i].geometry.getBounds());
+                console.log(polygonLayer.features[i].geometry-input-input.getBounds());
                 displayWKT(polygonLayer.features[i]);
               }*/
               var wktValue = generateWKT(drawnGeometry.feature);
@@ -164,7 +164,7 @@ angular.module('ui.jassa.geometry', [])
             }
 
             function toggleControl() {
-              //console.log('toggleControl', scope.geometry);
+              //console.log('toggleControl', scope.geometry-input-input);
               var control = drawControls[scope.geometry];
               for (var key in drawControls) {
                 control = drawControls[key];
@@ -197,7 +197,7 @@ angular.module('ui.jassa.geometry', [])
             // init openlayers
             init();
 
-            // set geometry
+            // set geometry-input-input
             var control = drawControls[scope.geometry];
             control.activate();
           }
@@ -2190,8 +2190,8 @@ angular.module('ui.jassa.sync')
 
 ;
 
-angular.module("template/geometry/geometry.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/geometry/geometry.html",
+angular.module("template/geometry-input/geometry-input.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/geometry-input/geometry-input.html",
     "<div id=\"jassa-edit-map\" style=\"height:375px;\">\n" +
     "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
     "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +

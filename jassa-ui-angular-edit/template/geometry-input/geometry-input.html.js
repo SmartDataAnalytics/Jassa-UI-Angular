@@ -1,5 +1,5 @@
-angular.module("template/geometry/geometry.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/geometry/geometry.html",
+angular.module("template/geometry-input/geometry-input.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/geometry-input/geometry-input.html",
     "<div id=\"jassa-edit-map\" style=\"height:375px;\">\n" +
     "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
     "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +

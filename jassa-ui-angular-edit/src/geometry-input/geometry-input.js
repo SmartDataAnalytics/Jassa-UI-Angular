@@ -1,12 +1,12 @@
-angular.module('ui.jassa.geometry', [])
+angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometry', ['$parse', function($parse) {
+  .directive('geometryInput', ['$parse', function($parse) {
 
     return {
       restrict: 'EA',
       priority: 4,
       require: ['^ngModel'],
-      templateUrl: 'template/geometry/geometry.html',
+      templateUrl: 'template/geometry-input/geometry-input.html',
       replace: true,
       scope: {
         bindModel: '=ngModel',
@@ -38,8 +38,8 @@ angular.module('ui.jassa.geometry', [])
             scope.$watch(function () {
               return scope.geometry;
             }, function (newValue) {
-              //console.log('radio', scope.geometry);
-              //scope.geometry = newValue;
+              //console.log('radio', scope.geometry-input-input);
+              //scope.geometry-input-input = newValue;
               toggleControl();
             });
 
@@ -115,7 +115,7 @@ angular.module('ui.jassa.geometry', [])
             function GeometryWasDrawn(drawnGeometry) {
               /*var ft = polygonLayer.features;
               for(var i=0; i< ft.length; i++){
-                console.log(polygonLayer.features[i].geometry.getBounds());
+                console.log(polygonLayer.features[i].geometry-input-input.getBounds());
                 displayWKT(polygonLayer.features[i]);
               }*/
               var wktValue = generateWKT(drawnGeometry.feature);
@@ -155,7 +155,7 @@ angular.module('ui.jassa.geometry', [])
             }
 
             function toggleControl() {
-              //console.log('toggleControl', scope.geometry);
+              //console.log('toggleControl', scope.geometry-input-input);
               var control = drawControls[scope.geometry];
               for (var key in drawControls) {
                 control = drawControls[key];
@@ -188,7 +188,7 @@ angular.module('ui.jassa.geometry', [])
             // init openlayers
             init();
 
-            // set geometry
+            // set geometry-input-input
             var control = drawControls[scope.geometry];
             control.activate();
           }
