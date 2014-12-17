@@ -33,18 +33,52 @@ angular.module('ui.jassa.geometry-input', [])
 
           responsePromise.success(function(data, status, headers, config) {
             if(angular.isFunction(successCallback)) {
-              successCallback(data);
+              successCallback(data, responsePromise);
             }
+
           });
           responsePromise.error(function(data, status, headers, config) {
             alert('AJAX failed!');
           });
+        };
+
+        $scope.fetchResults = function(searchString) {
+          var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';
+          return $http({
+            'method': 'GET',
+            'url': url,
+            'cache': true,
+            'headers' : {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          }).then(function(response) {
+            console.log('response', response);
+            var results = [];
+            for (var i in response.data) {
+              if (response.data[i].hasOwnProperty('geotext')) {
+                results.push({
+                  'wkt': response.data[i].geotext,
+                  'label': response.data[i].display_name
+                });
+              }
+            }
+            console.log('results', results);
+            return results;
+          });
+        };
+
+        $scope.onSelectGeocode = function(item) {
+          console.log('onselect', item);
+          $scope.bindModel = item.wkt;
         };
       }],
       compile: function(ele, attrs) {
         return {
           pre: function (scope, ele, attrs) {
             scope.searchString = '';
+
+
 
             var map, drawControls, polygonLayer, panel, wkt, vectors;
 
@@ -79,13 +113,13 @@ angular.module('ui.jassa.geometry-input', [])
                   console.log('getGeocodingInformation', data);
                   for (var i in data) {
                     if(data[i].geotext != null) {
-                      scope.bindModel = data[i].geotext;
-                      break;
+                      parseWKT(data[i].geotext);
                     }
 
                   }
                 });
               }
+              //scope.searchResults = scope.fetchGeocodingResults(newValue);
             });
 
             function init() {
@@ -178,9 +212,10 @@ angular.module('ui.jassa.geometry-input', [])
               return str;
             }
 
-            function parseWKT() {
+            function parseWKT(pWktString) {
+              var wktString = pWktString || scope.bindModel;
               //console.log('parseWKT', scope.bindModel);
-              var features = wkt.read(scope.bindModel);
+              var features = wkt.read(wktString);
               var bounds;
               if (features) {
                 if (features.constructor != Array) {
