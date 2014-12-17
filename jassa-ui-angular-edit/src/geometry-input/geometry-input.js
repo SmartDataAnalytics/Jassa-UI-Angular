@@ -1,6 +1,6 @@
 angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometryInput', ['$parse', function($parse) {
+  .directive('geometryInput', ['$http', function($http) {
 
     var uniqueId = 1;
 
@@ -17,10 +17,35 @@ angular.module('ui.jassa.geometry-input', [])
       controller: ['$scope', function($scope) {
         $scope.ngModelOptions = $scope.ngModelOptions || {};
         $scope.geometry = 'point';
+        $scope.getGeocodingInformation = function(searchString, successCallback) {
+
+          var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';
+
+          var responsePromise = $http({
+            'method': 'GET',
+            'url': url,
+            'cache': true,
+            'headers' : {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          responsePromise.success(function(data, status, headers, config) {
+            if(angular.isFunction(successCallback)) {
+              successCallback(data);
+            }
+          });
+          responsePromise.error(function(data, status, headers, config) {
+            alert('AJAX failed!');
+          });
+        };
       }],
       compile: function(ele, attrs) {
         return {
           pre: function (scope, ele, attrs) {
+            scope.searchString = '';
+
             var map, drawControls, polygonLayer, panel, wkt, vectors;
 
             scope.$watch(function () {
@@ -45,6 +70,24 @@ angular.module('ui.jassa.geometry-input', [])
               toggleControl();
             });
 
+            scope.$watch(function () {
+              return scope.searchString;
+            }, function (newValue) {
+              console.log('searchString', newValue);
+              if (newValue.length > 3) {
+                scope.getGeocodingInformation(newValue, function(data) {
+                  console.log('getGeocodingInformation', data);
+                  for (var i in data) {
+                    if(data[i].geotext != null) {
+                      scope.bindModel = data[i].geotext;
+                      break;
+                    }
+
+                  }
+                });
+              }
+            });
+
             function init() {
               // generate custom map id
               var mapId = 'openlayers-map-' + uniqueId++;
@@ -59,7 +102,6 @@ angular.module('ui.jassa.geometry-input', [])
               panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
 
               var snapVertex = {methods: ['vertex', 'edge'], layers: [vectors]};
-
 
               // allow testing of specific renderers via "?renderer=Canvas", etc
               var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;

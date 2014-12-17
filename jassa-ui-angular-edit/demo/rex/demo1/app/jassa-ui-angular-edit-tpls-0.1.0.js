@@ -9,7 +9,7 @@ angular.module("ui.jassa.edit", ["ui.jassa.edit.tpls", "ui.jassa.geometry-input"
 angular.module("ui.jassa.edit.tpls", ["template/geometry-input/geometry-input.html","template/rdf-term-input/rdf-term-input.html"]);
 angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometryInput', ['$parse', function($parse) {
+  .directive('geometryInput', ['$http', function($http) {
 
     var uniqueId = 1;
 
@@ -26,10 +26,35 @@ angular.module('ui.jassa.geometry-input', [])
       controller: ['$scope', function($scope) {
         $scope.ngModelOptions = $scope.ngModelOptions || {};
         $scope.geometry = 'point';
+        $scope.getGeocodingInformation = function(searchString, successCallback) {
+
+          var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';
+
+          var responsePromise = $http({
+            'method': 'GET',
+            'url': url,
+            'cache': true,
+            'headers' : {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          responsePromise.success(function(data, status, headers, config) {
+            if(angular.isFunction(successCallback)) {
+              successCallback(data);
+            }
+          });
+          responsePromise.error(function(data, status, headers, config) {
+            alert('AJAX failed!');
+          });
+        };
       }],
       compile: function(ele, attrs) {
         return {
           pre: function (scope, ele, attrs) {
+            scope.searchString = '';
+
             var map, drawControls, polygonLayer, panel, wkt, vectors;
 
             scope.$watch(function () {
@@ -54,6 +79,24 @@ angular.module('ui.jassa.geometry-input', [])
               toggleControl();
             });
 
+            scope.$watch(function () {
+              return scope.searchString;
+            }, function (newValue) {
+              console.log('searchString', newValue);
+              if (newValue.length > 3) {
+                scope.getGeocodingInformation(newValue, function(data) {
+                  console.log('getGeocodingInformation', data);
+                  for (var i in data) {
+                    if(data[i].geotext != null) {
+                      scope.bindModel = data[i].geotext;
+                      break;
+                    }
+
+                  }
+                });
+              }
+            });
+
             function init() {
               // generate custom map id
               var mapId = 'openlayers-map-' + uniqueId++;
@@ -68,7 +111,6 @@ angular.module('ui.jassa.geometry-input', [])
               panel = new OpenLayers.Control.Panel({'displayClass': 'olControlEditingToolbar'});
 
               var snapVertex = {methods: ['vertex', 'edge'], layers: [vectors]};
-
 
               // allow testing of specific renderers via "?renderer=Canvas", etc
               var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
@@ -2200,11 +2242,13 @@ angular.module('ui.jassa.sync')
 angular.module("template/geometry-input/geometry-input.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/geometry-input/geometry-input.html",
     "<div class=\"geometry-input\" style=\"height:375px;\">\n" +
-    "  <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
-    "  <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +
-    "  <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"geometry\" /><label>Polygon</label>\n" +
-    "  <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
-    "  <!--input type=\"text\" class=\"form-control\" ng-model=\"wkt\" /-->\n" +
+    "  <div>\n" +
+    "    <input type=\"radio\" value=\"point\" name=\"geometry\" ng-model=\"geometry\" /><label>Point</label>\n" +
+    "    <input type=\"radio\" value=\"line\" name=\"geometry\" ng-model=\"geometry\" /><label>Line</label>\n" +
+    "    <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"geometry\" /><label>Polygon</label>\n" +
+    "    <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
+    "  </div>\n" +
+    "  <input ng-model=\"searchString\" class=\"form-control\" type=\"text\" placeholder=\"Search for a place\"/>\n" +
     "  <div class=\"map\" style=\"width: 100%; height: 300px;\"></div>\n" +
     "</div>");
 }]);
