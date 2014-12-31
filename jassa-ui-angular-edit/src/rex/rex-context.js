@@ -221,6 +221,7 @@ angular.module('ui.jassa.rex')
                     var updateDerivedValues = function(dataMap) {
 //console.log('Start update derived');
                         var talis = assembleTalisRdfJson(dataMap);
+                        processPrefixes(talis);
 
                         // Update the final RDF graph
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);

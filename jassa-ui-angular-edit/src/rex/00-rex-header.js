@@ -226,6 +226,47 @@ var assembleTalisRdfJson = function(map) {
 
     return result;
 };
+
+/**
+ * In place processing of prefixes in a Talis RDF JSON structure.
+ *
+ * If objects have a prefixMapping attribute, value and datatype fields
+ * are expanded appropriately.
+ *
+ */
+var processPrefixes = function(talisRdfJson) {
+    var result = {};
+
+    var sMap = talisRdfJson;
+    var ss = Object.keys(sMap);
+    ss.forEach(function(s) {
+        var pMap = sMap[s];
+        var ps = Object.keys(pMap);
+
+        ps.forEach(function(p) {
+           var iArr = pMap[p];
+
+           iArr.forEach(function(cMap) {
+               var pm = cMap.prefixMapping;
+
+               if(cMap.type === 'uri') {
+                   var val = cMap.value;
+                   cMap.value = pm.expandPrefix(val);
+               } else if(cMap.type === 'literal' && cMap.datatype != null) {
+                   var datatype = cMap.datatype;
+
+                   cMap.datatype = pm.expandPrefix(datatype);
+               }
+
+               delete cMap['prefixMapping'];
+           });
+        });
+    });
+
+    return result;
+};
+
+
 var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
 var createCoordinate = function(scope, component) {

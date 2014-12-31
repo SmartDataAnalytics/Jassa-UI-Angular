@@ -98,6 +98,9 @@ angular.module('ui.jassa.rex')
 
                     scope.rexRef = rexRef();
 
+
+                    // Make the prefixes part of the Talis RDF json object
+                    createCompileComponent('rexPrefixMapping', 'prefixMapping', $parse);
                 }
             };
         }
