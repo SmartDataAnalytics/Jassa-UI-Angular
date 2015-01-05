@@ -35,7 +35,7 @@ angular.module('ui.jassa.rex')
         priority: basePriority + 13,
         restrict: 'A',
         scope: true,
-        require: '^rexPredicate',
+        require: ['^rexContext', '^rexPredicate'],
         controller: function() {},
         compile: function(ele, attrs) {
 
@@ -54,7 +54,10 @@ angular.module('ui.jassa.rex')
 
 
             return {
-                pre: function(scope, ele, attrs, predicateCtrl) {
+                pre: function(scope, ele, attrs, ctrls) {
+                    var predicateCtrl = ctrls[1];
+                    var contextCtrl = ctrls[0];
+
                     var i = predicateCtrl.rexObjectScopes.length;
                     if(!attrs['rexObject']) {
                         attrs['rexObject'] = '' + i;
@@ -99,8 +102,10 @@ angular.module('ui.jassa.rex')
                     scope.rexRef = rexRef();
 
 
+                    // Below stuff is deprecated
                     // Make the prefixes part of the Talis RDF json object
-                    createCompileComponent('rexPrefixMapping', 'prefixMapping', $parse);
+                    //var cc = createCompileComponent('rexPrefixMapping', 'prefixMapping', $parse, true);
+                    //cc.pre(scope, ele, attrs, ctrls);
                 }
             };
         }

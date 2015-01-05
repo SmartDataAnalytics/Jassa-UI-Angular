@@ -16,7 +16,7 @@ angular.module('ui.jassa.rex')
             //$scope.override = new jassa.util.HashMap();
 
             //this.rexContext = $scope.rexContext;
-            this.getOverride = function() {
+            this.getOverride =    function() {
                 //return $scope.override;
                 var rexContext = $scope.rexContext;
                 var r = rexContext ? rexContext.override : null;
@@ -218,10 +218,10 @@ angular.module('ui.jassa.rex')
                         return result;
                     };
 
-                    var updateDerivedValues = function(dataMap) {
+                    var updateDerivedValues = function(dataMap, prefixMapping) {
 //console.log('Start update derived');
                         var talis = assembleTalisRdfJson(dataMap);
-                        processPrefixes(talis);
+                        processPrefixes(talis, prefixMapping);
 
                         // Update the final RDF graph
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
@@ -371,7 +371,11 @@ angular.module('ui.jassa.rex')
                         //console.log('dataMapHash: ', r);
                         return r;
                     }, function(dataMap) {
-                        updateDerivedValues(currentDataMap);
+
+                        var rexContext = scope.rexContext;
+                        var prefixMapping = rexContext ? rexContext.prefixMapping : null;
+
+                        updateDerivedValues(currentDataMap, prefixMapping);
                     }, true);
 
 

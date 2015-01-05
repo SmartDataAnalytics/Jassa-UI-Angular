@@ -75,7 +75,7 @@ function capitalize(s)
 
 // TODO We need to expand prefixed values if the termtype is IRI
 
-var createCompileComponent = function($rexComponent$, $component$, $parse) {
+var createCompileComponent = function($rexComponent$, $component$, $parse, oneWay) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
 //if(true) { return; }
 
@@ -89,10 +89,12 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             var modelGetter = $parse(modelExprStr);
             var modelSetter = modelGetter.assign;
 
-            var obj = syncAttr($parse, scope, attrs, $rexComponent$);
+            if(!oneWay) {
+                syncAttr($parse, scope, attrs, $rexComponent$);
+            }
 
             var contextCtrl = ctrls[0];
-            var objectCtrl = ctrls[1];
+            //var objectCtrl = ctrls[1];
 
             var slot = contextCtrl.allocSlot();
             slot.entry = {};
@@ -125,38 +127,40 @@ var createCompileComponent = function($rexComponent$, $component$, $parse) {
             }, true);
 
 
-            scope.$watch(function() {
-                var coordinate = slot.entry.key;
-                var r = getEffectiveValue(scope.rexContext, coordinate); //scope.rexContext.getValue(coordinate);
-                return r;
+            if(!oneWay) {
+                scope.$watch(function() {
+                    var coordinate = slot.entry.key;
+                    var r = getEffectiveValue(scope.rexContext, coordinate); //scope.rexContext.getValue(coordinate);
+                    return r;
 
-            }, function(value) {
-                var coordinate = slot.entry.key;
+                }, function(value) {
+                    var coordinate = slot.entry.key;
 
-                var entry = {
-                    key: coordinate,
-                    val: value
-                };
+                    var entry = {
+                        key: coordinate,
+                        val: value
+                    };
 
-                //console.log('Value at coordinate ')
-
-                if(value != null) {
-                    //contextCtrl.getOverride().putEntries([entry]);
-                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
-                }
-
-                slot.entry.value = value;
-
-                if(modelSetter) {
-                    // If the given model is writeable, then we need to update it
-                    // whenever the coordinate's value changes
+                    //console.log('Value at coordinate ')
 
                     if(value != null) {
-                        modelSetter(scope, value);
+                        //contextCtrl.getOverride().putEntries([entry]);
+                        setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
                     }
-                }
 
-            }, true);
+                    slot.entry.value = value;
+
+                    if(modelSetter) {
+                        // If the given model is writeable, then we need to update it
+                        // whenever the coordinate's value changes
+
+                        if(value != null) {
+                            modelSetter(scope, value);
+                        }
+                    }
+
+                }, true);
+            }
 
             // Forwards: If the model changes, we need to update the
             // change object in the scope
@@ -234,7 +238,7 @@ var assembleTalisRdfJson = function(map) {
  * are expanded appropriately.
  *
  */
-var processPrefixes = function(talisRdfJson) {
+var processPrefixes = function(talisRdfJson, prefixMapping) {
     var result = {};
 
     var sMap = talisRdfJson;
@@ -247,18 +251,21 @@ var processPrefixes = function(talisRdfJson) {
            var iArr = pMap[p];
 
            iArr.forEach(function(cMap) {
-               var pm = cMap.prefixMapping;
+               //var pm = cMap.prefixMapping;
+               var pm = prefixMapping;
 
-               if(cMap.type === 'uri') {
-                   var val = cMap.value;
-                   cMap.value = pm.expandPrefix(val);
-               } else if(cMap.type === 'literal' && cMap.datatype != null) {
-                   var datatype = cMap.datatype;
+               if(pm) {
+                   if(cMap.type === 'uri') {
+                       var val = cMap.value;
+                       cMap.value = pm.expandPrefix(val);
+                   } else if(cMap.type === 'literal' && cMap.datatype != null) {
+                       var datatype = cMap.datatype;
 
-                   cMap.datatype = pm.expandPrefix(datatype);
+                       cMap.datatype = pm.expandPrefix(datatype);
+                   }
+
+                   //delete cMap['prefixMapping'];
                }
-
-               delete cMap['prefixMapping'];
            });
         });
     });

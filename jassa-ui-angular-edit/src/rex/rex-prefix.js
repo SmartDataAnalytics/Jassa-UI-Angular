@@ -2,6 +2,9 @@ angular.module('ui.jassa.rex')
 
 /**
  * Prefixes
+ *
+ * prefixes must be declared together with the context and cannot be nested
+ *
  */
 .directive('rexPrefix', ['$parse', function($parse) {
     return {
@@ -9,6 +12,7 @@ angular.module('ui.jassa.rex')
         restrict: 'A',
         scope: true,
         //require: '^rexContext',
+        require: 'rexContext',
         controller: ['$scope', function($scope) {
             $scope.rexPrefix = $scope.rexPrefix || {};
         }],
@@ -52,12 +56,17 @@ angular.module('ui.jassa.rex')
 //                        }
 
                         scope.rexPrefixMapping = new jassa.rdf.PrefixMappingImpl(scope.rexPrefix);
+
+                        scope.rexContext.prefixMapping = scope.rexPrefixMapping;
                     };
 
                     // Update the prefixMapping when the prefixes change
-                    scope.$watch(function() {
+                    scope.$watchGroup([function() {
                         return scope.rexPrefix;
-                    }, function(rexPrefix) {
+                    }, function() {
+                        return scope.rexContext;
+                    }],
+                    function(rexPrefix) {
                         updatePrefixMapping();
                     }, true);
 
