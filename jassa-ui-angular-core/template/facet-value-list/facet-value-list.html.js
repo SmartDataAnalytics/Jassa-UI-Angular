@@ -1,7 +1,7 @@
 angular.module("template/facet-value-list/facet-value-list.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/facet-value-list/facet-value-list.html",
     "<div class=\"frame\">\n" +
-<<<<<<< HEAD
+    "<<<<<<< HEAD\n" +
     "    <form ng-submit=\"filterTable(filterText)\">\n" +
     "        <input type=\"text\" ng-model=\"filterText\" />\n" +
     "        <input class=\"btn-primary\" type=\"submit\" value=\"Filter\" />\n" +
@@ -22,7 +22,7 @@ angular.module("template/facet-value-list/facet-value-list.html", []).run(["$tem
     "<!--               </tr> -->\n" +
     "<!--           </table> -->\n" +
     "          <pagination class=\"pagination-small\" total-items=\"pagination.totalItems\" page=\"pagination.currentPage\" max-size=\"pagination.maxSize\" boundary-links=\"true\" rotate=\"false\" num-pages=\"pagination.numPages\" previous-text=\"&lsaquo;\" next-text=\"&rsaquo;\" first-text=\"&laquo;\" last-text=\"&raquo;\"></pagination>\n" +
-=======
+    "=======\n" +
     "	<form ng-submit=\"filterTable(filterText)\">\n" +
     "	    <input type=\"text\" ng-model=\"filterText\" />\n" +
     "		<input class=\"btn-primary\" type=\"submit\" value=\"Filter\" />\n" +
@@ -44,7 +44,7 @@ angular.module("template/facet-value-list/facet-value-list.html", []).run(["$tem
     "              </tr>\n" +
     "      	</table>\n" +
     "  		<pagination class=\"pagination-small\" total-items=\"pagination.totalItems\" page=\"pagination.currentPage\" max-size=\"pagination.maxSize\" boundary-links=\"true\" rotate=\"false\" num-pages=\"pagination.numPages\" previous-text=\"&lsaquo;\" next-text=\"&rsaquo;\" first-text=\"&laquo;\" last-text=\"&raquo;\"></pagination>\n" +
->>>>>>> origin
+    ">>>>>>> origin\n" +
     "</div>\n" +
     "");
 }]);
