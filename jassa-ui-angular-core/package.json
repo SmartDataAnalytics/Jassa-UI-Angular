@@ -1,11 +1,7 @@
 {
   "author": "https://github.com/GeoKnow/Jassa-UI-Angular/graphs/contributor",
   "name": "jassa-ui-angular",
-<<<<<<< HEAD
   "version": "0.9.0-SNAPSHOT",
-=======
-  "version": "0.8.1",
->>>>>>> origin
   "homepage": "https://github.com/GeoKnow/Jassa-UI-Angular",
   "dependencies": {},
   "devDependencies": {
