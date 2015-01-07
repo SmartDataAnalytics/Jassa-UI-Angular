@@ -46,6 +46,7 @@
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
     <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
     <script src="bower_components/moment/moment.js"></script>
+    <script src="bower_components/angularjs/angular.js"></script>
     <script src="bower_components/ng-stats/dist/ng-stats.js"></script>
     <!-- endbower -->
 
@@ -115,8 +116,8 @@
 
         var sparqlService = jassa.service.SparqlServiceBuilder
             //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            //.http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            .http('http://localhost/data/pokedex/sparql', ['http://pokedex.org/'], {type: 'POST'})
+            .http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
+            //.http('http://localhost/data/pokedex/sparql', ['http://pokedex.org/'], {type: 'POST'})
             .virtFix().paginate(50000).pageExpand(100).create();
 
         // TODO Somehow update .cache() on update

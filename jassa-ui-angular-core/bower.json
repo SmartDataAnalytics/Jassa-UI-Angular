@@ -11,16 +11,11 @@
     "jassa-ui-angular.css"
   ],
   "dependencies": {
-<<<<<<< HEAD
     "jassa": "0.9.0-SNAPSHOT",
-=======
-    "jassa": "0.8.1",
->>>>>>> origin
-    "angular": "1.2.16-build.63+sha.8d4d437",
+    "angular": "v1.3.5-build.3630+sha.30694c8",
     "bootstrap": "3.1.0",
     "angular-ui-bootstrap-bower": "0.11.2",
-    "ng-grid": "2.0.11",
-    "angular-sanitize": "v1.2.16-build.63+sha.8d4d437",
+    "angular-sanitize": "v1.3.5-build.3630+sha.30694c8",
     "jquery-ui": "1.10.3",
     "angular-ui-sortable": "0.12.11",
     "angular-ui-utils": "0.1.1"
