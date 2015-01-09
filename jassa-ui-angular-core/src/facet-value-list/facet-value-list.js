@@ -55,6 +55,10 @@ angular.module('ui.jassa.facet-value-list', [])
 
                 $q.when(dataPromise).then(function(entries) {
                     var items = entries.map(function(entry) {
+                        return entry.val;
+                    });
+                    /*
+                    var items = entries.map(function(entry) {
                         var labelInfo = entry.val.labelInfo = {};
                         labelInfo.displayLabel = '' + entry.key;
                         //console.log('entry: ', entry);
@@ -67,6 +71,7 @@ angular.module('ui.jassa.facet-value-list', [])
 
                         return entry.val;
                     });
+                    */
                     var cm = $scope.facetTreeConfig.getFacetConfig().getConstraintManager();
                     var cs = cm.getConstraintsByPath(path);
                     var values = {};
