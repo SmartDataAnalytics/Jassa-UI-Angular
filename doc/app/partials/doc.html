@@ -1,0 +1,24 @@
+
+<h2>Introduction</h2>
+
+<a href="files/paper_semdev2014_jassa_final_public.pdf">Jassa @ Semdev @ ISWC 2014 Italy, Riva del Garda</a>
+
+
+
+
+The JAvascript Suite for SPARQL Access is framework for efficient interaction with SPARQL endpoints.
+As such, it provides a low level RDF API which closely follows the design of Apache Jena.
+
+
+<h2>Services</h2>
+
+
+<h3>Cancellation</h3>
+var wrappedService = jassa.util.PromiseUtils.lastRequestify(service);
+wrappedService.someMethod().then(function() { ... });
+wrappedService.cancelAll();
+
+jassa.PromiseUtils.lastRequest(promiseSupplierFn);
+
+
+</div>

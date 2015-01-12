@@ -1,0 +1,80 @@
+<div
+    class="row"
+    ng-init="ex06={}; ex06.context={}; ex06.subject='dbr:Leipzig'; ex06.baseGraph=newGraph()"
+    rex-context="ex06.context"
+    rex-base-graph="ex06.baseGraph"
+    rex-lookup="lookupFn"
+    rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
+    rex-subject="ex06.subject"
+    rex-typeof="'dbo:Place'">
+
+    <div class="col-md-6">
+
+        <div class="alert alert-info" role="alert">
+            <h3>WKT &lt;-&gt; LonLat sync</h3>
+            <i>Conditional generation of RDF using hidden fields</i>
+
+            <form role="form">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">URI: </span>
+                        <input name="uri" type="text" class="form-control" ng-model="ex06.subject" ng-model-options="defaultNgModelOptions">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">WKT: </span>
+                        <input name="geometry" type="text" class="form-control" ng-model="ex06.wkt" ng-model-options="defaultNgModelOptions" rex-predicate="'geo:geometry'" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Test: </span>
+                        <input name="geometry" type="text" class="form-control" ng-model="ex06.test" ng-model-options="defaultNgModelOptions" rex-predicate="'dbo:foo'" rex-iri>
+                    </div>
+                </div>
+
+
+                <span ng-hide="PointUtils.isWktPoint(ex06.wkt)">Could not parse input as a WKT Point</span>
+
+                <!--
+                    Note the '' + PointUtils... is there for converting null
+                    and float values to string
+                -->
+                <input
+                    ng-if="PointUtils.isWktPoint(ex06.wkt)"
+                    type="hidden"
+                    rex-predicate="'geo:long'"
+                    rex-literal="'' + PointUtils.wktToXy(ex06.wkt).x"
+                    rex-datatype="'xsd:float'"
+                >
+
+                <input
+                    ng-if="PointUtils.isWktPoint(ex06.wkt)"
+                    type="hidden"
+                    rex-predicate="'geo:lat'"
+                    rex-literal="'' + PointUtils.wktToXy(ex06.wkt).y"
+                    rex-datatype="'xsd:float'"
+                >
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+        <div class="alert alert-success" role="alert">
+            <h3>Output</h3>
+
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+            </div>
+        </div>
+    </div>
+
+</div>

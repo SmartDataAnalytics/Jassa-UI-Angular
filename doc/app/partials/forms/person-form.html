@@ -1,0 +1,116 @@
+<div class="row" ng-init="ex04={}; ex04.context={}; ex04.baseIri='dbr:'" rex-context rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-lookup="lookupFn">
+    <div class="col-md-6">
+
+
+        <div class="alert alert-info" role="alert">
+            <h3>Person data</h3>
+            <i>By default the URI is generated from given name and surname, unless overridden by the user.</i>
+
+        <!-- TODO: Resetting to the default value on an existing resource does not restore the original URL / need to think of something -->
+
+            <form name="personForm" role="form" rex-subject="ex04.subject" rex-typeof="'foaf:Person'">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">URI: </span>
+                        <input name="uri" type="text" class="form-control"
+                            ng-model="ex04.subject"
+                            sync-template="{{ex04.baseIri + ex04.givenName + ex04.surname}}"
+                            sync-to-target-cond="personForm.uri.$pristine">
+                        <span ng-if="!personForm.uri.$pristine" class="input-group-btn">
+                            <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Given Name: </span>
+                        <input name="givenName" type="text" class="form-control" ng-model="ex04.givenName" ng-model-options="defaultNgModelOptions" rex-predicate="'foaf:givenName'" rex-literal="ex04.givenName">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Surname: </span>
+                        <input type="text" class="form-control" ng-model="ex04.surname" ng-model-options="defaultNgModelOptions" rex-predicate="'foaf:surname'" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">E-Mail: </span>
+                        <input type="text" class="form-control" ng-model="email" ng-model-options="defaultNgModelOptions"rex-predicate="'foaf:mbox'" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group" ng-init="genders=[{name: 'male', uri: 'http://male'}, {name: 'female', uri: 'http://female'}, {name: 'a lot of other options could go here...', uri: 'http://other'}]">
+                    <div class="input-group">
+                        <span class="input-group-addon">Gender: </span>
+                        <select type="text" class="form-control" ng-model="selectedGenderUri" ng-model-options="defaultNgModelOptions" ng-options="gender.uri as gender.name for gender in genders" rex-predicate="'foaf:gender'" rex-iri="selectedGenderUri"></select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group"
+                        rex-predicate="'dbo:birthDate'"
+                        rex-literal="birthDateStr"
+                        rex-datatype="'xsd:date'"
+                    >
+                        <span class="input-group-addon">Birthdate: </span>
+                        <input
+                            type="text" class="form-control"
+                            ng-model="birthDate"
+                            ng-model-options="defaultNgModelOptions"
+
+                            sync-source="birthDate"
+                            sync-target="birthDateStr"
+                            sync-to-target="dateToString"
+                            sync-to-source="parseDate"
+
+                            datepicker-popup="dd-MMMM-yyyy" is-open="dp.opened"
+                            min-date="'1920-01-01'" max-date="'2015-06-22'"
+                            datepicker-options="dateOptions" close-text="Close"
+                        >
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="alert alert-success" role="alert">
+            <h3>Output</h3>
+
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+            </div>
+
+            <hr />
+            Added:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+            ></div>
+
+            <hr />
+            Removed:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+            ></div>
+
+
+            <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.length && !rexContext.diff.added.length }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
+
+        </div>
+    </div>
+
+</div>
+

@@ -1,0 +1,32 @@
+<ol class="breadcrumb" scroll-glue>
+    <li>
+        <button class="btn btn-primary" ng-disabled="path.isEmpty()" ng-click="setPath(0)">
+            <span class="glyphicon glyphicon-home"></span>
+        </button>
+    </li>
+
+<!--     <li ng-if="offset != 0"> -->
+<!--         ... -->
+<!--     </li> -->
+
+<!-- .slice(-offset) -->
+    <li ng-repeat="slot in state.slots">
+        <button class="btn btn-primary" ng-disabled="$last && !model.property" ng-click="setPath($index + 1)">
+            {{slot.labelInfo.displayLabel || slot.property.getUri()}} {{slot.isInverse ? '-1' : ''}}
+        </button>
+    </li>
+
+    <li ng-show="state.value == null">
+        <button class="btn btn-warning" ng-click="invert()">
+            {{model.pathHead.isInverse() ? '&lt;' : '&gt;'}}
+        </button>
+    </li>
+
+    <li ng-show="state.value != null">
+        <button class="btn btn-warning" ng-click="model.property = null">
+            {{state.value.labelInfo.displayLabel}} {{model.pathHead.isInverse() ? '-1' : ''}}
+        </button>
+    </li>
+
+
+</ol>
