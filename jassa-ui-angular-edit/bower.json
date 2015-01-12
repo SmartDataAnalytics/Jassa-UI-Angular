@@ -1,8 +1,8 @@
 {
   "name": "jassa-ui-angular-edit",
-  "version": "0.9.0-SNAPSHOT",,
+  "version": "0.9.0-SNAPSHOT",
   "main": [
-    "jassa-ui-angular-edit.js",
+    "jassa-ui-angular-edit.js"
   ],
   "dependencies": {
     "jassa": "0.9.0-SNAPSHOT",
