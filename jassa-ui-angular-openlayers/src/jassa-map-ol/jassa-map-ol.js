@@ -227,7 +227,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
             scope.map = map;
 
-            Jassa.setOlMapCenter(scope.map, scope.config);
+            Jassa.OpenLayersUtils.setCenter(scope.map, scope.config);
 
             // Status Div
             //<ul><li ng-repeat="item in loadingSources">{{item.id}}</li></ul>
