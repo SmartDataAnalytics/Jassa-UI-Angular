@@ -1,22 +1,32 @@
 //TODO Move to some better place
-Jassa.setOlMapCenter = function(map, config) {
-    var zoom = config.zoom;
+Jassa.OpenLayersUtils = Jassa.OpenLayersUtils || {
+    setCenter: function(map, config) {
+        var zoom = config.zoom;
 
-    var center = config.center;
-    var olCenter = null;
-    if(center && center.lon != null && center.lat != null) {
-        var lonlat = new OpenLayers.LonLat(center.lon, center.lat);
-        olCenter = lonlat.clone().transform(map.displayProjection, map.projection);
-    }
+        var center = config.center;
+        var olCenter = null;
+        if(center && center.lon != null && center.lat != null) {
+            var lonlat = new OpenLayers.LonLat(center.lon, center.lat);
+            olCenter = lonlat.clone().transform(map.displayProjection, map.projection);
+        }
 
-    if(olCenter != null) {
-        map.setCenter(olCenter, zoom);
-    }
-    else if(zoom != null) {
-        map.setZoom(zoom);
+        if(olCenter != null) {
+            map.setCenter(olCenter, zoom);
+        }
+        else if(zoom != null) {
+            map.setZoom(zoom);
+        }
+    },
+
+    getExtent: function(map) {
+        var olRawExtent = map.getExtent();
+        var e = olRawExtent.transform(map.projection, map.displayProjection);
+
+        var result = new jassa.geo.Bounds(e.left, e.bottom, e.right, e.top);
+
+        return result;
     }
 };
-
 
 
 angular.module('ui.jassa.openlayers.jassa-map-ol', [])
@@ -24,10 +34,10 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 .controller('JassaMapOlCtrl', ['$scope', '$q', function($scope, $q) {
 
     $scope.loadingSources = [];
-    
+
     $scope.items = [];
 
-    
+
     /**
      * Checks whether the item is a box or a generic object
      */
@@ -44,7 +54,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             mapWrapper.addWkt(item.id, wkt, item);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
         }
     };
-    
+
     $scope.$watchCollection('items', function(after, before) {
         var mapWrapper = $scope.map.widget;
         mapWrapper.clearItems();
@@ -53,18 +63,18 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             addItem(item);
         });
     });
-    
-    
+
+
     //$scope.boxes = [];
     var fetchDataFromSourceCore = function(dataSource, bounds) {
-        
+
         var p = dataSource.fetchData(bounds);
-        
+
         var result = p.pipe(function(items) {
 
             items = _(items).compact();
 
-            // Commented out because this is the application's decision 
+            // Commented out because this is the application's decision
             // Add the dataSource as the config
 //            _(items).each(function(item) {
 //                item.config = dataSource;
@@ -72,16 +82,16 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
             return items;
         });
-        
+
         return result;
     };
-    
+
     var fetchDataFromSource = function(dataSourceId, dataSource, bounds) {
         // Check if we are already loading from this data source
         var idToState = _($scope.loadingSources).indexBy('id');
-        
+
         var state = idToState[dataSourceId];
-        
+
         // If there is a prior state, cancel it
         if(state) {
             if(state.promise.abort) {
@@ -96,39 +106,39 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             idToState[dataSourceId] = state;
             $scope.loadingSources.push(state);
         }
-        
+
         var requestId = ++state.requestId;
-        
+
         var promise = fetchDataFromSourceCore(dataSource, bounds);
-        
+
         var result = promise.pipe(function(items) {
             if(idToState[dataSourceId].requestId != requestId) {
                 return;
             }
 
             items = _(items).compact(true);
-            
-            
+
+
             jassa.util.ArrayUtils.removeByGrep($scope.loadingSources, function(item) {
                 return item.id === dataSourceId;
             });
-            
+
             jassa.util.ArrayUtils.addAll($scope.items, items);
 
             if(!$scope.$$phase && !$scope.$root.$$phase) {
                 $scope.$apply();
             }
-            
+
             return items;
         });
 
-        
+
         state.promise = result;
-        
+
         return result;
     };
-    
-        
+
+
     var fetchData = function(dataSources, bounds, progressionCallback) {
 
         var promises = [];
@@ -137,11 +147,11 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             var promise = fetchDataFromSource('' + i, dataSource, bounds);
             promises.push(promise);
         });
-        
+
         //var promises = _(dataSources).map(function(dataSource) {
         //    fetchDataFromSource
         //});
-        
+
         var result = jQuery.when.apply(window, promises).pipe(function() {
             var r = _(arguments).flatten(true);
             return r;
@@ -151,11 +161,11 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
     };
 
     var refresh = function() {
-        
+
         jassa.util.ArrayUtils.clear($scope.items);
 
         var dataSources = $scope.sources;
-        var bounds = jassa.geo.openlayers.MapUtils.getExtent($scope.map);
+        var bounds = Jassa.OpenLayersUtils.getExtent($scope.map);
 
         var promise = fetchData(dataSources, bounds);
 
@@ -164,26 +174,26 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 //            $scope.items = items;
 //        });
     };
-    
-    
+
+
     // Make Jassa's ObjectUtils known to the scope - features the hashCode utility function
     $scope.ObjectUtils = jassa.util.ObjectUtils;
-    
+
     $scope.$watch('config', function(config, oldConfig) {
         if(_(config).isEqual(oldConfig)) {
             return;
         }
-        
-        Jassa.setOlMapCenter($scope.map, config);
+
+        Jassa.OpenLayersUtils.setCenter($scope.map, config);
     }, true);
-    
+
 
     $scope.$watch('[map.center, map.zoom]', function() {
         //console.log('Map refresh: ' + jassa.util.ObjectUtils.hashCode($scope.config));
         refresh();
     }, true);
-    
-    
+
+
 //    $scope.$watch('sources', function() {
 //        refresh();
 //    });
@@ -191,7 +201,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
         refresh();
     });
 
-    
+
 }])
 
 //http://jsfiddle.net/A2G3D/1/
@@ -208,13 +218,13 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             onUnselect: '&unselect'
         },
         link: function (scope, element, attrs) {
-            
+
             var $el = jQuery(element).ssbMap();
             var widget = $el.data('custom-ssbMap');
 
             var map = widget.map;
             map.widget = widget;
-            
+
             scope.map = map;
 
             Jassa.setOlMapCenter(scope.map, scope.config);
@@ -222,10 +232,10 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             // Status Div
             //<ul><li ng-repeat="item in loadingSources">{{item.id}}</li></ul>
             var statusDivHtml = '<span ng-show="loadingSources.length > 0" class="label label-primary" style="position: absolute; right: 10px; bottom: 25px; z-index: 1000;">Waiting for data from <span class="badge">{{loadingSources.length}}</span> sources... </span>';
-            
+
             var $elStatus = $compile(statusDivHtml)(scope);
             element.append($elStatus);
-            
+
             /*
             var $;
             if (!$) {$ = angular.element; }
@@ -237,18 +247,18 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
                 'z-index': 1000
             });
             var $statusContent = $('<span>YAAAY</span>');
-            
+
             $statusDiv.append($statusContent);
-            
+
             element.append($statusDiv);
 */
-            
+
             // Status Div
-            
+
             var syncModel = function(event) {
                 var tmp = scope.map.getCenter();
                 var center = tmp.transform(scope.map.projection, scope.map.displayProjection);
-                
+
                 //console.log('syncModel', center);
 
                 scope.config.center = {lon: center.lon, lat: center.lat};
@@ -258,7 +268,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
                 }
             };
 
-            
+
             $el.on('ssbmapfeatureselect', function(ev, data) {
                 scope.onSelect({data: data});
             });
@@ -266,12 +276,12 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
             $el.on('ssbmapfeatureunselect', function(ev, data) {
                 scope.onUnselect({data: data});
             });
-                    
-            
+
+
             map.events.register('moveend', this, syncModel);
             map.events.register('zoomend', this, syncModel);
         }
-            
+
     };
 }])
 
