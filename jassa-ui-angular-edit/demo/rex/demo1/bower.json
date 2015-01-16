@@ -11,5 +11,6 @@
     "ng-stats": ""
   },
   "resolutions": {
+    "angular": "1.3.5-build.3630+sha.30694c8"
   }
 }
