@@ -12,6 +12,7 @@ angular.module('ui.jassa.rdf-term-input', [])
     return {
         restrict: 'EA',
         priority: 4,
+        transclude: true,
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
         replace: true,
@@ -22,13 +23,17 @@ angular.module('ui.jassa.rdf-term-input', [])
             ngModelOptions: '=?',
             logo: '@?',
             langs: '=?', // suggestions of available languages
-            datatypes: '=?' // suggestions of available datatypes
+            datatypes: '=?', // suggestions of available datatypes
+            rightButton: '=?'
         },
         controller: ['$scope', function($scope) {
 
             $scope.state = $scope.$state || {};
             $scope.ngModelOptions = $scope.ngModelOptions || {};
 
+            this.setRightButton = function() {
+              $scope.rightButton = true;
+            };
 
             $scope.vocab = vocab;
 
@@ -87,12 +92,33 @@ angular.module('ui.jassa.rdf-term-input', [])
 //              $scope.state.lang = model.id;
 //            };
 
+            $scope.refreshDatatype = function(newDatatypeValue) {
+              console.log('new Datatype', newDatatypeValue);
+              /*
+              var newDatatype = {
+                id: newDatatypeValue,
+                displayLabel: newDatatypeValue
+              };
+              // add new datatype to datatypes
+              $scope.datatypes.push(newDatatype);
+              // set datatype as selected
+              $scope.datatypes.selected = newDatatype;
+              $scope.state.datatype = newDatatypeValue;
+              */
+            };
+
         }],
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ngModel) {
 
+                    scope.rightButton = false;
 
+
+
+                    scope.setRightButton = function() {
+                      scope.rightButton = true;
+                    };
 
                     var getValidState = function() {
                         var result;
@@ -249,14 +275,14 @@ angular.module('ui.jassa.rdf-term-input', [])
                             }
                           }
 
-                          // if the datatype is not in hashmap add them
+                          // if the language is not in hashmap add them
                           if (!matchedLang) {
                             // create new datatype set
                             var newLang = {
                               id: scope.state.lang,
                               displayLabel: scope.state.lang
                             };
-                            // add new datatype to datatypes
+                            // add new language to langs
                             scope.langs.push(newLang);
                             // set datatype as selected
                             scope.langs.selected = newLang;

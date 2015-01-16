@@ -1,8 +1,9 @@
-<div class="input-group">
+<div>
+  <div class="input-group">
 
     <!-- First input addon -->
     <!-- TODO Make content configurable -->
-<!--     <span class="input-group-addon"><span class="glyphicon glyphicon-link"></span></span> -->
+    <!--     <span class="input-group-addon"><span class="glyphicon glyphicon-link"></span></span> -->
     <span class="input-group-addon" ng-bind-html="logo"></span>
 
 <!--     <div class="input-group-addon"> -->
@@ -27,6 +28,7 @@
     <div ng-show="state.type===vocab.typedLiteral" class="input-group-addon" style="border-left: 0px;">
       <ui-select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
         <ui-select-match placeholder="Datatype">{{$select.selected.displayLabel}}</ui-select-match>
+        <!--ui-select-choices repeat="item in datatypes | filter: $select.search" refresh="refreshDatatype($select.search)" refresh-delay="100"-->
         <ui-select-choices repeat="item.id as item in datatypes | filter: $select.search">
           <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
         </ui-select-choices>
@@ -52,5 +54,9 @@
 
     </div-->
     <input type="text" class="form-control margin-left-1" style="height:52px; margin-left: -1px !important;" ng-model="state.value" ng-model-options="ngModelOptions">
+    <span ng-show="rightButton" class="input-group-btn">
+      <button class="btn btn-default" type="button">Map</button>
+    </span>
+  </div>
+  <div ng-transclude></div>
 </div>
-

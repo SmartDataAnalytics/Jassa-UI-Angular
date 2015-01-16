@@ -1,10 +1,11 @@
 angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/rdf-term-input/rdf-term-input.html",
-    "<div class=\"input-group\">\n" +
+    "<div>\n" +
+    "  <div class=\"input-group\">\n" +
     "\n" +
     "    <!-- First input addon -->\n" +
     "    <!-- TODO Make content configurable -->\n" +
-    "<!--     <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-link\"></span></span> -->\n" +
+    "    <!--     <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-link\"></span></span> -->\n" +
     "    <span class=\"input-group-addon\" ng-bind-html=\"logo\"></span>\n" +
     "\n" +
     "<!--     <div class=\"input-group-addon\"> -->\n" +
@@ -29,6 +30,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <div ng-show=\"state.type===vocab.typedLiteral\" class=\"input-group-addon\" style=\"border-left: 0px;\">\n" +
     "      <ui-select ng-model=\"state.datatype\" ng-model-options=\"ngModelOptions\" ng-disabled=\"disabled\" theme=\"selectize\"  reset-search-input=\"false\" style=\"width: 100px;\" >\n" +
     "        <ui-select-match placeholder=\"Datatype\">{{$select.selected.displayLabel}}</ui-select-match>\n" +
+    "        <!--ui-select-choices repeat=\"item in datatypes | filter: $select.search\" refresh=\"refreshDatatype($select.search)\" refresh-delay=\"100\"-->\n" +
     "        <ui-select-choices repeat=\"item.id as item in datatypes | filter: $select.search\">\n" +
     "          <span ng-bind-html=\"item.displayLabel | highlight: $select.search\"></span>\n" +
     "        </ui-select-choices>\n" +
@@ -54,7 +56,11 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    </div-->\n" +
     "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"height:52px; margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
+    "    <span ng-show=\"rightButton\" class=\"input-group-btn\">\n" +
+    "      <button class=\"btn btn-default\" type=\"button\">Map</button>\n" +
+    "    </span>\n" +
+    "  </div>\n" +
+    "  <div ng-transclude></div>\n" +
     "</div>\n" +
-    "\n" +
     "");
 }]);
