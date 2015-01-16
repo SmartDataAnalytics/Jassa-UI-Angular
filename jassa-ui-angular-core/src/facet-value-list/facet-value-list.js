@@ -83,6 +83,7 @@ angular.module('ui.jassa.facet-value-list', [])
 
                     items.forEach(function(item) {
                         var isConstrained = values['' + item.node];
+                        item.tags = item.tags || {};
                         item.tags.isConstrainedEqual = isConstrained;
                     });
 

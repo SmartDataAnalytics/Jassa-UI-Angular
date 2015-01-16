@@ -35,33 +35,45 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
     $scope.loadingSources = [];
 
-    $scope.items = [];
+    $scope.entries = [];
 
 
     /**
      * Checks whether the item is a box or a generic object
      */
-    var addItem = function(item) {
+    var addEntry = function(entry) {
         var mapWrapper = $scope.map.widget;
 
+        var id = entry.key;
+        var item = entry.val;
+
+        if(!item) {
+            throw new Error('Should not happen');
+        }
+
         if(item.zoomClusterBounds) {
-            mapWrapper.addBox(item.id, item.zoomClusterBounds);
+            mapWrapper.addBox(id, item.zoomClusterBounds);
         }
         else {
-            var wktNode = item.wkt;
-            var wkt = wktNode.getLiteralLexicalForm();
+            //var wktNode = item.wkt;
+            //var wkt = wktNode.getLiteralLexicalForm();
+            var wkt = item.wkt;
 
-            mapWrapper.addWkt(item.id, wkt, item);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
+            mapWrapper.addWkt(id, wkt, item);// {fillColor: markerFillColor, strokeColor: markerStrokeColor});
         }
     };
 
-    $scope.$watchCollection('items', function(after, before) {
-        var mapWrapper = $scope.map.widget;
-        mapWrapper.clearItems();
+    $scope.$watchCollection(function() {
+        return $scope.entries;
+    }, function() {
+        if($scope.entries) {
+            var mapWrapper = $scope.map.widget;
+            mapWrapper.clearItems();
 
-        _($scope.items).each(function(item) {
-            addItem(item);
-        });
+            $scope.entries.forEach(function(entry) {
+                addEntry(entry);
+            });
+        }
     });
 
 
@@ -70,9 +82,9 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
         var p = dataSource.fetchData(bounds);
 
-        var result = p.then(function(items) {
+        var result = p.then(function(entries) {
 
-            items = _(items).compact();
+            entries = _(entries).compact();
 
             // Commented out because this is the application's decision
             // Add the dataSource as the config
@@ -80,7 +92,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 //                item.config = dataSource;
 //            });
 
-            return items;
+            return entries;
         });
 
         return result;
@@ -111,25 +123,25 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
         var promise = fetchDataFromSourceCore(dataSource, bounds);
 
-        var result = $q.when(promise).then(function(items) {
+        var result = $q.when(promise).then(function(entries) {
             if(idToState[dataSourceId].requestId != requestId) {
                 return;
             }
 
-            items = _(items).compact(true);
+            entries = _(entries).compact(true);
 
 
-            jassa.util.ArrayUtils.removeByGrep($scope.loadingSources, function(item) {
-                return item.id === dataSourceId;
+            jassa.util.ArrayUtils.removeByGrep($scope.loadingSources, function(loadingSource) {
+                return loadingSource.id === dataSourceId;
             });
 
-            jassa.util.ArrayUtils.addAll($scope.items, items);
+            jassa.util.ArrayUtils.addAll($scope.entries, entries);
 
 //            if(!$scope.$$phase && !$scope.$root.$$phase) {
 //                $scope.$apply();
 //            }
 
-            return items;
+            return entries;
         });
 
 
@@ -162,7 +174,7 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', [])
 
     var refresh = function() {
 
-        jassa.util.ArrayUtils.clear($scope.items);
+        jassa.util.ArrayUtils.clear($scope.entries);
 
         var dataSources = $scope.sources;
         var bounds = Jassa.OpenLayersUtils.getExtent($scope.map);

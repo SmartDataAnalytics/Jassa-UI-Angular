@@ -8,7 +8,7 @@ angular.module('ui.jassa.pointer-events-scroll-fix', [])
 .directive('pointerEventsScrollFix', function() {
     return {
         restrict: 'A',
-        //scope: 
+        //scope:
         compile: function() {
             return {
                 post: function(scope, elem, attrs) {
@@ -27,13 +27,13 @@ angular.module('ui.jassa.pointer-events-scroll-fix', [])
                             return result;
                         };
                     }
-                    
+
                     var backup = null;
-                    
+
                     scope.$watch(
                         function () { return jQuery(elem).hasScrollBar(); },
                         function (hasScrollBar) {
-                            console.log('Scrollbar state: ', hasScrollBar, backup);
+                            //console.log('Scrollbar state: ', hasScrollBar, backup);
                             if(hasScrollBar) {
                                 if(!backup) {
                                     backup = elem.css('pointer-events');

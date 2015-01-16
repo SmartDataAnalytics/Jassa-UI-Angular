@@ -222,3 +222,19 @@ a {
 }
 
 
+
+/**
+ * facet-list
+ */
+
+.facet-list-item {
+    padding: 0px
+}
+
+.facet-list-item-btn {
+    border: 0px
+}
+
+.facet-breadcrumb {
+    width: 100%
+}
