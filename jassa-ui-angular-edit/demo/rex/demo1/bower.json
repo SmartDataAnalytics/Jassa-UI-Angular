@@ -5,7 +5,7 @@
     "angular": "1.3.5-build.3630+sha.30694c8",
     "angular-animate": "1.3.5-build.3630+sha.30694c8",
     "angular-ui-bootstrap-bower": "0.12.0",
-    "jassa-ui-angular": "0.9.0-SNAPSHOT",
+    "jassa-ui-angular-edit": "0.9.0-SNAPSHOT",
     "angular-ui-select": "0.9.4",
     "selectize": "~0.8.5",
     "angular-ui-utils": "",
