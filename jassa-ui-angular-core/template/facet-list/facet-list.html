@@ -49,7 +49,7 @@
                     <button style="text-align: left;" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="$parent.$parent.breadcrumb.property = item.property.getUri()">
                         <span class="glyphicon glyphicon glyphicon-record"></span>
                         {{item.labelInfo.displayLabel || $parent.$parent.NodeUtils.toPrettyString(item.property)}}
-                        <span class="counter">{{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
+                        <span class="counter"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
                     </button>
                     <button class="btn btn-default facet-list-item-btn pull-right" type="button" ng-click="$parent.$parent.descendFacet(item.property)">
                         <span class="glyphicon glyphicon-chevron-down"></span>
@@ -61,7 +61,7 @@
                     <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="margin-bottom: -1px; text-align: left;" class="btn btn-label facet-list-item-btn" type="button" ng-click="$parent.$parent.toggleConstraint(item.node)">
                         <span class="glyphicon glyphicon glyphicon-record facet-value"></span>
                         {{$parent.$parent.NodeUtils.toPrettyString(item.node)}}
-                        <span class="counter">{{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
+                        <span class="counter"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
                     </button>
                 </div>
 

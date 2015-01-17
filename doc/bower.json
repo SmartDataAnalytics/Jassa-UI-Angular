@@ -18,6 +18,7 @@
     "jassa": "0.9.0-SNAPSHOT",
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
     "jassa-ui-angular-edit": "0.9.0-SNAPSHOT",
+    "jassa-ui-angular-openlayers": "0.9.0-SNAPSHOT",
     "leaflet": "0.7.3",
     "leaflet.markercluster": "0.4.0",
     "angular-snap": "1.6.0",

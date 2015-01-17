@@ -39,6 +39,13 @@ angular.module(
             templateUrl: "partials/edit.html",
             controller: 'EditCtrl'
         })
+        .state('geo', {
+            url: "/geo",
+            templateUrl: "partials/geo.html",
+            controller: 'GeoCtrl'
+        })
         ;
 
-}]);
+}])
+
+;

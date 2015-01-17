@@ -9,7 +9,6 @@
 	
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
     <!-- endbower -->
 
     <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
@@ -17,13 +16,12 @@
     <script src="bower_components/jscache/cache.js"></script>
 
     <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <!-- endbower -->
 
     <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
@@ -35,13 +33,12 @@
     <!-- <script src="../../../target/release/repo/jassa-ui-angular-openlayers-tpls.js"></script> -->
 	
 	<script type="text/javascript">
-    _.mixin(_.str.exports());
+
+    jassa = new Jassa(Promise, $.ajax);
 
 	var rdf = jassa.rdf;
 	var sparql = jassa.sparql;
     var service = jassa.service;
-	var sponate = jassa.sponate;
-    var facete = jassa.facete;
 
     var geo = jassa.geo;
 
@@ -71,9 +68,9 @@
         var sparqlServiceB = createSparqlService('http://linkedgeodata.org/sparql', ['http://linkedgeodata.org']);        
         var sparqlServiceC = createSparqlService('http://localhost/data/geolink/sparql', ['http://geolink.aksw.org/']);        
         
-        var conceptA = facete.ConceptUtils.createTypeConcept('http://dbpedia.org/ontology/Airport');      
-        var conceptB = facete.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');      
-        var conceptC = facete.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
+        var conceptA = sparql.ConceptUtils.createTypeConcept('http://dbpedia.org/ontology/Airport');      
+        var conceptB = sparql.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');      
+        var conceptC = sparql.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
                 
         var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
             

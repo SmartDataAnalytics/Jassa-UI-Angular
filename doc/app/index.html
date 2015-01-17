@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
     <link rel="stylesheet" href="bower_components/selectize/dist/css/selectize.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="bower_components/angular-snap/angular-snap.css" />
     <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
@@ -42,6 +43,7 @@
     <script src="bower_components/selectize/dist/js/selectize.js"></script>
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/jassa-ui-angular-edit/jassa-ui-angular-edit-tpls.js"></script>
+    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <script src="bower_components/leaflet/dist/leaflet.js"></script>
     <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
     <script src="bower_components/snapjs/snap.js"></script>
@@ -60,13 +62,14 @@
 
     <!-- End of automatic generated header - custom content below -->
 
-
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
     <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
+
 
 
     <script type="text/javascript">
     // Init jassa
-    console.log(Jassa.extClass);
+    //console.log(Jassa.extClass);
     jassa = new Jassa(Promise, $.ajax);
     </script>
 
@@ -76,6 +79,7 @@
 
     <script src="js/app/sponate.js"></script>
     <script src="js/app/edit.js"></script>
+    <script src="js/app/geo.js"></script>
 
 </head>
 

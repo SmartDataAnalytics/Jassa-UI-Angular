@@ -29,3 +29,9 @@ html, body {
 .delete {
   float: right;
 }
+
+
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}

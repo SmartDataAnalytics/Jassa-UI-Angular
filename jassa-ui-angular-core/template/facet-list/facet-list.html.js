@@ -51,7 +51,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "                    <button style=\"text-align: left;\" class=\"btn btn-default btn-label facet-list-item-btn\" type=\"button\" ng-click=\"$parent.$parent.breadcrumb.property = item.property.getUri()\">\n" +
     "                        <span class=\"glyphicon glyphicon glyphicon-record\"></span>\n" +
     "                        {{item.labelInfo.displayLabel || $parent.$parent.NodeUtils.toPrettyString(item.property)}}\n" +
-    "                        <span class=\"counter\">{{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>\n" +
+    "                        <span class=\"counter\"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>\n" +
     "                    </button>\n" +
     "                    <button class=\"btn btn-default facet-list-item-btn pull-right\" type=\"button\" ng-click=\"$parent.$parent.descendFacet(item.property)\">\n" +
     "                        <span class=\"glyphicon glyphicon-chevron-down\"></span>\n" +
@@ -63,7 +63,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "                    <button ng-class=\"item.isConstrainedEqual ? 'btn-primary' : 'btn-default'\" style=\"margin-bottom: -1px; text-align: left;\" class=\"btn btn-label facet-list-item-btn\" type=\"button\" ng-click=\"$parent.$parent.toggleConstraint(item.node)\">\n" +
     "                        <span class=\"glyphicon glyphicon glyphicon-record facet-value\"></span>\n" +
     "                        {{$parent.$parent.NodeUtils.toPrettyString(item.node)}}\n" +
-    "                        <span class=\"counter\">{{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>\n" +
+    "                        <span class=\"counter\"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>\n" +
     "                    </button>\n" +
     "                </div>\n" +
     "\n" +

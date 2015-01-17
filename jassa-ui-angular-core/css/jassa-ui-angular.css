@@ -238,3 +238,8 @@ a {
 .facet-breadcrumb {
     width: 100%
 }
+
+.counter {
+    font-style: italic;
+    font-size: smaller;
+}

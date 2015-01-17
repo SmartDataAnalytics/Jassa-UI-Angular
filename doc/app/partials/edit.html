@@ -1,14 +1,41 @@
 <div>
 
-    <a href="partials/forms/dynamic.html" target="_blank">Source Code</a>
-    <div ng-include="'partials/forms/dynamic.html'"></div>
+<!--     <a href="partials/forms/dynamic.html" target="_blank">Source Code</a> -->
 
-    <a href="partials/forms/geo.html" target="_blank">Source Code</a>
-    <div ng-include="'partials/forms/geo.html'"></div>
+    <tabset>
+        <tab heading="Demo">
+            <div ng-include="'partials/forms/dynamic.html'"></div>
+        </tab>
+        <tab heading="Source">
+            <textarea ui-codemirror="editorOptions.ttl" ng-model="$templateCache.get('partials/forms/dynamic.html')"></textarea>
+        </tab>
+    </tabset>
 
-    <a href="partials/forms/person-form.html" target="_blank">Source Code</a>
-    <div ng-include="'partials/forms/person-form.html'"></div>
+    <tabset>
+        <tab heading="Demo">
+            <div ng-include="'partials/forms/geo.html'"></div>
+        </tab>
+        <tab heading="Source">
+            <textarea ui-codemirror="editorOptions.ttl" ng-model="$templateCache.get('partials/forms/geo.html')"></textarea>
+        </tab>
+    </tabset>
 
-    <a href="partials/forms/simple-editor.html" target="_blank">Source Code</a>
-    <div ng-include="'partials/forms/simple-editor.html'"></div>
+    <tabset>
+        <tab heading="Demo">
+            <div ng-include="'partials/forms/person-form.html'"></div>
+        </tab>
+        <tab heading="Source">
+            <textarea ui-codemirror="editorOptions.ttl" ng-model="$templateCache.get('partials/forms/person-form.html')"></textarea>
+            <a href="partials/forms/person-form.html" target="_blank">Source Code</a>
+        </tab>
+    </tabset>
+
+    <tabset>
+        <tab heading="Demo">
+            <div ng-include="'partials/forms/simple-editor.html'"></div>
+        </tab>
+        <tab heading="Source">
+            <textarea ui-codemirror="editorOptions.ttl" ng-model="$templateCache.get('partials/forms/simple-editor.html')"></textarea>
+        </tab>
+    </tabset>
 </div>
