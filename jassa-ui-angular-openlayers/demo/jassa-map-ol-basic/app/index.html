@@ -8,7 +8,6 @@
     <title>Jassa UI Angular: Facet Tree Demo</title>
 	
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <!-- endbower -->
 
     <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" />
@@ -21,11 +20,9 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <!-- endbower -->
-
-    <script src="lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
-    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
 
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
 
@@ -47,7 +44,7 @@
 	
 	
 	
-    angular.module('jassa.demo.map.ol.basic', ['ui.bootstrap', 'ui.jassa.openlayers'])
+    angular.module('jassa.demo.map.ol.basic', ['ui.jassa.openlayers'])
 
     .controller('AppCtrl', ['$scope', function($scope) {
 
@@ -57,10 +54,9 @@
         var geoMapFactoryWgs =  geo.GeoMapFactoryUtils.wgs84MapFactory;       
 
         var createSparqlService = function(url, graphUris) {
-            var result = new service.SparqlServiceHttp(url, graphUris);        
-            result = new service.SparqlServiceCache(result);
-            result = new service.SparqlServiceVirtFix(result);
-            result = new service.SparqlServicePaginate(result, 1000);
+            var result = service.SparqlServiceBuilder
+                .http(url, graphUris, {type: 'POST'})
+                .cache().virtFix().paginate(1000).pageExpand(100).create();
             return result;
         };
         
