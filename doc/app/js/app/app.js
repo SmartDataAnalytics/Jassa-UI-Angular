@@ -1,8 +1,8 @@
 angular.module(
     'jassa.demo',
     [
-       'ui.router', 'ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit',
-       'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'
+       'ui.router', 'ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa',
+       'ui.jassa.openlayers', 'ui.jassa.edit', 'ui.codemirror', 'ngAnimate'
     ],
     [ '$rootScopeProvider', function($rootScopeProvider) {
        $rootScopeProvider.digestTtl(10);
@@ -44,8 +44,17 @@ angular.module(
             templateUrl: "partials/geo.html",
             controller: 'GeoCtrl'
         })
+        .state('facete', {
+            url: "/facete",
+            templateUrl: "demos/facete/facete.html",
+            //controller: 'Ctrl'
+        })
         ;
 
+}])
+
+.controller('AppCtrl', ['$scope', '$templateCache', function($scope, $templateCache) {
+    $scope.$templateCache = $scope.$templateCache;
 }])
 
 ;

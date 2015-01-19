@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
     <link rel="stylesheet" href="bower_components/selectize/dist/css/selectize.css" />
-    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="bower_components/angular-snap/angular-snap.css" />
     <link rel="stylesheet" href="bower_components/codemirror/lib/codemirror.css" />
@@ -28,6 +27,7 @@
 
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
@@ -43,14 +43,13 @@
     <script src="bower_components/selectize/dist/js/selectize.js"></script>
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/jassa-ui-angular-edit/jassa-ui-angular-edit-tpls.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <script src="bower_components/leaflet/dist/leaflet.js"></script>
     <script src="bower_components/leaflet/dist/leaflet-src.js"></script>
     <script src="bower_components/snapjs/snap.js"></script>
     <script src="bower_components/angular-snap/angular-snap.js"></script>
-    <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
     <script src="bower_components/jquery-cookie/jquery.cookie.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
     <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
@@ -81,10 +80,11 @@
     <script src="js/app/edit.js"></script>
     <script src="js/app/geo.js"></script>
 
+    <script src="demos/facete/components/facet-list.js"></script>
 </head>
 
 
-<body>
+<body ng-controller="AppCtrl">
     <ng-include src="'partials/header.html'"></ng-include>
 
     <div class="container">

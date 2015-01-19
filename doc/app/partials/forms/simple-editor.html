@@ -29,6 +29,8 @@
                 <div class="form-group">
                     <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
 
+                    <geometry-input ng-if="property === 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry'" ng-model="term.value" ng-model-options="defaultNgModelOptions"></geometry-input>
+
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.type" ng-model-options="defaultNgModelOptions" rex-termtype="term.type"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.value" ng-model-options="defaultNgModelOptions" rex-value="term.value"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.lang" ng-model-options="defaultNgModelOptions" rex-lang="term.lang"> -->

@@ -13,10 +13,9 @@ angular.module('jassa.demo')
     var geoMapFactoryWgs =  geo.GeoMapFactoryUtils.wgs84MapFactory;
 
     var createSparqlService = function(url, graphUris) {
-        var result = new service.SparqlServiceHttp(url, graphUris);
-        result = new service.SparqlServiceCache(result);
-        result = new service.SparqlServiceVirtFix(result);
-        result = new service.SparqlServicePaginate(result, 1000);
+        var result = service.SparqlServiceBuilder
+            .http(url, graphUris, {type: 'POST'})
+            .cache().virtFix().paginate(1000).pageExpand(100).create();
         return result;
     };
 
@@ -25,8 +24,8 @@ angular.module('jassa.demo')
     var sparqlServiceC = createSparqlService('http://localhost/data/geolink/sparql', ['http://geolink.aksw.org/']);
 
     var conceptA = sparql.ConceptUtils.createTypeConcept('http://dbpedia.org/ontology/Airport');
-    var conceptB = sparql.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');
-    var conceptC = sparql.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
+    //var conceptB = sparql.ConceptUtils.createTypeConcept('http://linkedgeodata.org/ontology/Airport');
+    //var conceptC = sparql.ConceptUtils.createTypeConcept('http://www.linklion.org/ontology#Link');
 
     var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
 
@@ -50,7 +49,7 @@ angular.module('jassa.demo')
 
     $scope.dataSources = [
         createMapDataSource(sparqlServiceA, geoMapFactoryVirt, conceptA, '#CC0020'),
-        createMapDataSource(sparqlServiceB, geoMapFactoryWgs, conceptB, '#2000CC')
+        //createMapDataSource(sparqlServiceB, geoMapFactoryWgs, conceptB, '#2000CC')
         //createMapDataSource(sparqlServiceC, geoMapFactoryAsWktVirt, conceptC, '#663300'),
     ];
 

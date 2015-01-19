@@ -1,4 +1,33 @@
 <h2>Sponate</h2>
+<h3>Overview</h3>
+Sponate is a system for mapping result sets of SPARQL Select queries to (usually arrays) of JavaScript entities.
+Sponate is particularly useful for chosing the best labels from a set of RDF terms in regard to constraints, such as on the
+properties (e.g. skos:prefLabel, rdfs:label) and languages ('en', 'de', '').
+Further, Sponate supports transforming values by passing them to JavaScript functions.
+In addition, the system supports nested lookups, such that attribute values of an object created from one SPARQL result set
+may refer to objects created from another.
+Data access is provided via the <code>jassa.service.ListService</code> interface, which makes it possible to
+use different keyword search strategies.
+
+<h3>Concepts</h3>
+For this purpose </i><i>(sponate) maps</i> need to be defined, which are expressed in JavaScript.
+A map is comprised of a name, a SPARQL graph pattern, a template, and optionally a SPARQL service to override a default one.
+A <i>(sponate) store</i> is a container for a set of maps and configuration options, such as prefixes and the sparql service.
+
+The system operates by aggregation of result set rows into JavaScript objects and arrays.
+
+
+<h3>Mapping rules<h3>
+<ul>
+    <li>
+        The id attribute is special: New objects are created on every first encounter of a new id.
+    <li>
+        If an attribute is of type string, it will be parsed as a SPARQL expression. Hence, constant strings must be enclosed with either single of double quotes.
+        If no filter is provided, values will by default be <i>jsonified</i>. In cases where the RDF term is desired, the <i>node</i> filter can be applied.
+        Examples: <code>name: '?name'</code> <code>name: '?name | node'</code> <code>name: '"John Doe"'</code>
+    <li>
+    <li>jassa.rdf.Node and jassa.sparql.NodeValue</li>
+</ul>
 
 <h3>Simple Example</h3>
 
