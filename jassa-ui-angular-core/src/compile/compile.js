@@ -1,16 +1,15 @@
-angular.module('Facete2')
+angular.module('ui.jassa.compile', [])
 
 /**
- * Source http://stackoverflow.com/questions/17417607/angular-ng-bind-html-unsafe-and-directive-within-it
+ * Source
+ * http://stackoverflow.com/questions/17417607/angular-ng-bind-html-unsafe-and-directive-within-it
  */
-.directive('compile', ['$compile', function ($compile) {
+.directive('compile', ['$compile', function($compile) {
     return function(scope, element, attrs) {
-        scope.$watch(
-          function(scope) {
-             // watch the 'compile' expression for changes
+        scope.$watch(function(scope) {
+            // watch the 'compile' expression for changes
             return scope.$eval(attrs.compile);
-          },
-          function(value) {
+        }, function(value) {
             // when the 'compile' expression changes
             // assign it into the current DOM
             element.html(value);
@@ -20,9 +19,8 @@ angular.module('Facete2')
             // NOTE: we only compile .childNodes so that
             // we don't get into infinite loop compiling ourselves
             $compile(element.contents())(scope);
-          }
-      );
-  };
+        });
+    };
 }])
 
 ;
