@@ -18,16 +18,19 @@ The system operates by aggregation of result set rows into JavaScript objects an
 
 <h3>Example</h3>
 
-<textarea ng-init="loadTemplate('demos/sponate/basic/mapping.js', $parent, 'mapping')" ui-codemirror="editorOptions.ttl" ng-model="$parent.mapping"></textarea>
-<!-- <textarea ng-init="syncTemplate('demos/sponate/basic/template.html', $parent, 'template', 'sponate-dynamic-template')" ui-codemirror="editorOptions.ttl" ng-model="$parent.template"></textarea> -->
-<textarea ng-init="loadTemplate('demos/sponate/basic/template.html', $parent, 'template')" ui-codemirror="editorOptions.ttl" ng-model="$parent.template"></textarea>
-
-
-<button class="btn btn-primary" ng-click="doEval(mapping, $parent)">Run!</button>
-
-List:
-<div compile="$parent.template"></div>
-End of list;
+<tabset ng-init="context={}">
+    <tab heading="Mapping">
+        <textarea ng-init="loadTemplate('demos/sponate/basic/mapping.js', context, 'mapping')" ui-codemirror="" ng-model="context.mapping"></textarea>
+    </tab>
+    <tab heading="Template">
+        <textarea ng-init="loadTemplate('demos/sponate/basic/template.html', context, 'template')" ui-codemirror="" ng-model="context.template"></textarea>
+    </tab>
+    <tab heading="Ouput">
+        <button class="btn btn-primary" ng-click="doEval(context.mapping, context)">Run!</button>
+        <button class="btn btn-warning" ng-click="context.items=[]">Clear</button>
+        <div compile="context.template"></div>
+    </tab>
+</tabset>
 
 <h3>Mapping rules</h3>
 <ul>

@@ -1,13 +1,14 @@
 <ul class="media-list">
-<li>test</li>
-    <li class="media" ng-repeat="item in items">
+    <li class="media" ng-show="!context.items.length">No items to show</li>
+    <li class="media" ng-repeat="item in context.items">
         <div class="media-left">
             <a href="#">
-                <img class="media-object" src="item.depicition" alt="{{Image of item.label}}">
+                <img class="media-object" style="width: 64px;" ng-src="{{item.depiction}}" alt="Image of {{item.label}}">
             </a>
         </div>
         <div class="media-body">
             <h4 class="media-heading">{{item.label}}</h4>
+            {{item.description}}
         </div>
     </li>
 </ul>
