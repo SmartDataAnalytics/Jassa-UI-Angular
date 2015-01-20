@@ -16,17 +16,38 @@ A <i>(sponate) store</i> is a container for a set of maps and configuration opti
 
 The system operates by aggregation of result set rows into JavaScript objects and arrays.
 
+<h3>Example</h3>
 
-<h3>Mapping rules<h3>
+<textarea ng-init="loadTemplate('demos/sponate/basic/mapping.js', $parent, 'mapping')" ui-codemirror="editorOptions.ttl" ng-model="$parent.mapping"></textarea>
+<!-- <textarea ng-init="syncTemplate('demos/sponate/basic/template.html', $parent, 'template', 'sponate-dynamic-template')" ui-codemirror="editorOptions.ttl" ng-model="$parent.template"></textarea> -->
+<textarea ng-init="loadTemplate('demos/sponate/basic/template.html', $parent, 'template')" ui-codemirror="editorOptions.ttl" ng-model="$parent.template"></textarea>
+
+
+<button class="btn btn-primary" ng-click="doEval(mapping, $parent)">Run!</button>
+
+List:
+<div compile="$parent.template"></div>
+End of list;
+
+<h3>Mapping rules</h3>
 <ul>
     <li>
-        The id attribute is special: New objects are created on every first encounter of a new id.
+        The id attribute is special: New objects are created on every first encounter of a new value for the id attribute.
+    </li>
     <li>
         If an attribute is of type string, it will be parsed as a SPARQL expression. Hence, constant strings must be enclosed with either single of double quotes.
         If no filter is provided, values will by default be <i>jsonified</i>. In cases where the RDF term is desired, the <i>node</i> filter can be applied.
         Examples: <code>name: '?name'</code> <code>name: '?name | node'</code> <code>name: '"John Doe"'</code>
+    </li>
     <li>
-    <li>jassa.rdf.Node and jassa.sparql.NodeValue</li>
+        Attribute values and variables of type <code>jassa.rdf.Node</code> and <code>jassa.sparql.NodeValue</code> will keep their type
+        Given that ?name is an RDF literal of value <code>"John Doe"@en</code>, the following examples hold:
+        <ul>
+            <li><code>name: '?name'</code> -> name will be a String</li>
+            <li><code>name: jassa.rdf.NodeFactory.createVar('?name')</code> -> jassa.rdf.Node_Literal</li>
+            <li><code>name: new jassa.sparql.ExprVar(jassa.rdf.NodeFactory.createVar('?name'))</code> -> jassa.sparql.NodeValueNode</li>
+        </ul>
+    </li>
 </ul>
 
 <h3>Simple Example</h3>

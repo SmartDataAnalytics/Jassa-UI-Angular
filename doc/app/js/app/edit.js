@@ -1,8 +1,6 @@
 angular.module('jassa.demo')
 
-.controller('EditCtrl', ['$scope', '$templateCache', function($scope, $templateCache) {
-
-    $scope.$templateCache = $templateCache;
+.controller('EditCtrl', ['$scope', function($scope) {
 
     // Begin of REX Setup
 

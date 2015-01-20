@@ -53,8 +53,55 @@ angular.module(
 
 }])
 
-.controller('AppCtrl', ['$scope', '$templateCache', function($scope, $templateCache) {
-    $scope.$templateCache = $scope.$templateCache;
+.controller('AppCtrl', ['$scope', '$q', '$templateCache', '$http', function($scope, $q, $templateCache, $http) {
+
+    $scope.loadTemplate = function(path, scope, attr) {
+        scope[attr] = '';
+        $q.when($http.get(path)).then(function(response) {
+            scope[attr] = response.data || '';
+
+            //console.log('Data for [' + path + ']: ', scope[attr]);
+        });
+
+        return scope[attr];
+    };
+
+
+    $scope.syncTemplate = function(path, scope, attr, name) {
+        $scope.loadTemplate(path, scope, attr);
+
+        $scope.$watch(function() {
+            return scope[attr];
+        }, function(val) {
+            $templateCache.put(name, val);
+            console.log('set cache: ', name, val);
+        }, true);
+    };
+
+    var doEvalCore = function(str, context) {
+        var f = function(str) {
+            console.log(str);
+            str = 'try {' + str + ' } catch(e) { console.log("Inner", e, e.stack); }';
+            //var r = eval('console.log("test");');
+            var r = eval(str);
+            return r;
+        };
+
+        var result = f.call(context, str);
+        return result;
+    };
+
+    $scope.doEval = function(str, context) {
+        //try {
+            doEvalCore(str, context);
+        //} catch (e) {
+            //console.log('Outer:', e);
+            //alert(JSON.stringify(e));
+            //console.log('Error', e,lineNumber, e, e.stack);
+        //}
+    };
+
+
 }])
 
 ;
