@@ -7,7 +7,7 @@ angular.module("template/geometry-input/geometry-input.html", []).run(["$templat
     "    <input type=\"radio\" value=\"polygon\" name=\"geometry\" ng-model=\"geometry\" /><label>Polygon</label>\n" +
     "    <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
     "  </div>\n" +
-    "  <input ng-model=\"searchString\" class=\"form-control\" type=\"text\" placeholder=\"Search for a place\"/>\n" +
+    "  <!--input ng-model=\"searchString\" class=\"form-control\" type=\"text\" placeholder=\"Search for a place\"/-->\n" +
     "  <input ng-model=\"searchResult\"\n" +
     "         placeholder=\"Search for a place (typeahead)\"\n" +
     "         typeahead-min-length=\"3\"\n" +
