@@ -1,6 +1,6 @@
 angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometryInput', ['$http', function($http) {
+  .directive('geometryInput', ['$http', '$q', function($http, $q) {
 
     var uniqueId = 1;
 
@@ -42,30 +42,85 @@ angular.module('ui.jassa.geometry-input', [])
           });
         };
 
-        $scope.fetchResults = function(searchString) {
-          var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';
+        $scope.fetchResultsForEndpoint = function(uri, searchString) {
           return $http({
             'method': 'GET',
-            'url': url,
+            'url': uri+searchString,
             'cache': true,
             'headers' : {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             }
-          }).then(function(response) {
-            console.log('response', response);
+          });
+        };
+
+        $scope.fetchResults = function(searchString) {
+          // Geocoding APIs
+          var urls = [
+              'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q=',
+              'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
+          ];
+
+          // stores promises for each geocoding api
+          var promises = [];
+          for (var i in urls) {
+            promises.push($scope.fetchResultsForEndpoint(urls[i], searchString));
+          }
+
+          // after getting the response then process the response promise
+          var resultPromise = $q.all(promises).then(function(responses){
+
             var results = [];
-            for (var i in response.data) {
-              if (response.data[i].hasOwnProperty('geotext')) {
-                results.push({
-                  'wkt': response.data[i].geotext,
-                  'label': response.data[i].display_name
-                });
+
+            for (var i in responses) {
+              var a = document.createElement('a');
+              a.href = responses[i].config.url;
+
+
+              for (var j in responses[i].data) {
+                // Nominatim
+                if(i==='0') {
+                  if (responses[i].data[j].hasOwnProperty('geotext')) {
+                    results.push({
+                      'firstInGroup': false,
+                      'wkt': responses[i].data[j].geotext,
+                      'label': responses[i].data[j].display_name,
+                      'group': a.hostname
+                    });
+                  }
+                }
+
+                // Nokia HERE Maps Sample
+                if(i==='1') {
+                  for(var k in responses[i].data[j].View[0].Result) {
+                    if(responses[i].data[j].View[0].Result[k].Location.hasOwnProperty('Shape')) {
+                      results.push({
+                        'firstInGroup': false,
+                        'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
+                        'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
+                        'group': a.hostname
+                      });
+                    }
+                  }
+                }
               }
             }
-            console.log('results', results);
+
+            // mark the first of each group for headlines
+            results = _(results).groupBy('group');
+            results = _(results).map(function(g) {
+              g[0].firstInGroup = true;
+              return g;
+            });
+            results = _(results).flatten();
+            results = _(results).value();
+
+            //console.log('results', results);
+
             return results;
           });
+
+          return resultPromise;
         };
 
         $scope.onSelectGeocode = function(item) {
@@ -77,8 +132,6 @@ angular.module('ui.jassa.geometry-input', [])
         return {
           pre: function (scope, ele, attrs) {
             scope.searchString = '';
-
-
 
             var map, drawControls, polygonLayer, panel, wkt, vectors;
 
@@ -115,7 +168,6 @@ angular.module('ui.jassa.geometry-input', [])
                     if(data[i].geotext != null) {
                       parseWKT(data[i].geotext);
                     }
-
                   }
                 });
               }
