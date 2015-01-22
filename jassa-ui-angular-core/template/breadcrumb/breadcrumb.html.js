@@ -1,6 +1,13 @@
 angular.module("template/breadcrumb/breadcrumb.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/breadcrumb/breadcrumb.html",
     "<ol class=\"breadcrumb facet-breadcrumb\" scroll-glue-right>\n" +
+    "    <!-- If the path is empty, show the instance list button  -->\n" +
+    "    <li ng-show=\"path.isEmpty()\">\n" +
+    "        <button class=\"btn btn-default\" ng-disabled=\"path.isEmpty()\" ng-click=\"setPath(-1)\">\n" +
+    "            <span class=\"glyphicon glyphicon glyphicon-menu-hamburger\"></span>\n" +
+    "        </button>\n" +
+    "    </li>\n" +
+    "\n" +
     "    <li>\n" +
     "        <button class=\"btn btn-default\" ng-disabled=\"path.isEmpty()\" ng-click=\"setPath(0)\">\n" +
     "            <span class=\"glyphicon glyphicon-home\"></span>\n" +

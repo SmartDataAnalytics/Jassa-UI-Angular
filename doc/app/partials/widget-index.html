@@ -1,0 +1,17 @@
+<h2>Widgets</h2>
+
+<div ng-init="context={}">
+<tabset>
+    <tab heading="Mapping">
+        <textarea ng-init="loadTemplate('demos/widgets/widgets.js', context, 'js')" ui-codemirror="" ng-model="context.js"></textarea>
+    </tab>
+    <tab heading="Template">
+        <textarea ng-init="loadTemplate('demos/widgets/widgets.html', context, 'html')" ui-codemirror="" ng-model="context.html"></textarea>
+    </tab>
+    <tab heading="Ouput">
+        <button class="btn btn-primary" ng-click="doEval(context.js, context)">Run!</button>
+        <button class="btn btn-warning" ng-click="context.items=[]">Clear</button>
+        <div compile="context.html"></div>
+    </tab>
+</tabset>
+</div>

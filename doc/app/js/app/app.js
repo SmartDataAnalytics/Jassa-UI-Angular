@@ -20,7 +20,7 @@ angular.module(
 }])
 
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise("/home");
+    $urlRouterProvider.otherwise('/home');
 
     // Now set up the states
     $stateProvider
@@ -30,23 +30,28 @@ angular.module(
             //controller: 'SearcCtrl'
         })
         .state('sponate', {
-            url: "/sponate",
-            templateUrl: "partials/sponate.html",
+            url: '/sponate',
+            templateUrl: 'partials/sponate.html',
             controller: 'SponateCtrl'
         })
         .state('edit', {
-            url: "/edit",
-            templateUrl: "partials/edit.html",
+            url: '/edit',
+            templateUrl: 'partials/edit.html',
             controller: 'EditCtrl'
         })
         .state('geo', {
-            url: "/geo",
-            templateUrl: "partials/geo.html",
+            url: '/geo',
+            templateUrl: 'partials/geo.html',
             controller: 'GeoCtrl'
         })
         .state('facete', {
-            url: "/facete",
-            templateUrl: "demos/facete/facete.html",
+            url: '/facete',
+            templateUrl: 'demos/facete/facete.html',
+            //controller: 'Ctrl'
+        })
+        .state('widgets', {
+            url: '/widgets',
+            templateUrl: 'partials/widget-index.html',
             //controller: 'Ctrl'
         })
         ;
@@ -81,8 +86,8 @@ angular.module(
     var doEvalCore = function(str, context) {
         var f = function(str) {
             console.log(str);
-            str = 'try {' + str + ' } catch(e) { console.log("Inner", e, e.stack); }';
-            //var r = eval('console.log("test");');
+            str = 'try {' + str + ' } catch(e) { console.log(\'Inner\', e, e.stack); }';
+            //var r = eval('console.log('test');');
             var r = eval(str);
             return r;
         };

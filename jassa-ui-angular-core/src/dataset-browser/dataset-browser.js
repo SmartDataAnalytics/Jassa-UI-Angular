@@ -8,7 +8,7 @@ angular.module('ui.jassa.dataset-browser', [])
         /*
          * Set up the Sponate mapping for the data we are interested in
          */
-        var store = new sponate.StoreFacade(sparqlService, {
+        var store = new jassa.sponate.StoreFacade(sparqlService, {
             'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
             'dbpedia-owl': 'http://dbpedia.org/ontology/',
             'foaf': 'http://xmlns.com/foaf/0.1/',
@@ -17,9 +17,9 @@ angular.module('ui.jassa.dataset-browser', [])
             'o': 'http://example.org/ontology/'
         });
 
-        var labelConfig = new sparql.BestLabelConfig(langs);
+        var labelConfig = new jassa.sparql.BestLabelConfig(langs);
         var labelTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig); };
-        var commentTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(new sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment])); };
+        var commentTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment])); };
 
         var template = [{
             id: '?s',
@@ -29,11 +29,13 @@ angular.module('ui.jassa.dataset-browser', [])
             resources: [{
                 label: 'Distributions',
                 items: [{ $ref: { target: 'distributions', on: '?x'} }],
-                template: 'distribution-list.html'
+                template: 'template/dataset-browser/distribution-list.html'
             }, {
                 label: 'Join Summaries',
                 items: [[{ $ref: { target: 'datasets', on: '?j'} }], function(items) { // <- here be recursion
-                    var r = _(items).chain().map(function(item) { return item.resources[0].items; }).flatten(true).value();
+                    var r = _(items).chain().map(function(item) {
+                                return item.resources[0].items;
+                            }).flatten(true).value();
                     return r;
                 }],
                 template: 'template/dataset-browser/distribution-list.html'
@@ -65,10 +67,14 @@ angular.module('ui.jassa.dataset-browser', [])
 
         var result = store.primaryDatasets.getListService();
 
-        result = new service.ListServiceTransformConceptMode(result, function() {
-            var searchConfig = new sparql.BestLabelConfig(langs, [vocab.rdfs.comment, vocab.rdfs.label]);
-            var labelRelation = sparql.LabelUtils.createRelationPrefLabels(searchConfig);
+        result = new jassa.service.ListServiceTransformConceptMode(result, function() {
+            var searchConfig = new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment, jassa.vocab.rdfs.label]);
+            var labelRelation = jassa.sparql.LabelUtils.createRelationPrefLabels(searchConfig);
             return labelRelation;
+        });
+
+        result.fetchItems().then(function(entries) {
+            console.log('Got: ', entries);
         });
 
         return result;
@@ -78,7 +84,7 @@ angular.module('ui.jassa.dataset-browser', [])
     $scope.$watch(function() {
         return $scope.sparqlService;
     }, function(sparqlService) {
-        $scope.listService = createListService($scope.langs);
+        $scope.listService = createListService(sparqlService, $scope.langs);
     });
 
 
@@ -118,31 +124,36 @@ angular.module('ui.jassa.dataset-browser', [])
         $scope.offset = 0;
     };
 
+    /*
+    var buildAccessUrl = function(accessUrl, graphUrls) {
+        var defaultQuery = 'Select * { ?s ?p ?o } Limit 10'
+        return accessUrl + '?qtxt=' + encodeURIComponent(defaultQuery) + (
+            graphUrls && graphUrls.length > 0
+                ? '&' + graphUrls.map(function(item) { return 'default-graph-uri=' + encodeURIComponent(item); }).join('&')
+                : ''
+        );
+    }
+    */
+
+
     $scope.context = {
         // TODO Get rid of the limitation of having to pass in the itemTemplate via a 'context' object
-        itemTemplate: 'dataset-item.html',
-
-        buildAccessUrl: function(accessUrl, graphUrls) {
-            var defaultQuery = 'Select * { ?s ?p ?o } Limit 10'
-            return accessUrl + '?qtxt=' + encodeURIComponent(defaultQuery) + (
-                graphUrls && graphUrls.length > 0
-                    ? '&' + graphUrls.map(function(item) { return 'default-graph-uri=' + encodeURIComponent(item); }).join('&')
-                    : ''
-            );
-        }
+        itemTemplate: 'template/dataset-browser/dataset-item.html'
     };
 
     //$scope.itemTemplate = 'dataset-item.html';
+    $scope.itemTemplate = 'template/dataset-browser/dataset-item.html';
 }])
 
 .directive('datasetBrowser', function() {
     return {
         restrict: 'EA',
         replace: true,
-        templateUrl: 'template/dataset-browser/dataset-list.html',
+        //templateUrl: 'template/dataset-browser/dataset-list.html',
+        templateUrl: 'template/dataset-browser/dataset-browser.html',
         scope: {
             sparqlService: '=',
-            model: '=ngModel',
+            //model: '=ngModel',
             maxSize: '=?',
             onSelect: '&select'
         },
