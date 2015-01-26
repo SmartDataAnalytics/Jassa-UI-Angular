@@ -55,7 +55,7 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "    <!--div class=\"input-group-addon\">\n" +
     "\n" +
     "    </div-->\n" +
-    "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"height:52px; margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
+    "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
     "    <span ng-show=\"rightButton\" class=\"input-group-btn\">\n" +
     "      <button class=\"btn btn-default\" type=\"button\">Map</button>\n" +
     "    </span>\n" +

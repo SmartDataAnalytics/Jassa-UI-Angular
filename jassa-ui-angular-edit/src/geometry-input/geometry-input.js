@@ -17,6 +17,8 @@ angular.module('ui.jassa.geometry-input', [])
       controller: ['$scope', function($scope) {
         $scope.ngModelOptions = $scope.ngModelOptions || {};
         $scope.geometry = 'point';
+        $scope.isLoading = 'false';
+
         $scope.getGeocodingInformation = function(searchString, successCallback) {
 
           var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';

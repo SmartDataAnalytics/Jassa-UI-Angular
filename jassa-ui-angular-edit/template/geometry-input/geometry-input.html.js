@@ -8,8 +8,10 @@ angular.module("template/geometry-input/geometry-input.html", []).run(["$templat
     "    <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
     "  </div>\n" +
     "  <!--input ng-model=\"searchString\" class=\"form-control\" type=\"text\" placeholder=\"Search for a place\"/-->\n" +
-    "  <input ng-model=\"searchResult\"\n" +
+    "  <input ng-class=\"isLoading ? 'is-processing' : ''\"\n" +
+    "         ng-model=\"searchResult\"\n" +
     "         placeholder=\"Search for a place (typeahead)\"\n" +
+    "         typeahead-loading=\"isLoading\"\n" +
     "         typeahead-min-length=\"3\"\n" +
     "         typeahead-wait-ms=\"100\"\n" +
     "         typeahead-template-url=\"template/geometry-input/geometry-input-typeahead.html\"\n" +

@@ -6,8 +6,10 @@
     <input type="radio" value="box" name="geometry" ng-model="geometry" /><label>Box</label>
   </div>
   <!--input ng-model="searchString" class="form-control" type="text" placeholder="Search for a place"/-->
-  <input ng-model="searchResult"
+  <input ng-class="isLoading ? 'is-processing' : ''"
+         ng-model="searchResult"
          placeholder="Search for a place (typeahead)"
+         typeahead-loading="isLoading"
          typeahead-min-length="3"
          typeahead-wait-ms="100"
          typeahead-template-url="template/geometry-input/geometry-input-typeahead.html"
