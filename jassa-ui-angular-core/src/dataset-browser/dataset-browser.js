@@ -138,11 +138,11 @@ angular.module('ui.jassa.dataset-browser', [])
 
     $scope.context = {
         // TODO Get rid of the limitation of having to pass in the itemTemplate via a 'context' object
-        itemTemplate: 'template/dataset-browser/dataset-item.html'
+        itemTemplate: 'template/dataset-browser/dataset-list-item.html'
     };
 
     //$scope.itemTemplate = 'dataset-item.html';
-    $scope.itemTemplate = 'template/dataset-browser/dataset-item.html';
+    $scope.itemTemplate = 'template/dataset-browser/dataset-list-item.html';
 }])
 
 .directive('datasetBrowser', function() {
@@ -155,7 +155,7 @@ angular.module('ui.jassa.dataset-browser', [])
             sparqlService: '=',
             //model: '=ngModel',
             maxSize: '=?',
-            onSelect: '&select'
+            onSelect: '=?'
         },
         controller: 'DatasetBrowserCtrl',
         compile: function(elm, attrs) {

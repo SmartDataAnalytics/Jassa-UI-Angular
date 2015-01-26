@@ -69,7 +69,18 @@
     <script type="text/javascript">
     // Init jassa
     //console.log(Jassa.extClass);
-    jassa = new Jassa(Promise, $.ajax);
+    // TODO Make the ajax wrapper a util method
+    jassa = new Jassa(Promise, function() {
+        var jqXHR = $.ajax.apply(this, arguments);
+        var r = Promise.resolve(jqXHR)
+            .cancellable()
+            .catch(Promise.TimeoutError, Promise.CancellationError, function(e) {
+                //console.log('CANCELLED REQUEST');
+                jqXHR.abort();
+                throw e;
+            });
+        return r;
+    });
     </script>
 
 
@@ -80,6 +91,7 @@
     <script src="js/app/geo.js"></script>
 
     <script src="demos/facete/components/facet-list.js"></script>
+    <script src="demos/sponate/linking/linking.js"></script>
 </head>
 
 

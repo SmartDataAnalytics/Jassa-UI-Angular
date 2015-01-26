@@ -1,5 +1,19 @@
 <h2>Widgets</h2>
 
+
+<div ng-init="ls = listServiceWatcher.watch(testListService); ls.ctrl.filter.concept = { searchString: null, mode: 'regex'};">
+    <div class="form-group">
+        <input type="text" ng-model="ls.ctrl.filter.concept.searchString">
+    </div>
+    <ul class="media-list">
+        <li class="media"ng-repeat="item in ls.state.items">
+            <ng-include src="'template/dataset-browser/dataset-item.html'"></ng-include>
+        </li>
+        <li ng-show="!ls.state.items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li>
+    </ul>
+</div>
+
+
 <div ng-init="context={}">
 <tabset>
     <tab heading="Mapping">
@@ -14,4 +28,9 @@
         <div compile="context.html"></div>
     </tab>
 </tabset>
+</div>
+
+<div>
+Linking Demo
+        <ng-include ng-controller="LinkingDemoCtrl" src="'demos/sponate/linking/linking.html'"></ng-include>
 </div>

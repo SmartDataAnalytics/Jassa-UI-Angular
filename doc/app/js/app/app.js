@@ -58,6 +58,13 @@ angular.module(
 
 }])
 
+.filter('objectToArray', function() {
+    return function(input) {
+        var r = _.values(input);
+        return r;
+    }
+})
+
 .controller('AppCtrl', ['$scope', '$q', '$templateCache', '$http', function($scope, $q, $templateCache, $http) {
 
     $scope.loadTemplate = function(path, scope, attr) {
@@ -106,6 +113,106 @@ angular.module(
         //}
     };
 
+
+
+
+
+
+
+
+
+
+    var createListService = function(sparqlService, langs) {
+
+        /*
+         * Set up the Sponate mapping for the data we are interested in
+         */
+        var store = new jassa.sponate.StoreFacade(sparqlService, {
+            'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            'dbpedia-owl': 'http://dbpedia.org/ontology/',
+            'foaf': 'http://xmlns.com/foaf/0.1/',
+            'dcat': 'http://www.w3.org/ns/dcat#',
+            'theme': 'http://example.org/resource/theme/',
+            'o': 'http://example.org/ontology/'
+        });
+
+        var labelConfig = new jassa.sparql.BestLabelConfig(langs);
+        var labelTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig); };
+        var commentTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment])); };
+
+        var template = [{
+            id: '?s',
+            label: { $ref: { target: labelTemplateFn, attr: 'displayLabel' }},
+            comment: { $ref: { target: commentTemplateFn, attr: 'displayLabel' }},
+            depiction: '?d',
+            resources: [{
+                label: 'Distributions',
+                items: [{ $ref: { target: 'distributions', on: '?x'} }],
+                template: 'template/dataset-browser/distribution-list.html'
+            }, {
+                label: 'Join Summaries',
+                items: [[{ $ref: { target: 'datasets', on: '?j'} }], function(items) { // <- here be recursion
+                    var r = _(items).chain().map(function(item) {
+                                return item.resources[0].items;
+                            }).flatten(true).value();
+                    return r;
+                }],
+                template: 'template/dataset-browser/distribution-list.html'
+            }]
+        }];
+
+        store.addMap({
+            name: 'primaryDatasets',
+            template: template,
+            from: '?s a dcat:Dataset ; dcat:theme theme:primary . Optional { ?s foaf:depiction ?d } . Optional { ?x o:distributionOf ?s } Optional { ?j o:joinSummaryOf ?s }'
+        });
+
+        store.addMap({
+            name: 'datasets',
+            template: template,
+            from: '?s a dcat:Dataset . Optional { ?s foaf:depiction ?d } . Optional { ?x o:distributionOf ?s } Optional { ?j o:joinSummaryOf ?s }'
+        });
+
+        store.addMap({
+            name: 'distributions',
+            template: [{
+                id: '?s',
+                accessUrl: '?a',
+                graphs: ['?g']
+            }],
+            from: '?s a dcat:Distribution ; dcat:accessURL ?a . Optional { ?s o:graph ?g } '
+        });
+
+
+        var result = store.primaryDatasets.getListService();
+
+        result = new jassa.service.ListServiceTransformConceptMode(result, function() {
+            var searchConfig = new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment, jassa.vocab.rdfs.label]);
+            var labelRelation = jassa.sparql.LabelUtils.createRelationPrefLabels(searchConfig);
+            return labelRelation;
+        });
+
+        result.fetchItems().then(function(entries) {
+            console.log('Got: ', entries);
+        });
+
+        return result;
+    };
+
+    var testSparqlService =
+        jassa.service.SparqlServiceBuilder
+            .http('http://cstadler.aksw.org/data/misc/sparql', ['http://datacat.aksw.org/'])
+            .cache()
+            .virtFix()
+            .paginate(1000)
+            .pageExpand(100)
+            .create();
+
+
+    $scope.testListService = createListService(testSparqlService, ['de', 'en', '']);
+    $scope.listServiceWatcher = new ListServiceWatcher($scope, $q);
+
+    console.log('utils: ', $scope.ListServiceUtils);
 
 }])
 
