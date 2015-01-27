@@ -94,14 +94,16 @@ angular.module('ui.jassa.geometry-input', [])
 
                 // Nokia HERE Maps Sample
                 if(i==='1') {
-                  for(var k in responses[i].data[j].View[0].Result) {
-                    if(responses[i].data[j].View[0].Result[k].Location.hasOwnProperty('Shape')) {
-                      results.push({
-                        'firstInGroup': false,
-                        'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
-                        'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
-                        'group': a.hostname
-                      });
+                  if (responses[i].data[j].View.length > 0) {
+                    for(var k in responses[i].data[j].View[0].Result) {
+                      if(responses[i].data[j].View[0].Result[k].Location.hasOwnProperty('Shape')) {
+                        results.push({
+                          'firstInGroup': false,
+                          'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
+                          'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
+                          'group': a.hostname
+                        });
+                      }
                     }
                   }
                 }
