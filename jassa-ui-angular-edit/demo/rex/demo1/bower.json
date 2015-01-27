@@ -8,6 +8,7 @@
     "underscore": "1.7.0",
     "angular-ui-codemirror": "0.1.6",
     "openlayers": "release-2.13.1",
+    "semantic-ui": "1.8.1",
     "ng-stats": ""
   },
   "resolutions": {

@@ -17,7 +17,7 @@ angular.module('ui.jassa.geometry-input', [])
       controller: ['$scope', function($scope) {
         $scope.ngModelOptions = $scope.ngModelOptions || {};
         $scope.geometry = 'point';
-        $scope.isLoading = 'false';
+        $scope.isLoading = false;
 
         $scope.getGeocodingInformation = function(searchString, successCallback) {
 
@@ -159,6 +159,7 @@ angular.module('ui.jassa.geometry-input', [])
               toggleControl();
             });
 
+            /** Disabled
             scope.$watch(function () {
               return scope.searchString;
             }, function (newValue) {
@@ -175,6 +176,7 @@ angular.module('ui.jassa.geometry-input', [])
               }
               //scope.searchResults = scope.fetchGeocodingResults(newValue);
             });
+            */
 
             function init() {
               // generate custom map id
