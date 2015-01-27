@@ -12,7 +12,7 @@
 
     <!-- Term type selector -->
     <div class="input-group-addon">
-        <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
+        <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;line-height:0;" >
           <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
           <ui-select-choices repeat="item.id as item in termTypes | filter: $select.search">
             <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
@@ -26,7 +26,7 @@
 <!--     </span> -->
 
     <div ng-show="state.type===vocab.typedLiteral" class="input-group-addon" style="border-left: 0px;">
-      <ui-select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
+      <ui-select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;line-height:0;" >
         <ui-select-match placeholder="Datatype">{{$select.selected.displayLabel}}</ui-select-match>
         <!--ui-select-choices repeat="item in datatypes | filter: $select.search" refresh="refreshDatatype($select.search)" refresh-delay="100"-->
         <ui-select-choices repeat="item.id as item in datatypes | filter: $select.search">
@@ -42,7 +42,7 @@
 <!--     </span> -->
 
     <div ng-show="state.type===vocab.plainLiteral" class="input-group-addon" style="border-left: 0px;">
-      <ui-select ng-model="state.lang" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;" >
+      <ui-select ng-model="state.lang" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px; line-height:0;" >
         <ui-select-match placeholder="Language">{{$select.selected.displayLabel}}</ui-select-match>
         <ui-select-choices repeat="item.id as item in langs | filter: $select.search">
           <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
