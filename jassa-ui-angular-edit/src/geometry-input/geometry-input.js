@@ -51,10 +51,10 @@ angular.module('ui.jassa.geometry-input', [])
           return result;
         };
 
-        $scope.fetchResultsForRestService = function(uri, searchString) {
+        $scope.fetchResultsForRestService = function(restServiceConfig, searchString) {
           return $http({
             'method': 'GET',
-            'url': uri+searchString,
+            'url': restServiceConfig.endpoint+searchString,
             'cache': true,
             'headers' : {
               'Accept': 'application/json',
@@ -76,7 +76,7 @@ angular.module('ui.jassa.geometry-input', [])
               id: '?s',
               label: '?l', // kann man dann noch besser machen - aber fürs erste passts
               wkt: '?g',
-              group: '' + sparqlServiceConfig.endpoint
+              group: '' + sparqlServiceConfig.name
             }],
             from: sparqlServiceConfig.query
           });
@@ -99,7 +99,7 @@ angular.module('ui.jassa.geometry-input', [])
             ],
             sparqlService: [
               {
-                'name' : 'LinkedGeoData',
+                'name' : 'LinkedGeoData (Natural Earth)',
                 'endpoint' : 'http://linkedgeodata.org/vsparql',
                 'graph' : 'http://linkedgeodata.org/ne/',
                 'type' : 'http://linkedgeodata.org/ne/ontology/Country',
@@ -129,7 +129,7 @@ angular.module('ui.jassa.geometry-input', [])
             if (serviceType === 'restService') {
               for(var r in sources.restService) {
                 var restService = sources.restService[r];
-                  promises.push($scope.fetchResultsForRestService(restService.endpoint, searchString));
+                  promises.push($scope.fetchResultsForRestService(restService, searchString));
               }
             }
 
@@ -160,7 +160,7 @@ angular.module('ui.jassa.geometry-input', [])
                       'firstInGroup': false,
                       'wkt': responses[i].data[j].geotext,
                       'label': responses[i].data[j].display_name,
-                      'group': a.hostname
+                      'group': sources.restService[i].name || a.hostname
                     });
                   }
                 }
@@ -175,7 +175,7 @@ angular.module('ui.jassa.geometry-input', [])
                           'firstInGroup': false,
                           'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
                           'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
-                          'group': a.hostname
+                          'group': sources.restService[i].name || a.hostname
                         });
                       }
                     }
