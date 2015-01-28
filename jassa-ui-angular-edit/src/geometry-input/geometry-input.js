@@ -44,7 +44,14 @@ angular.module('ui.jassa.geometry-input', [])
           });
         };
 
-        $scope.fetchResultsForEndpoint = function(uri, searchString) {
+        var createSparqlService = function(url, graphUris) {
+          var result = jassa.service.SparqlServiceBuilder.http(url, graphUris, {type: 'POST'})
+            .cache().virtFix().paginate(1000).pageExpand(100).create();
+
+          return result;
+        };
+
+        $scope.fetchResultsForRestService = function(uri, searchString) {
           return $http({
             'method': 'GET',
             'url': uri+searchString,
@@ -56,17 +63,83 @@ angular.module('ui.jassa.geometry-input', [])
           });
         };
 
+        $scope.fetchResultsForSparqlService = function(sparqlServiceConfig, searchString) {
+
+          var sparqlService = createSparqlService(sparqlServiceConfig.endpoint, sparqlServiceConfig.graph);
+
+          var store = new jassa.sponate.StoreFacade(sparqlService, _(sparqlServiceConfig.prefix)
+            .defaults(jassa.vocab.InitialContext));
+
+          store.addMap({
+            name: 'sparqlService',
+            template: [{
+              id: '?s',
+              label: '?l', // kann man dann noch besser machen - aber fürs erste passts
+              wkt: '?g',
+              group: '' + sparqlServiceConfig.endpoint
+            }],
+            from: sparqlServiceConfig.query
+          });
+
+          return store.sparqlService.getListService().fetchItems(null, 10);
+        };
+
         $scope.fetchResults = function(searchString) {
           // Geocoding APIs
-          var urls = [
-              'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q=',
-              'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
-          ];
+          var sources = {
+            restService: [
+              {
+                name: 'Nominatim',
+                endpoint: 'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q='
+              },
+              {
+                name: 'Nokia HERE',
+                endpoint: 'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
+              }
+            ],
+            sparqlService: [
+              {
+                'name' : 'LinkedGeoData',
+                'endpoint' : 'http://linkedgeodata.org/vsparql',
+                'graph' : 'http://linkedgeodata.org/ne/',
+                'type' : 'http://linkedgeodata.org/ne/ontology/Country',
+                'active' : false,
+                'facets' : false,
+                'prefix' : {
+                  ogc: 'http://www.opengis.net/ont/geosparql#',
+                  geom: 'http://geovocab.org/geometry#'
+                },
+                'query' : '{'
+                  +' Graph <http://linkedgeodata.org/ne/> {'
+                  +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
+                  +' rdfs:label ?l ;'
+                  +' geom:geometry ['
+                  +'  ogc:asWKT ?g'
+                  +' ] '
+                  +' FILTER regex(?l, "'+ searchString +'") '
+                  +' } '
+                  +'}'
+              }
+            ]
+          };
 
           // stores promises for each geocoding api
           var promises = [];
-          for (var i in urls) {
-            promises.push($scope.fetchResultsForEndpoint(urls[i], searchString));
+          for (var serviceType in sources) {
+            if (serviceType === 'restService') {
+              for(var r in sources.restService) {
+                var restService = sources.restService[r];
+                  promises.push($scope.fetchResultsForRestService(restService.endpoint, searchString));
+              }
+            }
+
+            if (serviceType === 'sparqlService') {
+              for(var s in sources.sparqlService) {
+                var sparqlService = sources.sparqlService[s];
+                promises.push($scope.fetchResultsForSparqlService(sparqlService, searchString));
+              }
+            }
+
           }
 
           // after getting the response then process the response promise
@@ -75,13 +148,13 @@ angular.module('ui.jassa.geometry-input', [])
             var results = [];
 
             for (var i in responses) {
+              // used to grab the hostname a.href = url -> a.hostname
               var a = document.createElement('a');
-              a.href = responses[i].config.url;
-
 
               for (var j in responses[i].data) {
                 // Nominatim
                 if(i==='0') {
+                  a.href = responses[i].config.url;
                   if (responses[i].data[j].hasOwnProperty('geotext')) {
                     results.push({
                       'firstInGroup': false,
@@ -94,6 +167,7 @@ angular.module('ui.jassa.geometry-input', [])
 
                 // Nokia HERE Maps Sample
                 if(i==='1') {
+                  a.href = responses[i].config.url;
                   if (responses[i].data[j].View.length > 0) {
                     for(var k in responses[i].data[j].View[0].Result) {
                       if(responses[i].data[j].View[0].Result[k].Location.hasOwnProperty('Shape')) {
@@ -105,6 +179,20 @@ angular.module('ui.jassa.geometry-input', [])
                         });
                       }
                     }
+                  }
+                }
+              }
+
+              // LinkedGeoData
+              if(i==='2') {
+                if (responses[i].length > 0) {
+                  for(var l in responses[i]) {
+                    results.push({
+                      'firstInGroup': false,
+                      'wkt': responses[i][l].val.wkt,
+                      'label': responses[i][l].val.label,
+                      'group': responses[i][l].val.group
+                    });
                   }
                 }
               }
