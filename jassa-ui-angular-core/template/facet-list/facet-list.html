@@ -45,6 +45,14 @@
             </li>
             <li ng-repeat="item in items" class="list-group-item facet-list-item" ng-class="$parent.$parent.facetValuePath==null?'facet':'facet-value'">
 
+<!--                 <template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list> -->
+                Plugins: {{plugins}}
+                <ul ng-show="plugins.length > 0">
+                    <li style="display: inline;" ng-repeat="plugin in plugins">
+                        <div compile="plugin"></div>
+                    </li>
+                </ul>
+
                 <div ng-show="$parent.$parent.facetValuePath==null">
                     <button style="text-align: left;" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="$parent.$parent.breadcrumb.property = item.property.getUri()">
                         <span class="glyphicon glyphicon glyphicon-record"></span>

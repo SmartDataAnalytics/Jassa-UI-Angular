@@ -260,8 +260,8 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
             //facetConfig: '=',
             listFilter: '=?',
             pathHead: '=?',
-            //plugins: '=',
-            //pluginContext: '=', //plugin context
+            plugins: '=',
+            pluginContext: '=', //plugin context
             paginationOptions: '=?',
             loading: '=?',
             onSelect: '&select'

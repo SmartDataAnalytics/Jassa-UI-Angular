@@ -47,6 +47,14 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "            </li>\n" +
     "            <li ng-repeat=\"item in items\" class=\"list-group-item facet-list-item\" ng-class=\"$parent.$parent.facetValuePath==null?'facet':'facet-value'\">\n" +
     "\n" +
+    "<!--                 <template-list style=\"list-style:none; display: inline; padding-left: 0px;\" templates=\"plugins\" data=\"facet\" context=\"pluginContext\"></template-list> -->\n" +
+    "                Plugins: {{plugins}}\n" +
+    "                <ul ng-show=\"plugins.length > 0\">\n" +
+    "                    <li style=\"display: inline;\" ng-repeat=\"plugin in plugins\">\n" +
+    "                        <div compile=\"plugin\"></div>\n" +
+    "                    </li>\n" +
+    "                </ul>\n" +
+    "\n" +
     "                <div ng-show=\"$parent.$parent.facetValuePath==null\">\n" +
     "                    <button style=\"text-align: left;\" class=\"btn btn-default btn-label facet-list-item-btn\" type=\"button\" ng-click=\"$parent.$parent.breadcrumb.property = item.property.getUri()\">\n" +
     "                        <span class=\"glyphicon glyphicon glyphicon-record\"></span>\n" +
