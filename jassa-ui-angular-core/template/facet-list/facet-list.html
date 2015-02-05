@@ -1,5 +1,6 @@
 <div>
 
+    <!-- Notification when service is missing -->
     <div ng-if="!ls.ctrl.listService" class="alert alert-info">
         <span class="glyphicon glyphicon-exclamation-sign"></span>
         No service configured for the facet list.
@@ -8,19 +9,31 @@
     <!-- Breadcrumb -->
     <breadcrumb sparql-service="sparqlService" ng-model="breadcrumb"></breadcrumb>
 
-    <!-- Filter text input field -->
-    <div>
-        <form role="form" ng-submit="ls.ctrl.filter.concept=filterModel; listFilter.offset=0" novalidate>
-            <div class="input-group">
-                <input ng-model="filterModel" type="text" class="form-control facet-filter" placeholder="Find ...">
-                <span class="input-group-btn facet-filter-submit">
-                    <button type="submit" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                </span>
+    <form role="form" class="form-inline" ng-submit="ls.ctrl.filter.concept=filterModel; listFilter.offset=0" novalidate>
+        <div class="form-group">
+            <div class="col-sm-7">
+                <div class="input-group">
+                    <input ng-model="filterModel" type="text" class="form-control facet-filter" placeholder="Find ...">
+                    <span ng-if="ls.ctrl.filter.concept" class="input-group-btn facet-filter-submit">
+                        <button class="btn btn-default" type="button" ng-click="ls.ctrl.filter.concept=''"><span class="glyphicon glyphicon glyphicon-remove-circle"></span></button>
+                    </span>
+                    <span class="input-group-btn facet-filter-submit">
+                        <button type="submit" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                    </span>
+                </div>
             </div>
-        </form>
 
-        <div ng-show="ls.ctrl.filter.concept.length > 0" style="margin: 5px 0 0 10px; color: #aaa;"><span ng-show="ls.loading.data || ls.loading.pageCount">Filtering by</span><span ng-hide="ls.loading.data || ls.loading.pageCount">Filtered by </span> '{{ls.ctrl.filter.concept}}'</div>
-    </div>
+            <div class="col-sm-5">
+                <div class="input-group" ng-init="showOptions=[{value: 10, label: '10'}, {value: 25, label: '25'}, {value: 50, label: '50'}, {value: 100, label: '100'}]">
+                    <span class="input-group-addon">Show </span>
+                    <select class="form-control" type="text" ng-model="ls.ctrl.filter.limit"  ng-model-options="showOptions" ng-options="option.value as option.label for option in showOptions"></select>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <div ng-show="ls.ctrl.filter.concept.length > 0" style="margin: 5px 0 0 10px; color: #aaa;"><span ng-show="ls.loading.data || ls.loading.pageCount">Filtering by</span><span ng-hide="ls.loading.data || ls.loading.pageCount">Filtered by </span> '{{ls.ctrl.filter.concept}}'</div>
 
     <!-- Navigation buttons -->
     <div style="width: 100%">
@@ -34,20 +47,17 @@
     </div>
 
     <!-- TODO Loading data icon -->
-
-    <div class="form-group">
-        <div class="input-group" ng-init="showOptions=[{value: 10, label: '10'}, {value: 25, label: '25'}, {value: 50, label: '50'}, {value: 100, label: '100'}]">
-            <span class="input-group-addon">Show: </span>
-            <select class="form-control" ng-model="ls.ctrl.filter.limit"  ng-model-options="showOptions" ng-options="option.value as option.label for option in showOptions"></select>
-        </div>
-    </div>
-
     <!-- Paginator -->
     <div style="width: 100%; text-align: center">
         <span ng-show="ls.loading.pageCount" class="glyphicon glyphicon-refresh"></span>
 
         <pagination ng-show="ls.state.paging.numPages > 1" class="pagination pagination-sm" paging-model="ls" paging-style="pagingStyle"></pagination>
     </div>
+
+    <!-- Pagination status -->
+    <span style="margin: 5px 0 0 10px; color: #aaa;">
+    Showing {{ls.state.items.length}} entries in the positions {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + (ls.state.items.length ? 1 : 0)}} - {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + ls.state.items.length}} out of {{ls.state.paging.totalItems}} items in total.
+    </span>
 
     <ul ng-show="!ls.state.items.length" class="list-group facet-list">
         <li class="list-group-item facet-list-item" style="text-align: center">
@@ -60,8 +70,6 @@
     <!-- Data list -->
     <ul ng-show="!showConstraints && !ls.loading.data" class="list-group facet-list">
         <li ng-repeat="item in ls.state.items" class="list-group-item facet-list-item show-on-hover-parent" ng-class="facetValuePath==null?'facet':'facet-value'">
-
-<!--                 <template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list> -->
 
             <div ng-show="facetValuePath==null">
                 <button style="text-align: left;" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="breadcrumb.property = item.property.getUri()">
