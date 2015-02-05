@@ -21,65 +21,83 @@ angular.module('ui.jassa.paging-style', [])
 
     return {
         priority: 1050,
+        restrict: 'A',
         terminal: true,
-        pre: function(scope, elem, attrs, ctrls) {
-            var createDefaults = function() {
-                return {
-                    maxSize: 7,
-                    rotate: true,
-                    boundaryLinks: true,
-                    firstText: '&lt;&lt;',
-                    previousText: '&lt;',
-                    nextText: '&gt;',
-                    lastText: '&gt;&gt;'
-                };
-            };
+        scope: false,
+        compile: function(elem, attrs) {
+            return {
+                pre: function(scope, elem, attrs, ctrls) {
+                    var createDefaults = function() {
+                        return {
+                            maxSize: 6,
+                            rotate: true,
+                            boundaryLinks: true,
+                            directionLinks: true,
+                            firstText: '<<',
+                            previousText: '<',
+                            nextText: '>',
+                            lastText: '>>'
+                            /*
+                            firstText: '&lt;&lt;',
+                            previousText: '&lt;',
+                            nextText: '&gt;',
+                            lastText: '&gt;&gt;'
+                            */
+                        };
+                    };
 
-            // If the attribute is not present, add it
-            var setDefaultAttr = function(key, val) {
-                var expr = elem.attr(key);
-                if(expr == null) {
-                    elem.attr(key, '\'' + val + '\'');
+                    // If the attribute is not present, add it
+                    var setDefaultAttr = function(key, val, interpolate) {
+                        var expr = elem.attr(key);
+                        if(expr == null) {
+
+                            var v = interpolate ? '{{' + val + '}}' : val;
+                            elem.attr(key, v);
+                        }
+                    };
+
+
+                    var base = attrs.pagingStyle;
+                    if(base == null) {
+                        base = 'pagingStyle';
+                        scope.pagingStyle = {};
+                    }
+
+                    elem.removeAttr('paging-style');
+
+                    setDefaultAttr('max-size', base + '.maxSize', true);
+                    setDefaultAttr('rotate', base + '.rotate', true);
+                    setDefaultAttr('boundary-links', base + '.boundaryLinks', true);
+                    setDefaultAttr('first-text', base + '.firstText', true);
+                    setDefaultAttr('previous-text', base + '.previousText', true);
+                    setDefaultAttr('next-text', base + '.nextText', true);
+                    setDefaultAttr('last-text', base + '.lastText', true);
+                    setDefaultAttr('direction-links', base + '.directionLinks', true);
+
+                    var defs = createDefaults();
+
+                    var exprStr = attrs.pagingStyle;
+                    var modelGetter = $parse(exprStr);
+
+                    var initModel = function(obj) {
+                        obj = obj || modelGetter(scope);
+                        if(obj != null) {
+                            _.defaults(obj, defs);
+                        }
+                    };
+
+                    scope.$watch(function() {
+                        var r = modelGetter(scope);
+                        return r;
+                    }, function(obj) {
+                        initModel(obj);
+                    }, true);
+
+                    initModel();
+
+                    $compile(elem)(scope);
                 }
             };
-
-
-            var base = attrs.pagingStyle;
-            if(base == null) {
-                base = 'pagingStyle';
-                scope.pagingStyle = {};
-            }
-
-            setDefaultAttr('max-size', base + '.maxSize');
-            setDefaultAttr('rotate', base + '.rotate');
-            setDefaultAttr('boundary-links', base + '.boundaryLinks');
-            setDefaultAttr('first-text', base + '.firstText');
-            setDefaultAttr('previous-text', base + '.previousText');
-            setDefaultAttr('next-text', base + '.nextText');
-            setDefaultAttr('last-text', base + '.lastText');
-            setDefaultAttr('direction-links', base + '.directionLinks');
-
-            var defs = createDefaults();
-
-            var exprStr = attrs.pagingStyle;
-            var modelGetter = $parse(exprStr);
-
-            var initModel = function(model) {
-                model = model || modelGetter();
-                if(obj != null) {
-                    _.defaults(obj, defs);
-                }
-            };
-
-            $scope.$watch(function() {
-                var r = modelGetter();
-                return r;
-            }, function(model) {
-                initModel(model);
-            }, true);
-
-            initModel();
-            $compile(ele)(scope);
         }
     };
 }])

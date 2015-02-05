@@ -1,4 +1,4 @@
-angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
+angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-style', 'ui.jassa.paging-model', 'ui.bootstrap']) // ui.bootstrap for paginator
 
 
 /**
@@ -7,6 +7,24 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
  *
  */
 .controller('FacetListCtrl', ['$rootScope', '$scope', '$q', '$timeout', function($rootScope, $scope, $q, $timeout) {
+
+
+    var listServiceWatcher = new ListServiceWatcher($scope, $q);
+
+    $scope.ls = listServiceWatcher.watch('listService');
+
+    $scope.$watch(function() {
+        return $scope.listFilter;
+    }, function(listFilter) {
+        if(listFilter != null) {
+            $scope.ls.ctrl.filter = listFilter;
+        }
+    });
+
+
+    $scope.pagingStyle = $scope.pagingStyle || {};
+
+
 
     $scope.showConstraints = false;
 
@@ -24,7 +42,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
 
     $scope.location = null;
 
-    $scope.listFilter = $scope.listFilter || { limit: 10, offset: 0, concept: null };
+    //$scope.listFilter = $scope.listFilter || { limit: 10, offset: 0, concept: null };
 
     //$scope.listFilter = $scope.listFilter || { limit: 10, offset: 0, concept: null };// new jassa.service.ListFilter();
 
@@ -35,9 +53,9 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
     $scope.facetValuePath = null;
 
 
-    $scope.$watch('filterString', function(newValue) {
-        $scope.listFilter.concept = newValue;
-    });
+//    $scope.$watch('filterString', function(newValue) {
+//        $scope.listFilter.concept = newValue;
+//    });
 
 
     $scope.$watch('location', function() {
@@ -68,10 +86,10 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
 //        }
 //    }, true);
 
-    $scope.$watch('listFilter.concept', function(newValue) {
-        $scope.filterModel = newValue;
-        $scope.filterString = newValue;
-    });
+//    $scope.$watch('listFilter.concept', function(newValue) {
+//        $scope.filterModel = newValue;
+//        $scope.filterString = newValue;
+//    });
 
     $scope.descendFacet = function(property) {
         var pathHead = $scope.breadcrumb.pathHead;
@@ -261,8 +279,8 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb'])
             listFilter: '=?',
             pathHead: '=?',
             plugins: '=',
-            pluginContext: '=', //plugin context
-            paginationOptions: '=?',
+            pluginContext: '=?', //plugin context
+            pagingStyle: '=?',
             loading: '=?',
             onSelect: '&select'
         },

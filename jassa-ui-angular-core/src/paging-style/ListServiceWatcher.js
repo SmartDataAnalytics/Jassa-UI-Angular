@@ -56,7 +56,19 @@ var ListServiceWatcher = Jassa.ext.Class.create({
         _.defaults(result.paginationOptions, defs.paginationOptions);
 
 
-        result.ctrl.listService = rawListServiceExpr;
+        // Util method
+        var calcNumPages = function() {
+            var limit = tryCatch(function() { return result.state.filter.limit; });
+            var totalItems = tryCatch(function() { return result.state.paging.totalItems; }, 0);
+
+            var r = (limit == null ? 1 : Math.ceil(totalItems / limit));
+
+            r = Math.max(r, 1);
+            return r;
+        };
+
+
+        //result.ctrl.listService = rawListServiceExpr;
 
         result.doRefresh = function() {
             var p1 = result.doRefreshCount();
@@ -70,41 +82,60 @@ var ListServiceWatcher = Jassa.ext.Class.create({
             result.loading.data = true;
 
             var filter = result.ctrl.filter;
-            var listService = result.state.listService;
+            var listService = result.ctrl.listService;
 
-            var r = Promise.resolve(listService).then(function(listService) {
-                $q.when(listService.fetchItems(filter.concept, filter.limit, filter.offset)).then(function(entries) {
+            var r;
+            if(listService != null) {
+                r = Promise.resolve(listService).then(function(listService) {
+                    $q.when(listService.fetchItems(filter.concept, filter.limit, filter.offset)).then(function(entries) {
 
-                    result.state.entries = entries;
+                        result.state.entries = entries;
 
-                    result.state.items = entries.map(function(entry) {
-                        return entry.val;
+                        result.state.items = entries.map(function(entry) {
+                            return entry.val;
+                        });
+
+                        result.loading.data = false;
+
+                        result.state.filter.limit = result.ctrl.filter.limit;
+                        result.state.filter.offset = result.ctrl.filter.offset;
+                        //result.state.listService = result.ctrl.listService;
                     });
-
+                }, function() {
                     result.loading.data = false;
-
-                    result.state.filter.limit = result.ctrl.filter.limit;
-                    result.state.filter.offset = result.ctrl.filter.offset;
-
                 });
-            });
+            } else {
+                r = Promise.resolve({});
+            }
 
             return r;
         };
 
         result.doRefreshCount = function() {
-            result.loading.pageCount = true;
 
             var filter = result.ctrl.filter;
-            var listService = result.state.listService;
+            var listService = result.ctrl.listService;
 
-            var r = Promise.resolve(listService).then(function(listService) {
-                $q.when(listService.fetchCount(filter.concept)).then(function(countInfo) {
-                      //$scope.totalItems = countInfo.count;
+            var r;
+            if(listService != null) {
+                result.loading.pageCount = true;
 
-                    result.loading.pageCount = false;
+                r = Promise.resolve(listService).then(function(listService) {
+                    $q.when(listService.fetchCount(filter.concept)).then(function(countInfo) {
+                          //$scope.totalItems = countInfo.count;
+                        result.state.paging.totalItems = countInfo.count;
+
+                        result.state.paging.numPages = calcNumPages();
+
+
+                        result.loading.pageCount = false;
+                    }, function() {
+                        result.loading.pageCount = false;
+                    });
                 });
-            });
+            } else {
+                r = Promise.resolve({});
+            }
 
             return r;
         };
@@ -125,17 +156,6 @@ var ListServiceWatcher = Jassa.ext.Class.create({
             }
         };
 
-        // Util method
-        var calcNumPages = function() {
-            var limit = tryCatch(function() { return result.state.filter.limit; });
-            var totalItems = tryCatch(function() { return result.state.countInfo.count; }, 0);
-
-            var result = (limit == null ? 1 : Math.ceil(totalItems / limit));
-
-            result = Math.max(result, 1);
-            return result;
-        };
-
 
         // Keep track of all watchers, so we can unregister them all if desired
         result.watchers = result.watchers || [];
@@ -145,15 +165,19 @@ var ListServiceWatcher = Jassa.ext.Class.create({
             return r;
         };
 
+        addWatch(rawListServiceExpr, function(lse) {
+            result.ctrl.listService = lse;
+        });
+
         addWatch(function() {
             return result.ctrl.listService;
-        }, function(rawListService) {
+        }, function(listService) {
             if(result.cancelAll) {
                 result.cancelAll();
             }
 
             //result.state.listService = jassa.util.PromiseUtils.lastRequestify(rawListService);
-            jassa.util.PromiseUtils.replaceService(result.state, 'listService', rawListService);
+            jassa.util.PromiseUtils.replaceService(result.state, 'listService', listService);
 
             result.doRefresh();
         });
@@ -225,9 +249,9 @@ ListServiceWatcher.getDefaults = function() {
                 offset: 0
             },
             paging: {
-                currentPage: 1,
-                numPages: 1,
-                totalItems: 0
+                currentPage: 1
+                //numPages: 1,
+                //totalItems: 0
             }
         },
         watchers: []

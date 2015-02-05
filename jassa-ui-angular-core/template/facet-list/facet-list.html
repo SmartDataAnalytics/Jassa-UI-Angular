@@ -1,16 +1,16 @@
 <div>
-<!--     <H2>Facets</H2> -->
 
+    <div ng-if="!ls.ctrl.listService" class="alert alert-info">
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        No service configured for the facet list.
+    </div>
+
+    <!-- Breadcrumb -->
     <breadcrumb sparql-service="sparqlService" ng-model="breadcrumb"></breadcrumb>
 
-    <!-- <div class="input-group">
-        <button type="submit" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-    </div> -->
-
-<!--     <div class="alert alert-success" role="alert" style="margin: 0px; padding: 0 0 5px 0px"> -->
-
-<div>
-        <form role="form" ng-submit="filterString=filterModel; listFilter.offset=0" novalidate>
+    <!-- Filter text input field -->
+    <div>
+        <form role="form" ng-submit="ls.ctrl.filter.concept=filterModel; listFilter.offset=0" novalidate>
             <div class="input-group">
                 <input ng-model="filterModel" type="text" class="form-control facet-filter" placeholder="Find ...">
                 <span class="input-group-btn facet-filter-submit">
@@ -19,12 +19,10 @@
             </div>
         </form>
 
-        <div ng-show="filterString.length > 0" style="margin: 5px 0 0 10px; color: #aaa;"><span ng-show="loading.data || loading.pageCount">Filtering by</span><span ng-hide="loading.data || loading.pageCount">Filtered by </span> '{{filterString}}'</div>
-</div>
-<!--     </div> -->
+        <div ng-show="ls.ctrl.filter.concept.length > 0" style="margin: 5px 0 0 10px; color: #aaa;"><span ng-show="ls.loading.data || ls.loading.pageCount">Filtering by</span><span ng-hide="ls.loading.data || ls.loading.pageCount">Filtered by </span> '{{ls.ctrl.filter.concept}}'</div>
+    </div>
 
-
-
+    <!-- Navigation buttons -->
     <div style="width: 100%">
         <button ng-show="!showConstraints && facetValuePath" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.property = null"><span class="glyphicon glyphicon-chevron-left"></span> Back</button>
         <button ng-show="!showConstraints && !facetValuePath && !breadcrumb.pathHead.getPath().isEmpty()" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.pathHead = breadcrumb.pathHead.up()"><span class="glyphicon glyphicon-chevron-left"></span> Up</button>
@@ -35,47 +33,67 @@
         <div class="clearfix"></div>
     </div>
 
-<!--     <div ng-show="!showConstraints" class="facets alert alert-info" role="alert" style="margin: 0px; padding: 0px"> -->
+    <!-- TODO Loading data icon -->
 
-        <jassa-list ng-show="!showConstraints" list-service="listService" list-filter="listFilter" list-class="'list-group facet-list'" loading="loading" pagination-options="paginationOptions">
-            <li ng-show="!items.length" class="list-group-item facet-list-item" style="text-align: center">
-                <button class="btn btn-default btn-label facet-list-item-btn disabled" type="button">
-                    No results
-                </button>
-            </li>
-            <li ng-repeat="item in items" class="list-group-item facet-list-item" ng-class="$parent.$parent.facetValuePath==null?'facet':'facet-value'">
+    <div class="form-group">
+        <div class="input-group" ng-init="showOptions=[{value: 10, label: '10'}, {value: 25, label: '25'}, {value: 50, label: '50'}, {value: 100, label: '100'}]">
+            <span class="input-group-addon">Show: </span>
+            <select class="form-control" ng-model="ls.ctrl.filter.limit"  ng-model-options="showOptions" ng-options="option.value as option.label for option in showOptions"></select>
+        </div>
+    </div>
+
+    <!-- Paginator -->
+    <div style="width: 100%; text-align: center">
+        <span ng-show="ls.loading.pageCount" class="glyphicon glyphicon-refresh"></span>
+
+        <pagination ng-show="ls.state.paging.numPages > 1" class="pagination pagination-sm" paging-model="ls" paging-style="pagingStyle"></pagination>
+    </div>
+
+    <ul ng-show="!ls.state.items.length" class="list-group facet-list">
+        <li class="list-group-item facet-list-item" style="text-align: center">
+            <button class="btn btn-default btn-label facet-list-item-btn disabled" type="button">
+                No results
+            </button>
+        </li>
+    </ul>
+
+    <!-- Data list -->
+    <ul ng-show="!showConstraints && !ls.loading.data" class="list-group facet-list">
+        <li ng-repeat="item in ls.state.items" class="list-group-item facet-list-item show-on-hover-parent" ng-class="facetValuePath==null?'facet':'facet-value'">
 
 <!--                 <template-list style="list-style:none; display: inline; padding-left: 0px;" templates="plugins" data="facet" context="pluginContext"></template-list> -->
-                Plugins: {{plugins}}
-                <ul ng-show="plugins.length > 0">
-                    <li style="display: inline;" ng-repeat="plugin in plugins">
-                        <div compile="plugin"></div>
-                    </li>
-                </ul>
 
-                <div ng-show="$parent.$parent.facetValuePath==null">
-                    <button style="text-align: left;" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="$parent.$parent.breadcrumb.property = item.property.getUri()">
-                        <span class="glyphicon glyphicon glyphicon-record"></span>
-                        {{item.labelInfo.displayLabel || $parent.$parent.NodeUtils.toPrettyString(item.property)}}
-                        <span class="counter"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
-                    </button>
-                    <button class="btn btn-default facet-list-item-btn pull-right" type="button" ng-click="$parent.$parent.descendFacet(item.property)">
-                        <span class="glyphicon glyphicon-chevron-down"></span>
-                    </button>
-                    <div class="clearfix"></div>
-                </div>
+            <div ng-show="facetValuePath==null">
+                <button style="text-align: left;" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="breadcrumb.property = item.property.getUri()">
+                    <span class="glyphicon glyphicon glyphicon-record"></span>
+                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.property)}}
+                    <span class="counter"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
+                </button>
+                <button class="btn btn-default facet-list-item-btn pull-right" type="button" ng-click="descendFacet(item.property)">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                </button>
 
-                <div ng-show="$parent.$parent.facetValuePath!=null">
-                    <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="margin-bottom: -1px; text-align: left;" class="btn btn-label facet-list-item-btn" type="button" ng-click="$parent.$parent.toggleConstraint(item.node)">
-                        <span class="glyphicon glyphicon glyphicon-record facet-value"></span>
-                        {{$parent.$parent.NodeUtils.toPrettyString(item.node)}}
-                        <span class="counter"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
-                    </button>
-                </div>
+            <ul ng-show="plugins.length > 0">
+                <li style="display: inline;" ng-repeat="plugin in plugins">
+                    <div compile="plugin"></div>
+                </li>
+            </ul>
 
-            </li>
-        </jassa-list>
+                <div class="clearfix"></div>
+            </div>
 
+            <div ng-show="facetValuePath!=null">
+                <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="margin-bottom: -1px; text-align: left;" class="btn btn-label facet-list-item-btn" type="button" ng-click="toggleConstraint(item.node)">
+                    <span class="glyphicon glyphicon glyphicon-record facet-value"></span>
+                    {{NodeUtils.toPrettyString(item.node)}}
+                    <span class="counter"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
+                </button>
+            </div>
+
+        </li>
+    </ul>
+
+    <!-- Constraints -->
     <div class="constraints">
         <constraint-list
             ng-show="showConstraints"
