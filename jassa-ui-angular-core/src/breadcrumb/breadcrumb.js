@@ -23,7 +23,7 @@ angular.module('ui.jassa.breadcrumb', [])
         var sparqlService = $scope.sparqlService;
 
         var propertyName = $scope.model.property;
-        var property = propertyName == null ? null : jassa.rdf.NodeFactory.createUri(propertyName);
+        var property = (propertyName == null || propertyName === true) ? null : jassa.rdf.NodeFactory.createUri(propertyName);
 
         var pathHead = $scope.model.pathHead;
         var path = pathHead ? pathHead.getPath() : null;

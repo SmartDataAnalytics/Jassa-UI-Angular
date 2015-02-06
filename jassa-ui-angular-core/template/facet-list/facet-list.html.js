@@ -26,7 +26,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "            </div>\n" +
     "\n" +
     "            <div class=\"col-sm-5\">\n" +
-    "                <div class=\"input-group\" ng-init=\"showOptions=[{value: 10, label: '10'}, {value: 25, label: 'twenty five'}, {value: 50, label: '50'}, {value: 100, label: '100'}]\">\n" +
+    "                <div class=\"input-group\" ng-init=\"showOptions=[{value: 10, label: '10'}, {value: 25, label: '25'}, {value: 50, label: '50'}, {value: 100, label: '100'}]\">\n" +
     "                    <span class=\"input-group-addon\">Show </span>\n" +
     "                    <select class=\"form-control\" type=\"text\" ng-model=\"ls.ctrl.filter.limit\"  ng-model-options=\"showOptions\" ng-options=\"option.value as option.label for option in showOptions\"></select>\n" +
     "                </div>\n" +

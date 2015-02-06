@@ -1,8 +1,8 @@
 <ol class="breadcrumb facet-breadcrumb" scroll-glue-right>
     <!-- If the path is empty, show the instance list button  -->
-    <li ng-show="path.isEmpty()">
-        <button class="btn btn-default" ng-disabled="path.isEmpty()" ng-click="setPath(-1)">
-            <span class="glyphicon glyphicon glyphicon-menu-hamburger"></span>
+    <li ng-if="model.pathHead.getPath().isEmpty() && (model.property===true || model.property==null)">
+        <button class="btn btn-default" ng-disabled="model.pathHead.getPath().isEmpty() && model.property===true" ng-click="model.property=true">
+            <span class="glyphicon glyphicon glyphicon-list"></span>
         </button>
     </li>
 
@@ -23,7 +23,7 @@
         </button>
     </li>
 
-    <li ng-show="state.value == null">
+    <li ng-show="state.value == null && model.property !== true">
         <button class="btn btn-default" ng-click="invert()">
             {{model.pathHead.isInverse() ? '&lt;' : '&gt;'}}
         </button>
