@@ -97,6 +97,11 @@ a {
     background-color: #bbccff;
 }
 
+.facet-row:hover .show-on-hover-child {
+    display: inline;
+}
+
+
 
 .highlite {
     /*background-color: #ddeeff;*/
@@ -201,6 +206,9 @@ a {
 .show-on-hover-parent-inline:hover .show-on-hover-child {
     display: inline;
 }
+
+
+
 
 
    /* Not working yet, as openlayers positions the element programmatically */

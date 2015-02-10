@@ -1,0 +1,38 @@
+<div>
+<table class="table table-striped" ng-init="lsx = listServiceWatcher.watch(linkListService);">
+
+    <div class="alert alert-success" role="alert">
+        Legend: <span class="label label-success">Both resources</span> <span class="label label-primary">Source only</span> <span class="label label-warning">Target only</span>
+    </div>
+
+    <tr><th>Link</th><th>Source</th><th>Target</th></tr>
+    <tr ng-repeat="link in lsx.state.items">
+        <td>
+            <span class="label label-warning" title="{{link.source.id}}">{{link.source.displayLabel}}</span>
+            <span class="label label-primary" title="{{link.target.id}}">{{link.target.displayLabel}}</span>
+        </td>
+
+
+        <button ng-class="{ 'disabled': offset === 0 }" type="button" class="btn btn-default" ng-click="offset = offset > 0 ? offset - 1 : offset">Prev</button>
+        <button type="button" class="btn btn-default" ng-click="offset = offset + 1">Next</button>
+
+        <td>
+            <table class="table table-striped">
+                <tr ng-repeat="predicate in link.cluster | objectToArray | orderBy:sourceOrderFn:true">
+                    <td>
+                        <span title="{{predicate.id}}" class="label" ng-class="predicate.sources.length === 2 ? 'label-success' : ( predicate.sources[0] === 'source' ? 'label-primary' : 'label-warning' )">{{predicate.displayLabel || predicate.id}}</span>
+                    </td>
+                    <td>
+                        <ul>
+                            <li ng-repeat="member in predicate.valueToMember | objectToArray | orderBy:sourceOrderFn:true">
+                                <span title="{{member.value.id}}" class="label preserve-whitespace" ng-class="member.sources.length === 2 ? 'label-success' : ( member.sources[0] === 'source' ? 'label-primary' : 'label-warning' )">{{member.value.displayLabel || member.value.id}}</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </td>
+
+    </tr>
+</table>
+</div>

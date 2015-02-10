@@ -1,6 +1,13 @@
 angular.module("template/breadcrumb/breadcrumb.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/breadcrumb/breadcrumb.html",
     "<ol class=\"breadcrumb facet-breadcrumb\" scroll-glue-right>\n" +
+    "    <!-- If the path is empty, show the instance list button  -->\n" +
+    "    <li ng-if=\"model.pathHead.getPath().isEmpty() && (model.property===true || model.property==null)\">\n" +
+    "        <button class=\"btn btn-default\" ng-disabled=\"model.pathHead.getPath().isEmpty() && model.property===true\" ng-click=\"model.property=true\">\n" +
+    "            <span class=\"glyphicon glyphicon glyphicon-list\"></span>\n" +
+    "        </button>\n" +
+    "    </li>\n" +
+    "\n" +
     "    <li>\n" +
     "        <button class=\"btn btn-default\" ng-disabled=\"path.isEmpty()\" ng-click=\"setPath(0)\">\n" +
     "            <span class=\"glyphicon glyphicon-home\"></span>\n" +
@@ -18,7 +25,7 @@ angular.module("template/breadcrumb/breadcrumb.html", []).run(["$templateCache",
     "        </button>\n" +
     "    </li>\n" +
     "\n" +
-    "    <li ng-show=\"state.value == null\">\n" +
+    "    <li ng-show=\"state.value == null && model.property !== true\">\n" +
     "        <button class=\"btn btn-default\" ng-click=\"invert()\">\n" +
     "            {{model.pathHead.isInverse() ? '&lt;' : '&gt;'}}\n" +
     "        </button>\n" +

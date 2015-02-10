@@ -2,15 +2,7 @@
 set -e
 
 npm install
-
-# Retrieve the package version via grunt (no idea how to make grunt output to stdout; that's why i just use a file)
-grunt getversion
-version=`cat target/version.txt`
-tag="v$version"
-#echo "$version"
-
-sourceFolder='dist'
-targetFolder='target/release/repo'
+source ./build.conf
 
 # !! WARNING: We delete the source folder as we assume its a dist folder anyway !!!
 rm -rf "$sourceFolder"
@@ -32,4 +24,5 @@ for source in `cd "$sourceFolder" && ls -1`; do
  
     cp -v "$sourceFolder/$source" "$targetFolder/$target"
 done
+
 

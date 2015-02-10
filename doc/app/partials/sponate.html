@@ -16,7 +16,7 @@ A <i>(sponate) store</i> is a container for a set of maps and configuration opti
 
 The system operates by aggregation of result set rows into JavaScript objects and arrays.
 
-<h3>Example</h3>
+<h4>A Simple Interactive Example</h4>
 
 <tabset ng-init="context={}">
     <tab heading="Mapping">
@@ -51,51 +51,18 @@ The system operates by aggregation of result set rows into JavaScript objects an
             <li><code>name: new jassa.sparql.ExprVar(jassa.rdf.NodeFactory.createVar('?name'))</code> -> jassa.sparql.NodeValueNode</li>
         </ul>
     </li>
-</ul>
-
-<h3>Simple Example</h3>
-
-<h4>Attribute Query</h4>
-<textarea ui-codemirror="editorOptions.html">
-SELECT * WHERE {
- ?r a dbo:Museum .
- ?r rdfs:label ?label .
- ?r dbo:abstract ?abst .
- ?r geo:long ?long .
- ?r geo:lat ?lat .
- OPTIONAL { ?r foaf:depiction ?d }}
-</textarea>
-
-<h4>Sponate Data Template</h4>
-<textarea ui-codemirror="editorOptions.html">
-{
-  id: "?r",
-  name : "?label",
-  abstract: "?abst",
-  lat: "?lat",
-  long: "?long",
-  pic: "?d"
-}
-</textarea>
-
-<h4>Angular View Template</h4>
-<textarea ui-codemirror="editorOptions.html">
-<script type="text/plain">
-{{name}}
-<div ng-hide="pic">(No image available.)</div>
-<img src="{{pic.slice(1, -1)}}">
-<br/><i>{{abstract}}</i>
-</script>
-</textarea>
-
-<ul>
-    <li><a class="label label-primary" href="http://cstadler.aksw.org/mappify2" target="_blank">Mappify</a></li>
+    <li>
+        If an argument is a function, it is expected to evaluate to a <i>part of the template</i> upon calling <code>store.collection.getListService()</code>
+        This allows dynamical modifications to the template, such as for reflecting changes in the array of preferred languages.
+    </li>
+    <li>If an argument is an array whose <i>last</i> element is a function, then Sponate will first evaluate all array elements except for the last one, and pass the
+    corresponding values as arguments to the given function. The function's return value will be used for further processing.
 </ul>
 
 
 <h3>Best Label Aggregation</h3>
+In this section we demonstrate how to select the best label from a set of available ones.
 
-<h4>Sponate Data Template</h4>
 <textarea ui-codemirror="editorOptions.html">
 <script type="text/plain">
 var prefixes = {
@@ -134,7 +101,7 @@ store.addMap({
 </textarea>
 
 
-<h4>Angular View Template</h4>
+<h4>References</h4>
 <textarea ui-codemirror="editorOptions.html">
 <script type="text/plain">
 <li class="media" ng-repeat="item in items">
@@ -165,3 +132,13 @@ store.addMap({
 
 
 
+<!-- <tabset ng-init="context={}"> -->
+<!--     <tab heading="Mapping"> -->
+<!--         <textarea ng-init="loadTemplate('demos/sponate/linking/mapping.js', context, 'mapping')" ui-codemirror="" ng-model="context.mapping"></textarea> -->
+<!--     </tab> -->
+<!--     <tab heading="Template"> -->
+<!--         <textarea ng-init="loadTemplate('demos/sponate/basic/template.html', context, 'template')" ui-codemirror="" ng-model="context.template"></textarea> -->
+<!--     </tab> -->
+<!--     <tab heading="Ouput"> -->
+<!--     </tab> -->
+<!-- </tabset> -->

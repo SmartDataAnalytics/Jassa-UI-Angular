@@ -1,0 +1,48 @@
+<!-- <ul class="media-list"> -->
+<!--     <li class="media" ng-repeat="item in items"> -->
+<!--         <ng-include src="'template/dataset-browser/dataset-item.html'" include-replace></ng-include> -->
+<!--     </li> -->
+<!--     <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li> -->
+<!-- </ul> -->
+
+
+
+<!--     <li class="media" ng-repeat="item in items"> -->
+<!--         <ng-include src="'template/dataset-browser/dataset-item.html'" include-replace></ng-include> -->
+<!--     </li> -->
+<!--     <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li> -->
+
+
+
+
+<div class="media-left">
+    <a href="" ng-click="context.onSelect({context: context, dataset: item})">
+        <img class="media-object" style="max-width: 64px; max-height: 64px;" ng-src="{{item.depiction}}">
+    </a>
+</div>
+
+<div class="media-body">
+    <a href="" ng-click="context.onSelect({context: context, dataset: item})"><h5 class="media-heading">{{item.label || 'Sorry, there is no title available in your preferred languages'}}</h5></a>
+
+<!-- <h4 class="media-heading">{{item.label || 'Sorry, there is no title available in your preferred languages'}}</h4> -->
+
+    <br />
+    <span bind-html-unsafe="item.comment || 'Sorry, there is no description available in your preferred languages' | typeaheadHighlight:searchString"></span>
+    <hr />
+    <ul class="list-inline">
+        <li ng-repeat="resource in item.resources" ng-show="resource.items.length">
+            <a href="" ng-click="item.showTab=(item.showTab===$index ? -1 : $index)"><span class="label" ng-class="item.showTab===$index ? 'label-success' : 'label-default'">{{resource.items.length}} {{resource.label}}</span></a>
+        </li>
+    </ul>
+
+    <div style="margin-top: 5px">
+        <div ng-repeat="resource in item.resources">
+            <div class="panel panel-default" ng-show="$index===item.showTab" ng-init="dists=resource.items">
+                <div class="panel-heading">{{resource.label}}</div>
+                <div class="panel-body">
+                    <div ng-include="resource.template"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
