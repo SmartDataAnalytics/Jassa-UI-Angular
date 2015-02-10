@@ -116,7 +116,7 @@ angular.module('ui.jassa.geometry-input', [])
                   +' geom:geometry ['
                   +'  ogc:asWKT ?g'
                   +' ] '
-                  +' FILTER regex(?l, "'+ searchString +'") '
+                  +' FILTER regex(?l, "'+ searchString +'", "i") '
                   +' } '
                   +'}'
               }

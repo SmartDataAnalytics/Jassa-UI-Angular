@@ -25,7 +25,7 @@ git clone git@github.com:GeoKnow/Jassa-UI-Angular-Edit-Bower.git "$targetFolder"
 #mkdir -p "$targetFolder"
 
 cp bower.json "$targetFolder"
-#cp css/jassa-ui-angular.css "$targetFolder"
+cp css/jassa-ui-angular-edit.css "$targetFolder"
 
 for source in `cd "$sourceFolder" && ls -1`; do
     target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?\.|\.|g'`
