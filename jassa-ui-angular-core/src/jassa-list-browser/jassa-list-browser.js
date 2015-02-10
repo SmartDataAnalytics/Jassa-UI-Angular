@@ -1,8 +1,9 @@
 angular.module('ui.jassa.jassa-list-browser', [])
 
-//.controller('JassaListBrowserCtrl', ['$scope', function($scope) {
-//
-//}])
+.controller('JassaListBrowserCtrl', ['$scope', function($scope) {
+    $scope.context = $scope.context || {};
+
+}])
 
 .directive('jassaListBrowser', function() {
     return {
@@ -21,10 +22,11 @@ angular.module('ui.jassa.jassa-list-browser', [])
             doFilter: '=',
             searchModes: '=',
             activeSearchMode: '=',
-            context: '=' // Extra data that can be passed in // TODO I would prefer access to the parent scope
+            itemTemplate: '=',
+            context: '=?' // Extra data that can be passed in // TODO I would prefer access to the parent scope
         },
         templateUrl: 'template/jassa-list-browser/jassa-list-browser.html',
-        //controller: 'JassaListBrowserCtrl'
+        controller: 'JassaListBrowserCtrl'
     };
 })
 

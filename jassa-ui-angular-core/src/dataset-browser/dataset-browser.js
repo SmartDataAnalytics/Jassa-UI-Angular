@@ -1,5 +1,5 @@
 //angular.module('DatasetBrowser', ['ui.jassa', 'ui.bootstrap', 'ui.sortable', 'ui.keypress', 'ngSanitize'])
-angular.module('ui.jassa.dataset-browser', [])
+angular.module('ui.jassa.dataset-browser', ['ui.jassa.include-replace'])
 
 .controller('DatasetBrowserCtrl', ['$scope', '$q', function($scope, $q) {
 
@@ -27,11 +27,13 @@ angular.module('ui.jassa.dataset-browser', [])
             comment: { $ref: { target: commentTemplateFn, attr: 'displayLabel' }},
             depiction: '?d',
             resources: [{
-                label: 'Distributions',
+                label: '"Distributions"',
+                type: '"dataset"',
                 items: [{ $ref: { target: 'distributions', on: '?x'} }],
                 template: 'template/dataset-browser/distribution-list.html'
             }, {
-                label: 'Join Summaries',
+                label: '"Join Summaries"',
+                type: 'join-summary',
                 items: [[{ $ref: { target: 'datasets', on: '?j'} }], function(items) { // <- here be recursion
                     var r = _(items).chain().map(function(item) {
                                 return item.resources[0].items;
@@ -135,11 +137,17 @@ angular.module('ui.jassa.dataset-browser', [])
     }
     */
 
-
     $scope.context = {
-        // TODO Get rid of the limitation of having to pass in the itemTemplate via a 'context' object
-        itemTemplate: 'template/dataset-browser/dataset-list-item.html'
+        onSelect: function() {
+            //console.log('onSelect called', arguments);
+            $scope.onSelect.apply(this, arguments);
+        }
     };
+
+//    $scope.context = {
+//        // TODO Get rid of the limitation of having to pass in the itemTemplate via a 'context' object
+//        itemTemplate: 'template/dataset-browser/dataset-list-item.html'
+//    };
 
     //$scope.itemTemplate = 'dataset-item.html';
     $scope.itemTemplate = 'template/dataset-browser/dataset-list-item.html';
@@ -155,7 +163,7 @@ angular.module('ui.jassa.dataset-browser', [])
             sparqlService: '=',
             //model: '=ngModel',
             maxSize: '=?',
-            onSelect: '=?'
+            onSelect: '&?'
         },
         controller: 'DatasetBrowserCtrl',
         compile: function(elm, attrs) {

@@ -71,26 +71,37 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "\n" +
     "    <!-- Data list -->\n" +
     "    <ul ng-show=\"!showConstraints && !ls.loading.data\" class=\"list-group facet-list\">\n" +
-    "        <li ng-repeat=\"item in ls.state.items\" class=\"list-group-item facet-list-item show-on-hover-parent\" ng-class=\"facetValuePath==null?'facet':'facet-value'\">\n" +
+    "        <li ng-repeat=\"item in ls.state.items\" class=\"list-group-item facet-list-item visible-on-hover-parent\" ng-class=\"facetValuePath==null?'facet':'facet-value'\">\n" +
     "\n" +
-    "            <div ng-show=\"facetValuePath==null\">\n" +
-    "                <button style=\"text-align: left;\" class=\"btn btn-default btn-label facet-list-item-btn\" type=\"button\" ng-click=\"breadcrumb.property = item.property.getUri()\">\n" +
+    "            <div ng-show=\"facetValuePath==null\" class=\"input-group\">\n" +
+    "\n" +
+    "                <button style=\"text-align: left; width: 100%\" class=\"btn btn-default btn-label facet-list-item-btn\" type=\"button\" ng-click=\"breadcrumb.property = item.property.getUri()\">\n" +
     "                    <span class=\"glyphicon glyphicon glyphicon-record\"></span>\n" +
     "                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.property)}}\n" +
     "                    <span class=\"counter\"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>\n" +
     "                </button>\n" +
-    "                <button class=\"btn btn-default facet-list-item-btn pull-right\" type=\"button\" ng-click=\"descendFacet(item.property)\">\n" +
-    "                    <span class=\"glyphicon glyphicon-chevron-down\"></span>\n" +
-    "                </button>\n" +
     "\n" +
-    "            <ul ng-show=\"plugins.length > 0\">\n" +
-    "                <li style=\"display: inline;\" ng-repeat=\"plugin in plugins\">\n" +
-    "                    <div compile=\"plugin\"></div>\n" +
-    "                </li>\n" +
-    "            </ul>\n" +
-    "\n" +
-    "                <div class=\"clearfix\"></div>\n" +
+    "                <div class=\"input-group-btn\">\n" +
+    "                    <ul class=\"list-inline\">\n" +
+    "                        <li ng-repeat=\"plugin in plugins\" compile=\"plugin\">\n" +
+    "<!--                             <ng-include src=\"plugin\"></ng-include> -->\n" +
+    "                        </li>\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default facet-list-item-btn visible-on-hover-child\" type=\"button\" ng-click=\"descendFacet(item.property)\">\n" +
+    "                                <span class=\"glyphicon glyphicon-chevron-right\"></span>\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
     "            </div>\n" +
+    "\n" +
+    "<!--             <ul ng-show=\"plugins.length > 0\" class=\"list-inline\"> -->\n" +
+    "<!--                 <li ng-repeat=\"plugin in plugins\"> -->\n" +
+    "<!--                     <div compile=\"plugin\"></div> -->\n" +
+    "<!--                 </li> -->\n" +
+    "<!--             </ul> -->\n" +
+    "\n" +
+    "<!--                 <div class=\"clearfix\"></div> -->\n" +
     "\n" +
     "            <div ng-show=\"facetValuePath!=null\">\n" +
     "                <button ng-class=\"item.isConstrainedEqual ? 'btn-primary' : 'btn-default'\" style=\"margin-bottom: -1px; text-align: left;\" class=\"btn btn-label facet-list-item-btn\" type=\"button\" ng-click=\"toggleConstraint(item.node)\">\n" +

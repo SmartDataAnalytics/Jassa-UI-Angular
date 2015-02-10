@@ -1,7 +1,15 @@
-angular.module('ui.jassa.jassa-media-list', [])
+angular.module('ui.jassa.jassa-media-list', ['ui.jassa.include-replace'])
 
 .controller('JassaMediaListCtrl', ['$scope', '$q', '$timeout', function($scope, $q, $timeout) {
     $scope.currentPage = 1;
+
+    $scope.limit = $scope.limit || 10;
+    $scope.offset = $scope.offset || 0;
+    $scope.items = $scope.items || [];
+    $scope.maxSize = $scope.maxSize || 6;
+
+
+
 
     // TODO Get rid of the $timeouts - not sure why $q.when alone breaks when we return results from cache
 
@@ -39,28 +47,29 @@ angular.module('ui.jassa.jassa-media-list', [])
     return {
         restrict: 'EA',
         templateUrl: 'template/jassa-media-list/jassa-media-list.html',
-        transclude: true,
+        //transclude: true,
         replace: true,
         scope: {
             listService: '=',
-            filter: '=',
-            limit: '=',
-            offset: '=',
-            totalItems: '=',
+            filter: '=?',
+            limit: '=?',
+            offset: '=?',
+            totalItems: '=?',
             //currentPage: '=',
-            items: '=',
-            maxSize: '=',
-            refresh: '=', // Extra attribute that is deep watched on changes for triggering refreshs
-            context: '=' // Extra data that can be passed in // TODO I would prefer access to the parent scope
+            itemTemplate: '=',
+            items: '=?',
+            maxSize: '=?',
+            refresh: '=?', // Extra attribute that is deep watched on changes for triggering refreshs
+            context: '=?' // Extra data that can be passed in // TODO I would prefer access to the parent scope
         },
         controller: 'JassaMediaListCtrl',
         link: function(scope, element, attrs, ctrl, transcludeFn) {
-            transcludeFn(scope, function(clone, scope) {
-                var e = element.find('ng-transclude');
-                var p = e.parent();
-                e.remove();
-                p.append(clone);
-            });
+//            transcludeFn(scope, function(clone, scope) {
+//                var e = element.find('ng-transclude');
+//                var p = e.parent();
+//                e.remove();
+//                p.append(clone);
+//            });
         }
     };
 }])

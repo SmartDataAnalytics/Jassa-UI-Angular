@@ -19,7 +19,10 @@
     </div>
 
     <ul class="media-list" style="width: 100%;">
-        <ng-transclude></ng-transclude>
+        <li class="media" ng-repeat="item in items">
+            <div ng-include="itemTemplate" include-replace></div>
+        </li>
+        <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li>
     </ul>
 
     <div style="width: 100%; text-align: center">

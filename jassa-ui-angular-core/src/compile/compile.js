@@ -8,6 +8,7 @@ angular.module('ui.jassa.compile', [])
     return {
         scope: true,
         terminal: true,
+        replace: true,
         compile: function(elem, attrs) {
             return {
                 post: function(scope, elem, attrs, controller) {
