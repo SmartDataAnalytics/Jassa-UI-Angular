@@ -82,7 +82,7 @@ var ListServiceWatcher = Jassa.ext.Class.create({
             result.loading.data = true;
 
             var filter = result.ctrl.filter;
-            var listService = result.ctrl.listService;
+            var listService = result.state.listService;
 
             var r;
             if(listService != null) {
@@ -114,7 +114,7 @@ var ListServiceWatcher = Jassa.ext.Class.create({
         result.doRefreshCount = function() {
 
             var filter = result.ctrl.filter;
-            var listService = result.ctrl.listService;
+            var listService = result.state.listService;
 
             var r;
             if(listService != null) {
