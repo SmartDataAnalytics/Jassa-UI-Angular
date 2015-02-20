@@ -7,7 +7,7 @@
   ],
   "dependencies": {
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
-    "angular-ui-select": "0.9.4",
+    "angular-ui-select": "0.9.9",
     "selectize": "~0.8.5",
     "angular-ui-utils": "",
     "moment": "2.8.4"
