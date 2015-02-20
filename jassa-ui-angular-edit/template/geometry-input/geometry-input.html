@@ -6,7 +6,8 @@
     <input type="radio" value="box" name="geometry" ng-model="geometry" /><label>Box</label>
   </div>
   <!--input ng-model="searchString" class="form-control" type="text" placeholder="Search for a place"/-->
-  <div class="ui icon input loading" style="width: 100%;">
+
+  <div style="width: 100%; position: relative;">
     <input ng-model="searchString"
            placeholder="Search for a place (typeahead)"
            typeahead-min-length="3"
@@ -16,7 +17,11 @@
            typeahead-min-length typeahead-on-select="onSelectGeocode($item)"
            typeahead="item.label as item.label for item in fetchResults($viewValue)"
            class="form-control" />
-    <i ng-if="isLoading" class="search icon"></i>
+    <div ng-if="isLoading" class="spinner">
+      <div class="double-bounce1"></div>
+      <div class="double-bounce2"></div>
+    </div>
   </div>
+
   <div class="map" style="width: 100%; height: 300px;"></div>
 </div>

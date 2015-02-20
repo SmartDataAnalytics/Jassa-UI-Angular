@@ -8,7 +8,8 @@ angular.module("template/geometry-input/geometry-input.html", []).run(["$templat
     "    <input type=\"radio\" value=\"box\" name=\"geometry\" ng-model=\"geometry\" /><label>Box</label>\n" +
     "  </div>\n" +
     "  <!--input ng-model=\"searchString\" class=\"form-control\" type=\"text\" placeholder=\"Search for a place\"/-->\n" +
-    "  <div class=\"ui icon input loading\" style=\"width: 100%;\">\n" +
+    "\n" +
+    "  <div style=\"width: 100%; position: relative;\">\n" +
     "    <input ng-model=\"searchString\"\n" +
     "           placeholder=\"Search for a place (typeahead)\"\n" +
     "           typeahead-min-length=\"3\"\n" +
@@ -18,8 +19,12 @@ angular.module("template/geometry-input/geometry-input.html", []).run(["$templat
     "           typeahead-min-length typeahead-on-select=\"onSelectGeocode($item)\"\n" +
     "           typeahead=\"item.label as item.label for item in fetchResults($viewValue)\"\n" +
     "           class=\"form-control\" />\n" +
-    "    <i ng-if=\"isLoading\" class=\"search icon\"></i>\n" +
+    "    <div ng-if=\"isLoading\" class=\"spinner\">\n" +
+    "      <div class=\"double-bounce1\"></div>\n" +
+    "      <div class=\"double-bounce2\"></div>\n" +
+    "    </div>\n" +
     "  </div>\n" +
+    "\n" +
     "  <div class=\"map\" style=\"width: 100%; height: 300px;\"></div>\n" +
     "</div>");
 }]);
