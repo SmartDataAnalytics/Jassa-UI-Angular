@@ -54,9 +54,21 @@
 
     </div-->
     <input type="text" class="form-control margin-left-1" style="margin-left: -1px !important;" ng-model="state.value" ng-model-options="ngModelOptions">
+    <div class="input-group-btn">
+      <button type="button" style="margin-left: -2px !important; border-radius: 0px; line-height: 1.5;" class="btn btn-default"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+      <button type="button" style="border-radius: 0px; line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        <li><a href="#">Reset Value</a></li>
+        <li><a href="#">Duplicate</a></li>
+      </ul>
+    </div>
     <span ng-show="rightButton" class="input-group-btn">
       <button class="btn btn-default" type="button">Map</button>
     </span>
+    <div class="input-group-btn" ng-transclude></div>
   </div>
-  <div ng-transclude></div>
+
 </div>

@@ -56,11 +56,23 @@ angular.module("template/rdf-term-input/rdf-term-input.html", []).run(["$templat
     "\n" +
     "    </div-->\n" +
     "    <input type=\"text\" class=\"form-control margin-left-1\" style=\"margin-left: -1px !important;\" ng-model=\"state.value\" ng-model-options=\"ngModelOptions\">\n" +
+    "    <div class=\"input-group-btn\">\n" +
+    "      <button type=\"button\" style=\"margin-left: -2px !important; border-radius: 0px; line-height: 1.5;\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span></button>\n" +
+    "      <button type=\"button\" style=\"border-radius: 0px; line-height: 1.5;\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">\n" +
+    "        <span class=\"caret\"></span>\n" +
+    "        <span class=\"sr-only\">Toggle Dropdown</span>\n" +
+    "      </button>\n" +
+    "      <ul class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">\n" +
+    "        <li><a href=\"#\">Reset Value</a></li>\n" +
+    "        <li><a href=\"#\">Duplicate</a></li>\n" +
+    "      </ul>\n" +
+    "    </div>\n" +
     "    <span ng-show=\"rightButton\" class=\"input-group-btn\">\n" +
     "      <button class=\"btn btn-default\" type=\"button\">Map</button>\n" +
     "    </span>\n" +
+    "    <div class=\"input-group-btn\" ng-transclude></div>\n" +
     "  </div>\n" +
-    "  <div ng-transclude></div>\n" +
+    "\n" +
     "</div>\n" +
     "");
 }]);
