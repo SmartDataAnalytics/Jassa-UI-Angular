@@ -78,33 +78,19 @@ angular.module('ui.jassa.rdf-term-input', [])
                     displayLabel: jassa.util.UriUtils.extractLabel(id)
                 };
             });
-            //$scope.
 
-//            $scope.onSelectTermType = function(item, model) {
-//              $scope.state.type = model.id;
-//            };
+            $scope.addLanguage = function(newLanguageValue) {
+              return {
+                id: newLanguageValue,
+                displayLabel: newLanguageValue
+              };
+            };
 
-//            $scope.onSelectDatatype = function(item, model) {
-//              $scope.state.datatype = model.id;
-//            };
-//
-//            $scope.onSelectLanguage = function(item, model) {
-//              $scope.state.lang = model.id;
-//            };
-
-            $scope.refreshDatatype = function(newDatatypeValue) {
-              console.log('new Datatype', newDatatypeValue);
-              /*
-              var newDatatype = {
+            $scope.addDatatype = function(newDatatypeValue) {
+              return {
                 id: newDatatypeValue,
                 displayLabel: newDatatypeValue
               };
-              // add new datatype to datatypes
-              $scope.datatypes.push(newDatatype);
-              // set datatype as selected
-              $scope.datatypes.selected = newDatatype;
-              $scope.state.datatype = newDatatypeValue;
-              */
             };
 
         }],
