@@ -3,11 +3,11 @@ button.no-border-radius {
 }
 
 input.margin-left-1 {
-  margin-left: -1px;
+  margin-left: -1px !important;
 }
 
-button.margin-left-1 {
-  margin-left: -1px;
+button.margin-left-2 {
+  margin-left: -2px !important;
 }
 
 .selectize-input {
