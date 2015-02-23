@@ -12,7 +12,8 @@ angular.module('ui.jassa.geometry-input', [])
       replace: true,
       scope: {
         bindModel: '=ngModel',
-        ngModelOptions: '=?'
+        ngModelOptions: '=?',
+        geocodingServices: '=geocodingServices'
       },
       controller: ['$scope', function($scope) {
         $scope.ngModelOptions = $scope.ngModelOptions || {};
@@ -70,6 +71,8 @@ angular.module('ui.jassa.geometry-input', [])
           var store = new jassa.sponate.StoreFacade(sparqlService, _(sparqlServiceConfig.prefix)
             .defaults(jassa.vocab.InitialContext));
 
+          var query = sparqlServiceConfig.query.replace(/%SEARCHSTRING%/gi,searchString);
+
           store.addMap({
             name: 'sparqlService',
             template: [{
@@ -78,7 +81,7 @@ angular.module('ui.jassa.geometry-input', [])
               wkt: '?g',
               group: '' + sparqlServiceConfig.name
             }],
-            from: sparqlServiceConfig.query
+            from: query
           });
 
           return store.sparqlService.getListService().fetchItems(null, 10);
@@ -124,26 +127,48 @@ angular.module('ui.jassa.geometry-input', [])
           };
 
           // stores promises for each geocoding api
-          var promises = [];
-          for (var serviceType in sources) {
+          var promiseCache = {
+            promisesMetaInformation: {
+              /**
+               * [{
+               *   name: x,
+               *   promiseID: y
+               * }]
+               */
+              restService: [],
+              sparqlService: []
+            },
+            promises: []
+          };
+          for (var serviceType in $scope.geocodingServices) {
             if (serviceType === 'restService') {
               for(var r in sources.restService) {
                 var restService = sources.restService[r];
-                  promises.push($scope.fetchResultsForRestService(restService, searchString));
+                promiseCache.promisesMetaInformation.restService.push({
+                  name: restService.name,
+                  id: promiseCache.promises.length
+                });
+                promiseCache.promises.push($scope.fetchResultsForRestService(restService, searchString));
               }
             }
 
             if (serviceType === 'sparqlService') {
               for(var s in sources.sparqlService) {
                 var sparqlService = sources.sparqlService[s];
-                promises.push($scope.fetchResultsForSparqlService(sparqlService, searchString));
+                promiseCache.promisesMetaInformation.sparqlService.push({
+                  name: sparqlService.name,
+                  id: promiseCache.promises.length
+                });
+                promiseCache.promises.push($scope.fetchResultsForSparqlService(sparqlService, searchString));
               }
             }
 
           }
 
           // after getting the response then process the response promise
-          var resultPromise = $q.all(promises).then(function(responses){
+          var resultPromise = $q.all(promiseCache.promises).then(function(responses){
+
+            console.log('promiseCache', promiseCache);
 
             var results = [];
 
@@ -160,7 +185,7 @@ angular.module('ui.jassa.geometry-input', [])
                       'firstInGroup': false,
                       'wkt': responses[i].data[j].geotext,
                       'label': responses[i].data[j].display_name,
-                      'group': sources.restService[i].name || a.hostname
+                      'group': $scope.geocodingServices.restService[i].name || a.hostname
                     });
                   }
                 }
@@ -175,7 +200,7 @@ angular.module('ui.jassa.geometry-input', [])
                           'firstInGroup': false,
                           'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
                           'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
-                          'group': sources.restService[i].name || a.hostname
+                          'group': $scope.geocodingServices.restService[i].name || a.hostname
                         });
                       }
                     }

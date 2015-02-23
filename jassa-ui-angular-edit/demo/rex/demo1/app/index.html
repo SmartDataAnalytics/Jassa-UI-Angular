@@ -96,7 +96,7 @@
 
     var app = angular.module(
         'jassa.ui.edit.demo.widgets',
-        ['ngSanitize', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
+        ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
 
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
@@ -261,8 +261,50 @@
             startingDay: 1
         };
 
+        // Geocoding APIs
+        $scope.mGeocodingServices = {
+          restService: [
+            {
+              name: 'Nominatim',
+              endpoint: 'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q='
+            },
+            {
+              name: 'Nokia HERE',
+              endpoint: 'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
+            }
+          ],
+          sparqlService: [
+            {
+              'name' : 'LinkedGeoData (Natural Earth)',
+              'endpoint' : 'http://linkedgeodata.org/vsparql',
+              'graph' : 'http://linkedgeodata.org/ne/',
+              'type' : 'http://linkedgeodata.org/ne/ontology/Country',
+              'active' : false,
+              'facets' : false,
+              'prefix' : {
+                ogc: 'http://www.opengis.net/ont/geosparql#',
+                geom: 'http://geovocab.org/geometry#'
+              },
+              'query' : '{'
+                +' Graph <http://linkedgeodata.org/ne/> {'
+                +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
+                +' rdfs:label ?l ;'
+                +' geom:geometry ['
+                +'  ogc:asWKT ?g'
+                +' ] '
+                +' FILTER regex(?l, "%SEARCHSTRING%", "i") '
+                +' } '
+                +'}'
+            }
+          ]
+        };
+
+        $scope.copy = angular.copy;
+
         showAngularStats();
     }]);
+
+
 
 
     </script>

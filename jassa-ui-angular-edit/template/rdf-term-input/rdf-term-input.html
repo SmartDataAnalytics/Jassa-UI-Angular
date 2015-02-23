@@ -1,74 +1,32 @@
-<div>
-  <div class="input-group">
-
-    <!-- First input addon -->
-    <!-- TODO Make content configurable -->
-    <!--     <span class="input-group-addon"><span class="glyphicon glyphicon-link"></span></span> -->
-    <span class="input-group-addon" ng-bind-html="logo"></span>
-
-<!--     <div class="input-group-addon"> -->
-<!--         <select ng-model="state.type"  ng-options="item.id as item.displayLabel for item in termTypes" ng-change="ensureValidity()"></select> -->
-<!--     </div> -->
-
-    <!-- Term type selector -->
-    <div class="input-group-addon" style="padding: 0px 0px !important;">
-        <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;line-height:0;" >
-          <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
-          <ui-select-choices repeat="item.id as item in termTypes | filter: $select.search">
-            <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
-          </ui-select-choices>
-        </ui-select>
-    </div>
-
-    <!-- Datatype selector -->
-<!--     <span ng-show="state.type===vocab.typedLiteral" class="input-group-addon"> -->
-<!--         <select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-options="item.id as item.displayLabel for item in datatypes"></select> -->
-<!--     </span> -->
-
-    <div ng-show="state.type===vocab.typedLiteral" class="input-group-addon" style="border-left: 0px; padding: 0px 0px !important;">
-      <ui-select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize" tagging="addDatatype" reset-search-input="false" style="width: 100px;line-height:0;" >
-        <ui-select-match placeholder="Datatype">{{$select.selected.displayLabel}}</ui-select-match>
-        <!--ui-select-choices repeat="item in datatypes | filter: $select.search" refresh="refreshDatatype($select.search)" refresh-delay="100"-->
-        <ui-select-choices repeat="item.id as item in datatypes | filter: $select.search">
-          <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-
-
-    <!-- Language selector -->
-<!--     <span ng-show="state.type===vocab.plainLiteral" class="input-group-addon"> -->
-<!--         <select ng-model="state.lang" ng-model-options="ngModelOptions" ng-options="item.id as item.displayLabel for item in langs"></select> -->
-<!--     </span> -->
-
-    <div ng-show="state.type===vocab.plainLiteral" class="input-group-addon" style="border-left: 0px; padding: 0px 0px !important;">
-      <ui-select ng-model="state.lang" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize" tagging="addLanguage" reset-search-input="false" style="width: 100px; line-height:0;" >
-        <ui-select-match placeholder="Language">{{$select.selected.displayLabel}}</ui-select-match>
-        <ui-select-choices repeat="item.id as item in langs | filter: $select.search">
-          <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-
-    <!--div class="input-group-addon">
-
-    </div-->
-    <input type="text" class="form-control margin-left-1" style="margin-left: -1px !important;" ng-model="state.value" ng-model-options="ngModelOptions">
-    <div class="input-group-btn">
-      <button type="button" style="margin-left: -2px !important; border-radius: 0px; line-height: 1.5;" class="btn btn-default"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-      <button type="button" style="border-radius: 0px; line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-        <span class="caret"></span>
-        <span class="sr-only">Toggle Dropdown</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right" role="menu">
-        <li><a href="#">Reset Value</a></li>
-        <li><a href="#">Duplicate</a></li>
-      </ul>
-    </div>
-    <span ng-show="rightButton" class="input-group-btn">
-      <button class="btn btn-default" type="button">Map</button>
-    </span>
-    <div class="input-group-btn" ng-transclude></div>
+<div class="input-group">
+  <!-- Term type selector -->
+  <div class="input-group-addon" style="padding: 0px 0px !important;">
+    <ui-select ng-model="state.type" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize"  reset-search-input="false" style="width: 100px;line-height:0;" >
+      <ui-select-match placeholder="Termtype">{{$select.selected.displayLabel}}</ui-select-match>
+      <ui-select-choices repeat="item.id as item in termTypes | filter: $select.search">
+        <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
+      </ui-select-choices>
+    </ui-select>
   </div>
-
+  <!-- Datatype selector -->
+  <div ng-show="state.type===vocab.typedLiteral" class="input-group-addon" style="border-left: 0px; padding: 0px 0px !important;">
+    <ui-select ng-model="state.datatype" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize" tagging="addDatatype" reset-search-input="false" style="width: 100px;line-height:0;" >
+      <ui-select-match placeholder="Datatype">{{$select.selected.displayLabel}}</ui-select-match>
+      <!--ui-select-choices repeat="item in datatypes | filter: $select.search" refresh="refreshDatatype($select.search)" refresh-delay="100"-->
+      <ui-select-choices repeat="item.id as item in datatypes | filter: $select.search">
+        <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
+      </ui-select-choices>
+    </ui-select>
+  </div>
+  <!-- Language selector -->
+  <div ng-show="state.type===vocab.plainLiteral" class="input-group-addon" style="border-left: 0px; padding: 0px 0px !important;">
+    <ui-select ng-model="state.lang" ng-model-options="ngModelOptions" ng-disabled="disabled" theme="selectize" tagging="addLanguage" reset-search-input="false" style="width: 100px; line-height:0;" >
+      <ui-select-match placeholder="Language">{{$select.selected.displayLabel}}</ui-select-match>
+      <ui-select-choices repeat="item.id as item in langs | filter: $select.search">
+        <span ng-bind-html="item.displayLabel | highlight: $select.search"></span>
+      </ui-select-choices>
+    </ui-select>
+  </div>
+  <!-- Input -->
+  <input type="text" class="form-control margin-left-1" style="margin-left: -1px !important;" ng-model="state.value" ng-model-options="ngModelOptions">
 </div>

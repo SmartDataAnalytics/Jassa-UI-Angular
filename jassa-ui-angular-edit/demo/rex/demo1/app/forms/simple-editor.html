@@ -25,21 +25,32 @@
         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
             {{rexPrefixMapping.shortForm(property)}}:
+
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
                 <div class="form-group">
-                    <rdf-term-input logo="{{$index + 1}}" ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang">
-
+                  <div class="input-group">
+                    <span class="input-group-addon">{{$index + 1}}</span>
+                    <rdf-term-input replace ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang">
                     </rdf-term-input>
+                    <div class="input-group-btn">
+                      <button type="button" ng-click="deleted=!deleted" ng-class="deleted ? 'btn-danger' : 'btn-default'" style="margin-left: -2px !important; border-radius: 0px; line-height: 1.5;" class="btn"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                      <button type="button" style="border-radius: 0px; line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a ng-click="copy(rexContext.json[rexSubject][rexPredicate][$index], term)" href="">Reset Value</a></li>
+                      </ul>
+                    </div>
+                  </div>
                   <div ng-if="property === 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry'">
-                    <geometry-input ng-model="term.value" ng-model-options="defaultNgModelOptions"></geometry-input>
+                    <geometry-input ng-model="term.value" ng-model-options="defaultNgModelOptions" geocoding-services="mGeocodingServices"></geometry-input>
                   </div>
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.type" ng-model-options="defaultNgModelOptions" rex-termtype="term.type"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.value" ng-model-options="defaultNgModelOptions" rex-value="term.value"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.lang" ng-model-options="defaultNgModelOptions" rex-lang="term.lang"> -->
 <!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.datatype" ng-model-options="defaultNgModelOptions" rex-datatype="term.datatype"> -->
 
-                    <input ng-show="objectData != null" class="form-control" type="checkbox" ng-model="deleted">
-                    <button ng-if="objectData == null" class="btn btn-primary" ng-click="rexContext.remove(rexRef)">Remove {{$index}}</button>
 
                 </div>
             </div>
