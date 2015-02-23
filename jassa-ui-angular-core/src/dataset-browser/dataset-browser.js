@@ -1,5 +1,5 @@
 //angular.module('DatasetBrowser', ['ui.jassa', 'ui.bootstrap', 'ui.sortable', 'ui.keypress', 'ngSanitize'])
-angular.module('ui.jassa.dataset-browser', ['ui.jassa.include-replace'])
+angular.module('ui.jassa.dataset-browser', ['ui.jassa.replace'])
 
 .controller('DatasetBrowserCtrl', ['$scope', '$q', function($scope, $q) {
 

@@ -20,7 +20,7 @@
 
     <ul class="media-list" style="width: 100%;">
         <li class="media" ng-repeat="item in items">
-            <div ng-include="itemTemplate" include-replace></div>
+            <div ng-include="itemTemplate" replace></div>
         </li>
         <li ng-show="!items.length" class="alert alert-danger" style="text-align: center" role="alert">No results</li>
     </ul>

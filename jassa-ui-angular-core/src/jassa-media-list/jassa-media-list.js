@@ -1,4 +1,4 @@
-angular.module('ui.jassa.jassa-media-list', ['ui.jassa.include-replace'])
+angular.module('ui.jassa.jassa-media-list', ['ui.jassa.replace'])
 
 .controller('JassaMediaListCtrl', ['$scope', '$q', '$timeout', function($scope, $q, $timeout) {
     $scope.currentPage = 1;
