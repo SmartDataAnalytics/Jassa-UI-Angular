@@ -22,7 +22,7 @@ angular.module("template/jassa-media-list/jassa-media-list.html", []).run(["$tem
     "\n" +
     "    <ul class=\"media-list\" style=\"width: 100%;\">\n" +
     "        <li class=\"media\" ng-repeat=\"item in items\">\n" +
-    "            <div ng-include=\"itemTemplate\" include-replace></div>\n" +
+    "            <div ng-include=\"itemTemplate\" replace></div>\n" +
     "        </li>\n" +
     "        <li ng-show=\"!items.length\" class=\"alert alert-danger\" style=\"text-align: center\" role=\"alert\">No results</li>\n" +
     "    </ul>\n" +
