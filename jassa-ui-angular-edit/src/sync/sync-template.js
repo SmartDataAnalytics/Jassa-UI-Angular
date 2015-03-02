@@ -11,7 +11,7 @@ angular.module('ui.jassa.sync')
  */
 .directive('syncTemplate', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: basePriority + 1000,
+        priority: 1000,
         restrict: 'A',
         scope: true,
         terminal: true,

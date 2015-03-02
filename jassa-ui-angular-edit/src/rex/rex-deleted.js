@@ -6,11 +6,11 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexDeleted', ['$parse', function($parse) {
     return {
-        priority: 379,
+        priority: 7,
         restrict: 'A',
         scope: true,
         require: ['^rexContext', '^rexObject'],
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
             return createCompileComponent('rexDeleted', 'deleted', $parse);
         }

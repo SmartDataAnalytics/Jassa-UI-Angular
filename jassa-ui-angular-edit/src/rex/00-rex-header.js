@@ -553,6 +553,6 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 
 // TODO Create a util for id allocation
 
-angular.module('ui.jassa.rex', []);
+angular.module('ui.jassa.rex', ['dddi']);
 
-var basePriority = 0;
+//var basePriority = 0;

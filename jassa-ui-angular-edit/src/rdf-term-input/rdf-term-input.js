@@ -11,11 +11,11 @@ angular.module('ui.jassa.rdf-term-input', [])
 
     return {
         restrict: 'EA',
-        priority: 4,
-        transclude: true,
+        priority: 0,
+        //transclude: true,
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
-        replace: true,
+        //replace: true,
         //scope: true,
         scope: {
             //ngModel: '=',

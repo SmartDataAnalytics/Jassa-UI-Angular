@@ -1,4 +1,4 @@
-angular.module('ui.jassa.rex', ['dddi'])
+angular.module('ui.jassa.rex')
 
 /**
  * Directive to refer to the set of URIs at a target
@@ -17,11 +17,11 @@ angular.module('ui.jassa.rex', ['dddi'])
  */
 .directive('rexNavTargets', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
     return {
-        priority: 379,
+        priority: 10,
         restrict: 'A',
         scope: true,
         require: ['^rexContext', '^rexSubject'],
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {

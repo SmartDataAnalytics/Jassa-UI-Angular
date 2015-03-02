@@ -2,7 +2,7 @@ angular.module('ui.jassa.rex')
 
 .directive('rexPredicate', ['$parse', function($parse) {
     return {
-        priority: basePriority + 17,
+        priority: 17,
         restrict: 'A',
         scope: true,
         //require: ['^?rexSubject', '^?rexObject']

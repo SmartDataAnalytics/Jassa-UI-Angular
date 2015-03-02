@@ -2,11 +2,11 @@ angular.module('ui.jassa.rex')
 
 .directive('rexSubject', ['$parse', '$q', function($parse, $q) {
     return {
-        priority: basePriority + 24,
+        priority: 24,
         restrict: 'A',
         scope: true,
         require: '^rexContext',
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, contextCtrl) {

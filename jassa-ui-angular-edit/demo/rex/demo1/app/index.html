@@ -35,6 +35,7 @@
     <script src="bower_components/angular-ui-sortable/sortable.js"></script>
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/dddi-angular/dddi-angular.js"></script>
     <script src="bower_components/angular-ui-select/dist/select.js"></script>
     <script src="bower_components/sifter/sifter.js"></script>
     <script src="bower_components/microplugin/src/microplugin.js"></script>
@@ -43,9 +44,7 @@
     <script src="bower_components/jassa-ui-angular-edit/jassa-ui-angular-edit-tpls.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/codemirror/lib/codemirror.js"></script>
-    <script src="bower_components/angularjs/angular.js"></script>
     <script src="bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
-    <script src="bower_components/ng-stats/dist/ng-stats.js"></script>
     <!-- endbower -->
 
     <!-- endbuild -->
@@ -86,8 +85,7 @@
     jassa = new Jassa(Promise, $.ajax);
     </script>
 
-    <!--script src="jassa-ui-angular-edit-tpls-0.1.0.js"></script-->
-    <script src="jassa-ui-angular-edit-tpls-0.9.0-SNAPSHOT.js"></script>
+<!--     <script src="jassa-ui-angular-edit-tpls-0.9.0-SNAPSHOT.js"></script> -->
 
 
 
@@ -96,7 +94,7 @@
 
     angular.module(
         'jassa.ui.edit.demo.widgets',
-        ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
+        ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.rex', 'ui.codemirror', 'ngAnimate'])
 
 // This is deprecated
 //     .config(['$parseProvider', function($parseProvider) {
@@ -131,6 +129,8 @@
 
         var updateService = new jassa.service.SparqlUpdateHttp('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org']);
 
+        $scope.UpdateUtils = jassa.service.UpdateUtils;
+/*
         $scope.performUpdate = function(diff, prefixMapping) {
             var str;
             str = $scope.createDeleteRequest(diff.removed, prefixMapping);
@@ -153,7 +153,7 @@
                 params: {
                 action: "get"
                 }
-            });*/
+            });* /
 
             //$http
 
@@ -180,7 +180,7 @@
             }
             return result;
         };
-
+*/
 
         $scope.lookupFn = function(node) {
             var result = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [node]);
@@ -311,7 +311,7 @@
 
         $scope.copy = angular.copy;
 
-        showAngularStats();
+        //showAngularStats();
     }]);
 
 
@@ -327,13 +327,16 @@
         <div class="col-md-10 col-md-offset-1">
             <div ng-include="'forms/dataset-editor.html'"></div>
 
+<!--
+            <div ng-include="'forms/dataset-editor.html'"></div>
             <div ng-include="'forms/dynamic.html'"></div>
 
             <div ng-include="'forms/geo.html'"></div>
 
             <div ng-include="'forms/person-form.html'"></div>
+-->
 
-            <div ng-include="'forms/simple-editor.html'"></div>
+<!--             <div ng-include="'forms/simple-editor.html'"></div> -->
 
         </div>
     </div>

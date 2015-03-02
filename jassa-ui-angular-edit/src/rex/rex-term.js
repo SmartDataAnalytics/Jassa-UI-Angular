@@ -14,11 +14,11 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexTerm', ['$parse', function($parse) {
     return {
-        priority: 379,
+        priority: 11,
         restrict: 'A',
         scope: true,
         require: ['^rexContext', '^rexObject'],
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
             throw new Error('rex-term is not implemented yet');
             //return createCompileComponent('rexValue', 'value', $parse);

@@ -1,9 +1,12 @@
+<div>
 <div
     class="row"
     ng-init="data={}; data.baseIri='data:'; data.dists=[]"
     rex-context
     rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
     rex-lookup="lookupFn">
+
+    <div rex-lookup="lookupFn"></div>
 
     <div class="col-md-6">
 
@@ -144,3 +147,4 @@
 
 </div>
 
+</div>

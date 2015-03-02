@@ -2,11 +2,11 @@ angular.module('ui.jassa.rex')
 
 .directive('rexLiteral', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: basePriority + 1000,
+        priority: 900,
         restrict: 'A',
         scope: true,
         terminal: true,
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, ctrls) {

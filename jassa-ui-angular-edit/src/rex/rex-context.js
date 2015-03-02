@@ -1,8 +1,9 @@
 angular.module('ui.jassa.rex')
 
+
 .directive('rexContext', ['$parse', function($parse) {
     return {
-        priority: basePriority + 30,
+        priority: 30,
         restrict: 'A',
         scope: true,
         require: 'rexContext',
@@ -82,6 +83,7 @@ angular.module('ui.jassa.rex')
 //            }
 
         }],
+
         compile: function(ele, attrs) {
 
             setEleAttrDefaultValue(ele, attrs, 'rex-context', 'rexContext');
