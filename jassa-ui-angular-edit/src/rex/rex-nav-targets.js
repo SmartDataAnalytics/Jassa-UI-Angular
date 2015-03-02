@@ -26,22 +26,31 @@ angular.module('ui.jassa.rex')
             return {
                 pre: function(scope, ele, attrs, ctrls) {
 
+                    syncAttr($parse, scope, attrs, 'rexNavPredicate');
+                    syncAttr($parse, scope, attrs, 'rexNavInverse');
+
 
                     var targetModelStr = ele.attr('rex-nav-targets');
                     var dddi = $dddi(scope);
 
-                    dddi.register(targetModelStr, ['rexSparqlService', 'rexSubject', 'rexNavProperty', '?rexNavInverse',
-                        function(sparqlService, subjectStr, propertyStr, isInverse) {
+                    dddi.register(targetModelStr, ['rexSparqlService', 'rexSubject', 'rexNavPredicate', '?rexNavInverse',
+                        function(sparqlService, subjectStr, predicateStr, isInverse) {
+
+                            var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+
+                            subjectStr = pm.expandPrefix(subjectStr);
+                            predicateStr = pm.expandPrefix(predicateStr);
 
                             //var path = new jassa.facete.Path([new jassa.facete.Step(propertyStr, isInverse)]);
 
                             var s = jassa.sparql.VarUtils.s;
-                            var p = jassa.rdf.NodeFactory.createUri(propertyStr);
-                            var o = jassa.sparql.VarUtils.o;
+                            var p = jassa.rdf.NodeFactory.createUri(predicateStr);
+                            //var o = jassa.sparql.VarUtils.o;
+                            var o = jassa.rdf.NodeFactory.createUri(subjectStr);
 
                             var triple = isInverse
-                                ? new jassa.rdf.Triple(o, p, s)
-                                : new jassa.rdf.Triple(s, p, o)
+                                ? new jassa.rdf.Triple(s, p, o)
+                                : new jassa.rdf.Triple(o, p, s)
                                 ;
 
                             var concept = new jassa.sparql.Concept(
@@ -56,7 +65,7 @@ angular.module('ui.jassa.rex')
 
                             var task = listService.fetchItems().then(function(entries) {
                                 var r = entries.map(function(item) {
-                                    var s = item.val.getUri();
+                                    var s = item.key.getUri();
                                     return s;
                                 });
 

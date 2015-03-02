@@ -67,8 +67,8 @@
                 </div>
 
                 <div>
-                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="o:isDistributionOf"  rex-nav-inverse="true" rex-nav-targets="data.dists">
-                        <li ng-repeat="dist in dists" rex-subject="dist">{{dist}}</li>
+                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="'o:distributionOf'"  rex-nav-inverse="true" rex-nav-targets="data.dists">
+                        <li ng-repeat="dist in data.dists" rex-subject="dist">{{dist}}</li>
                     </ul>
 
 <!--                     <ul> -->
