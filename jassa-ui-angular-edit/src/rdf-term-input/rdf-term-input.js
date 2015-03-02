@@ -15,7 +15,7 @@ angular.module('ui.jassa.rdf-term-input', [])
         //transclude: true,
         require: '^ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
-        //replace: true,
+        replace: true,
         //scope: true,
         scope: {
             //ngModel: '=',
