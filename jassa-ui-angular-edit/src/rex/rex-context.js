@@ -114,6 +114,40 @@ angular.module('ui.jassa.rex')
                             }
                         };
 
+                        /*
+                        rexContext.setObject = function(s, p, i, sourceObj) {
+                            var coordinate = new Coordinate(s, p, i);
+                            var targetObj = getOrCreateObjectAt(rexContext.override, coordinate);
+                            angular.copy(sourceObj, targetObj);
+                            //setObjectAt(rexContext.override, coordinate, value) {
+                        };
+                        */
+
+                        rexContext.addObject = function(_s, _p, sourceObj) {
+                            var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+                            //__defaultPrefixMapping;
+
+                            var s = pm.expandPrefix(_s);
+                            var p = pm.expandPrefix(_p);
+
+                            var coordinate = new Coordinate(s, p);
+
+                            var as = getObjectsAt(rexContext.json, coordinate);
+                            var bs = getObjectsAt(rexContext.override, coordinate);
+
+                            var a = as ? as.length : 0;
+                            var b = bs ? bs.length : 0;
+
+                            var i = Math.max(a, b);
+
+                            var c = new Coordinate(s, p, i);
+
+                            var targetObj = getOrCreateObjectAt(rexContext.override, c);
+                            angular.copy(sourceObj, targetObj);
+                            //setObjectAt(rexContext.override, coordinate, value) {
+                        };
+
+
                     };
 
                     // Make sure to initialize any provided context object

@@ -94,9 +94,14 @@
     <script type="text/javascript">
     jassa = new Jassa(Promise, $.ajax);
 
-    var app = angular.module(
+    angular.module(
         'jassa.ui.edit.demo.widgets',
         ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
+
+// This is deprecated
+//     .config(['$parseProvider', function($parseProvider) {
+//         $parseProvider.unwrapPromises(true);
+//     }])
 
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
@@ -109,6 +114,11 @@
                 'blur': 0
             }
         };
+
+
+        $scope.datasetSparqlService = jassa.service.SparqlServiceBuilder
+            .http('http://localhost:8870/sparql', ['http://datasets.org/'], {type: 'POST'})
+            .create();
 
 
         var sparqlService = jassa.service.SparqlServiceBuilder
@@ -315,6 +325,8 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
+            <div ng-include="'forms/dataset-editor.html'"></div>
+
             <div ng-include="'forms/dynamic.html'"></div>
 
             <div ng-include="'forms/geo.html'"></div>

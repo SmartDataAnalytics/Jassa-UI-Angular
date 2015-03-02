@@ -9,7 +9,7 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexIri', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: basePriority + 1000,
+        priority: basePriority + 900, //+ 1000,
         restrict: 'A',
         scope: true,
         terminal: true,

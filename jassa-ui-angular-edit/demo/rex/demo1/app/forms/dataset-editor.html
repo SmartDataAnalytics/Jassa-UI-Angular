@@ -1,0 +1,146 @@
+<div
+    class="row"
+    ng-init="data={}; data.baseIri='data:'; data.dists=[]"
+    rex-context
+    rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
+    rex-lookup="lookupFn">
+
+    <div class="col-md-6">
+
+
+        <div class="alert alert-info" role="alert">
+            <h3>Dataset Editor</h3>
+
+            <form name="datasetForm" role="form" rex-subject="data.subject" rex-typeof="'dcat:Dataset'">
+<!--                 <input type="hidden" rex-predicate="theme:primary" rex-iri="theme:primary"> -->
+
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">URI: </span>
+                        <input name="uri" type="text" class="form-control"
+                            ng-model="data.subject"
+                            sync-template="{{data.baseIri}}{{data.group}}_{{data.artifact}}_{{data.version}}"
+                            sync-to-target-cond="personForm.uri.$pristine">
+                        <span ng-if="!datasetForm.uri.$pristine" class="input-group-btn">
+                            <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Label: </span>
+                        <input type="text" class="form-control" ng-model="data.label" ng-model-options="defaultNgModelOptions"rex-predicate="'rdfs:label'" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Group: </span>
+                        <input type="text" class="form-control" ng-model="data.group" ng-model-options="defaultNgModelOptions" rex-predicate="'o:group'" rex-deleted="!data.group" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Artefact: </span>
+                        <input type="text" class="form-control" ng-model="data.artifact" ng-model-options="defaultNgModelOptions" rex-predicate="'o:artifact'" rex-deleted="!data.artifact" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Version: </span>
+                        <input type="text" class="form-control" ng-model="data.version" ng-model-options="defaultNgModelOptions"rex-predicate="'o:version'" rex-deleted="!data.version" rex-literal>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Comment: </span>
+                        <input type="text" class="form-control" ng-model="data.comment" ng-model-options="defaultNgModelOptions"rex-predicate="'rdfs:comment'" rex-literal>
+                    </div>
+                </div>
+
+                <div>
+                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="o:isDistributionOf"  rex-nav-inverse="true" rex-nav-targets="data.dists">
+                        <li ng-repeat="dist in dists" rex-subject="dist">{{dist}}</li>
+                    </ul>
+
+<!--                     <ul> -->
+<!--                         <li ng-repeat="distNode in rexContext.navigate(rexSubject, '<o:isDistributionOf') | filter:distNode.isUri()" rex-subject="distNode.getUri()" ng-init="dist={}"> -->
+<!--                         <li ng-repeat="dist in data.dists" rex-subject="dist.subject"> -->
+<!-- <li> -->
+<!--                         State: {{dist.subject}} {{rexSubject}} -->
+<!--                             <input type="hidden" ng-model="dist.subject" sync-template="dist:{{data.group}}_{{data.artifact}}_{{data.version}}_{{$index + 1}}"> -->
+
+<!--                             <input type="hidden" ng-model="rexSubject" rex-predicate="'o:distributionOf'" rex-iri="data.subject"> -->
+
+<!--                             <div class="form-group"> -->
+<!--                                 <div class="input-group"> -->
+<!--                                     <span class="input-group-addon">AccessUrl: </span> -->
+<!--                                     <input type="text" class="form-control" ng-model="dist.accessIri" ng-model-options="defaultNgModelOptions"rex-predicate="'dcat:accessUrl'" rex-literal> -->
+<!--                                 </div> -->
+<!--                             </div> -->
+
+<!--                             <div class="form-group"> -->
+<!--                                 <div class="input-group"> -->
+<!--                                     <span class="input-group-addon">Graph IRIs: </span> -->
+<!--                                     <input ng-model="dist.graphIris" ng-list=" " ng-trim="false" ng-model-options="defaultNgModelOptions" type="text" class="form-control"></input> -->
+
+<!--                                     Track by needed as angular otherwise raises exceptions in case of duplicate strings -->
+<!--                                     Could we make that a bit nicer? -->
+<!--                                     <div style="display:none" rex-predicate="'o:graph'"> -->
+<!--                                         <div ng-repeat="graphIri in dist.graphIris track by $index" rex-iri="graphIri"></div> -->
+<!--                                     </div> -->
+
+<!--                                     <input type="text" class="form-control" ng-model="dist.graphIri" rex-predicate="'o:graph'" rex-literal> -->
+<!--                                 </div> -->
+<!--                             </div> -->
+<!--                         </li> -->
+<!--                     </ul> -->
+
+<!-- TODO We need to push into the override i suppose, but the override might not have been init'd -->
+<!--                     <button class="btn btn-primary" ng-click="rexContext.addObject(rexSubject, rexPredicate, {type: 'uri' })">Add Distribution</button> -->
+<!--                     <button class="btn btn-primary" ng-click="data.dists.push({})">Add Distribution</button> -->
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="alert alert-success" role="alert">
+            <h3>Output</h3>
+
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+            </div>
+
+            <hr />
+            Added:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+            ></div>
+
+            <hr />
+            Removed:
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+            ></div>
+
+
+            <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
+
+        </div>
+    </div>
+
+</div>
+
