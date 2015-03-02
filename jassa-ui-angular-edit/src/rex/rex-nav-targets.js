@@ -75,9 +75,36 @@ angular.module('ui.jassa.rex')
                             return task;
                     }]);
 
+
+                    var updateRelation = function(array) {
+                        // Convert the array to triples
+
+                        var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+
+                        var s = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(scope.rexSubject));
+                        var p = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(scope.rexNavPredicate));
+
+                        var triples = array.map(function(item) {
+                            var o = jassa.rdf.NodeFactory.createUri(item);
+                            var r = scope.rexNavInverse
+                                ? new jassa.rdf.Triple(o, p, s)
+                                : new jassa.rdf.Triple(s, p, o)
+                                ;
+
+                            return r;
+                        });
+
+                        // TODO: We must check whether that triple already exists, and if it does not, insert it
+                        jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(triples, scope.rexContext.override);
+                    };
+
                     // TODO Check for changes in the target array, and update
                     // relations as needed
-                    //scope.$watch()
+                    scope.$watchCollection(targetModelStr, function(array) {
+                        if(array) {
+                            updateRelation(array);
+                        }
+                    });
 
                 }
             };

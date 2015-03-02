@@ -68,8 +68,10 @@
 
                 <div>
                     <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="'o:distributionOf'"  rex-nav-inverse="true" rex-nav-targets="data.dists">
-                        <li ng-repeat="dist in data.dists" rex-subject="dist">{{dist}}</li>
+                        <li ng-repeat="dist in data.dists track by $index" rex-subject="dist">{{dist}}
+                        </li>
                     </ul>
+                    <button class="btn btn-primary" ng-click="data.dists.push('http://a-new-uri.org')">+</button>
 
 <!--                     <ul> -->
 <!--                         <li ng-repeat="distNode in rexContext.navigate(rexSubject, '<o:isDistributionOf') | filter:distNode.isUri()" rex-subject="distNode.getUri()" ng-init="dist={}"> -->

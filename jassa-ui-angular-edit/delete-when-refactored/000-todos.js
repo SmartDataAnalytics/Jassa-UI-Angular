@@ -104,7 +104,7 @@ rex-values
   If no default is specified, the first values of a possibly present filter will become the implied default
 
 
-<input type="text" ng-model="array" rex-values="array" rex-default-lang="en" rex-default-termtype="uri">
+<input type="text" ng-model="array" ng-list=" " ng-trim="false" rex-values="array" rex-default-lang="en" rex-default-termtype="uri">
 <button ng-click="array.push('a new value')">
 
 Use rex-default-* to specify the effect of adding new values to that array.
