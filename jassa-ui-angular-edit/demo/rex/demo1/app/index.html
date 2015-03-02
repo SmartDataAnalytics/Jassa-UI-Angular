@@ -132,6 +132,8 @@
         var updateService = new jassa.service.SparqlUpdateHttp('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org']);
 
         $scope.UpdateUtils = jassa.service.UpdateUtils;
+
+        console.log('UpdateUtils: ', $scope.UpdateUtils);
 /*
         $scope.performUpdate = function(diff, prefixMapping) {
             var str;

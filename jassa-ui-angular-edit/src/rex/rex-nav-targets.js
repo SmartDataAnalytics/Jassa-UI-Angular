@@ -100,6 +100,9 @@ angular.module('ui.jassa.rex')
 
                     // TODO Check for changes in the target array, and update
                     // relations as needed
+
+                    // ISSUE: We need to ensure that each IRI in the array has the appropriate relation to
+                    // the source resource of the navigation
                     scope.$watchCollection(targetModelStr, function(array) {
                         if(array) {
                             updateRelation(array);

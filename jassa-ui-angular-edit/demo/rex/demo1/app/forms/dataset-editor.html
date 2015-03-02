@@ -67,8 +67,9 @@
                 </div>
 
                 <div>
-                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="'o:distributionOf'"  rex-nav-inverse="true" rex-nav-targets="data.dists">
+                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-nav-targets="data.dists">
                         <li ng-repeat="dist in data.dists track by $index" rex-subject="dist">{{dist}}
+                            <input type="text" rex-predicate="'o:test'" rex-literal="foobar">
                         </li>
                     </ul>
                     <button class="btn btn-primary" ng-click="data.dists.push('http://a-new-uri.org')">+</button>
@@ -125,21 +126,21 @@
                 sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
             </div>
 
-            <hr />
-            Added:
-            <div
-                ui-codemirror="editorOptions.ttl"
-                ng-model="turtle"
-                sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
-            ></div>
+<!--             <hr /> -->
+<!--             Added: -->
+<!--             <div -->
+<!--                 ui-codemirror="editorOptions.ttl" -->
+<!--                 ng-model="turtle" -->
+<!--                 sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}" -->
+<!--             ></div> -->
 
-            <hr />
-            Removed:
-            <div
-                ui-codemirror="editorOptions.ttl"
-                ng-model="turtle"
-                sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
-            ></div>
+<!--             <hr /> -->
+<!--             Removed: -->
+<!--             <div -->
+<!--                 ui-codemirror="editorOptions.ttl" -->
+<!--                 ng-model="turtle" -->
+<!--                 sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}" -->
+<!--             ></div> -->
 
 
             <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
