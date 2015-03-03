@@ -5,7 +5,7 @@ angular.module('ui.jassa.rex')
         priority: 4,
         restrict: 'A',
         scope: true,
-        require: ['^rexContext', '^rexObject'],
+        require: ['^rexContext', '^rexObject', '?ngModel'],
         controller: angular.noop,
         compile: function(ele, attrs) {
             return createCompileComponent('rexValue', 'value', $parse);

@@ -75,6 +75,11 @@ function capitalize(s)
 
 // TODO We need to expand prefixed values if the termtype is IRI
 
+/**
+ *
+ * @param oneWay If true, the model is not updated on rexContext changes for the respective coordinate
+ *
+ */
 var createCompileComponent = function($rexComponent$, $component$, $parse, oneWay) {
     //var $rexComponent$ = 'rex' + capitalize($component$);
 //if(true) { return; }
@@ -94,6 +99,9 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
             }
 
             var contextCtrl = ctrls[0];
+
+            // ngModel Used for pristine/dirty checking
+            var ngModel = ctrls[2];
             //var objectCtrl = ctrls[1];
 
             var slot = contextCtrl.allocSlot();
@@ -107,26 +115,46 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
 
 //console.log('Start: Creating compile component ' + tag);
 
-            // If the coordinate changes, we copy the value at the override's old coordinate to the new coordinate
+            // If the coordinate changes AND the model is not pristine,
+            // we copy the value at the override's old coordinate to the new coordinate
+            // This way we ensure we are not overwriting a user's input
+            // Otherwise (if the model is pristine), just set the model to the value of the current base data
             scope.$watch(function() {
                 var r = createCoordinate(scope, $component$);
                 return r;
             }, function(newCoordinate, oldCoordinate) {
+                // Tell the context the coordinate we are referring to
                 slot.entry.key = newCoordinate;
 
-                var oldValue = getEffectiveValue(scope.rexContext, oldCoordinate); //scope.rexContext.getValue(oldCoordinate);
-                if(oldValue) {
-                    var entry = {
-                        key: newCoordinate,
-                        val: oldValue
-                    };
+                if(!ngModel || !ngModel.$pristine) {
 
-                    //contextCtrl.getOverride().putEntries([entry]);
-                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
+                    var oldValue = getEffectiveValue(scope.rexContext, oldCoordinate); //scope.rexContext.getValue(oldCoordinate);
+                    if(oldValue) {
+                        var entry = {
+                            key: newCoordinate,
+                            val: oldValue
+                        };
+
+                        //contextCtrl.getOverride().putEntries([entry]);
+                        setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
+                    }
+                } else {
+                    // If the model is pristine, we do not update the override
+                    // instead we set the model to the source value for the given coordinate
+                    if(modelSetter) {
+                        // If the given model is writeable, then we need to update it
+                        // whenever the coordinate's value changes
+
+                        var value = getValueAt(scope.rexContext.json, newCoordinate);
+                        modelSetter(scope, value);
+                    }
+
                 }
             }, true);
 
 
+            // If the effective value at a coordinate changes, update the model
+            // Note: By default, if the effective value equals the source data, we reset the pristine flag
             if(!oneWay) {
                 scope.$watch(function() {
                     var coordinate = slot.entry.key;
@@ -159,11 +187,26 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                         }
                     }
 
+                    var isEmpty = function(str) {
+                        return str == null || str === '';
+                    };
+
+                    // Note: If the effective value equals the source value, we reset the pristine flag
+                    // This way, if the user manually restores changes to a value, the model is considered clean again
+                    // ISSUE: What about null value and empty string? Right now in this regard we treat them as equivalent.
+                    if(ngModel) {
+                        var srcValue = getValueAt(scope.rexContext.json, coordinate);
+                        if(srcValue === value || isEmpty(srcValue) && isEmpty(value)) {
+                            ngModel.$setPristine();
+                        }
+                    }
+
                 }, true);
             }
 
-            // Forwards: If the model changes, we need to update the
-            // change object in the scope
+            // TODO: Probably outdated: Forwards: If the model changes, we need to update the change object in the scope
+
+            // If the model value changes, we need to update the override to reflect this
             scope.$watch(function() {
                 var r = modelGetter(scope);
 

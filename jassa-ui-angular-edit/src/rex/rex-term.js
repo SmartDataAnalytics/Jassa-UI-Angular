@@ -1,6 +1,10 @@
 angular.module('ui.jassa.rex')
 
 /**
+ * TODO: Actually we should just implement this as a convenience directive which replaces itself with
+ * rex-termtype rex-value rex-lang and rex-datatype
+ * This way we wouldn't have to make the book keeping more complex than it already is
+ *
  * rexTerm synchronizes a model which is interpreted as an object in a talis RDF json and
  * thus provides the fields 'type', 'value', 'datatype' and 'lang'.
  *
