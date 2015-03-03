@@ -3,7 +3,8 @@
     ng-init="ex06={}; ex06.context={}; ex06.subject='dbr:Leipzig'; ex06.baseGraph=newGraph()"
     rex-context="ex06.context"
     rex-base-graph="ex06.baseGraph"
-    rex-lookup="lookupFn"
+    rex-sparql-service="sparqlService"
+    rex-lookup="true"
     rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
     rex-subject="ex06.subject"
     rex-typeof="'dbo:Place'">

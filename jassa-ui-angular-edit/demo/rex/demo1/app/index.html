@@ -127,6 +127,8 @@
             //.http('http://localhost/data/pokedex/sparql', ['http://pokedex.org/'], {type: 'POST'})
             .virtFix().paginate(50000).pageExpand(100).create();
 
+        $scope.sparqlService = sparqlService;
+
         // TODO Somehow update .cache() on update
 
         var updateService = new jassa.service.SparqlUpdateHttp('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org']);

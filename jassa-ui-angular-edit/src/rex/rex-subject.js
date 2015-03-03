@@ -16,17 +16,23 @@ angular.module('ui.jassa.rex')
                     var doPrefetch = function() {
                         //console.log('doPrefetch');
 
-                        var lookupFn = scope.rexLookup;
+                        var sparqlService = scope.rexSparqlService;
+                        var lookupEnabled = scope.rexLookup;
                         var subjectUri = scope.rexSubject;
 
-                        if(lookupFn && angular.isFunction(lookupFn) && subjectUri) {
+                        //if(lookupFn && angular.isFunction(lookupFn) && subjectUri) {
+                        if(lookupEnabled && sparqlService && subjectUri) {
 
                             var pm = scope.rexPrefixMapping;
                             var uri = pm ? pm.expandPrefix(subjectUri) : subjectUri;
 
                             var s = jassa.rdf.NodeFactory.createUri(uri);
 
-                            var promise = scope.rexLookup(s);
+
+                            var promise = jassa.service.ServiceUtils.execDescribeViaSelect(sparqlService, [s]);
+
+
+                            //var promise = scope.rexLookup(s);
                             $q.when(promise).then(function(graph) {
                                 var contextScope = contextCtrl.$scope.rexContext;
                                 var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();

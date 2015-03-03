@@ -3,8 +3,9 @@
     class="row"
     ng-init="data={}; data.baseIri='data:'; data.dists=[]"
     rex-context
+    rex-sparql-service="datasetSparqlService"
     rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
-    rex-lookup="lookupFn">
+    rex-lookup="true">
 
     <div rex-lookup="lookupFn"></div>
 
@@ -24,9 +25,9 @@
                         <input name="uri" type="text" class="form-control"
                             ng-model="data.subject"
                             sync-template="{{data.baseIri}}{{data.group}}_{{data.artifact}}_{{data.version}}"
-                            sync-to-target-cond="personForm.uri.$pristine">
+                            sync-to-target-cond="datasetForm.uri.$pristine">
                         <span ng-if="!datasetForm.uri.$pristine" class="input-group-btn">
-                            <button title="Reset to default value" type="button" class="btn btn-default" ng-click="personForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                            <button title="Reset to default value" type="button" class="btn btn-default" ng-click="datasetForm.uri.$setPristine()"><i class="glyphicon glyphicon-remove-circle"></i></button>
                         </span>
                     </div>
                 </div>
@@ -66,13 +67,20 @@
                     </div>
                 </div>
 
-                <div>
-                    <ul class="list" rex-sparql-service="datasetSparqlService" rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-nav-targets="data.dists">
-                        <li ng-repeat="dist in data.dists track by $index" rex-subject="dist">{{dist}}
-                            <input type="text" rex-predicate="'o:test'" rex-literal="foobar">
+                <div rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-nav-targets="data.dists">
+                    <ul class="list">
+                        <li ng-repeat="distIri in data.dists track by $index" rex-subject="distIri" ng-init="dist={}">{{distIri}}
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Access URL: </span>
+                                    <input type="text" class="form-control" ng-model="dist.accessURL" ng-model-options="defaultNgModelOptions" rex-predicate="'dcat:accessURL'" rex-iri>
+                                </div>
+                            </div>
+
                         </li>
                     </ul>
-                    <button class="btn btn-primary" ng-click="data.dists.push('http://a-new-uri.org')">+</button>
+                    <button class="btn btn-primary" ng-click="data.dists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button>
 
 <!--                     <ul> -->
 <!--                         <li ng-repeat="distNode in rexContext.navigate(rexSubject, '<o:isDistributionOf') | filter:distNode.isUri()" rex-subject="distNode.getUri()" ng-init="dist={}"> -->

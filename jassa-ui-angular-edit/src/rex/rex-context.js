@@ -58,15 +58,39 @@ angular.module('ui.jassa.rex')
                 return result;
             };
 
-
-            this.getReferencedCoordinates = function() {
+            this.getSlots = function() {
                 var slots = $scope.rexChangeSlots;
                 var slotIds = Object.keys(slots);
 
+                var result = slotIds.map(function(slotId) {
+                    var slot = slots[slotId];
+                    return slot;
+                });
+
+                return result;
+            };
+
+            // Iterate all slots and create a graph from all .triples attributes
+            this.getEnforcedGraph = function() {
+                var result = new jassa.rdf.GraphImpl();
+                var slots = this.getSlots();
+                slots.forEach(function(slot) {
+                    var triples = slot.triples;
+
+                    if(triples) {
+                        result.addAll(triples);
+                    }
+                });
+
+                return result;
+            };
+
+            // Iterate all slots and collect referenced coordinates
+            this.getReferencedCoordinates = function() {
                 var result = new jassa.util.HashSet();
 
-                slotIds.forEach(function(slotId) {
-                    var slot = slots[slotId];
+                var slots = this.getSlots();
+                slots.forEach(function(slot) {
                     var entry = slot.entry;
 
                     var coordinate = entry ? entry.key : null;
@@ -124,7 +148,7 @@ angular.module('ui.jassa.rex')
                             //setObjectAt(rexContext.override, coordinate, value) {
                         };
                         */
-
+/* TODO I think it is not used anymore, but code left here for reference
                         rexContext.addObject = function(_s, _p, sourceObj) {
                             var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
                             //__defaultPrefixMapping;
@@ -148,7 +172,7 @@ angular.module('ui.jassa.rex')
                             angular.copy(sourceObj, targetObj);
                             //setObjectAt(rexContext.override, coordinate, value) {
                         };
-
+*/
 
                     };
 
@@ -254,13 +278,31 @@ angular.module('ui.jassa.rex')
                         return result;
                     };
 
+                    var dataMapToGraph = function(dataMap, prefixMapping) {
+                        var talis = assembleTalisRdfJson(dataMap);
+                        processPrefixes(talis, prefixMapping);
+
+                        // Update the final RDF graph
+                        var result = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
+                        return result;
+                    };
+
                     var updateDerivedValues = function(dataMap, prefixMapping) {
 //console.log('Start update derived');
+                        /*
                         var talis = assembleTalisRdfJson(dataMap);
                         processPrefixes(talis, prefixMapping);
 
                         // Update the final RDF graph
                         var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
+                        */
+                        var targetGraph = dataMapToGraph(dataMap, prefixMapping);
+
+                        var enforcedGraph = ctrl.getEnforcedGraph();
+                        targetGraph.addAll(enforcedGraph);
+
+
+
                         scope.rexContext.graph = targetGraph;
 
                         scope.rexContext.targetJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(targetGraph);

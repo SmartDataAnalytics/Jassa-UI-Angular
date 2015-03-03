@@ -26,6 +26,18 @@ angular.module('ui.jassa.rex')
             return {
                 pre: function(scope, ele, attrs, ctrls) {
 
+                    var contextCtrl = ctrls[0];
+
+                    var slot = contextCtrl.allocSlot();
+                    slot.triples = [];
+                    //slot.entry = {};
+
+                    scope.$on('$destroy', function() {
+                        slot.release();
+                    });
+
+
+
                     syncAttr($parse, scope, attrs, 'rexNavPredicate');
                     syncAttr($parse, scope, attrs, 'rexNavInverse');
 
@@ -85,7 +97,7 @@ angular.module('ui.jassa.rex')
                         var p = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(scope.rexNavPredicate));
 
                         var triples = array.map(function(item) {
-                            var o = jassa.rdf.NodeFactory.createUri(item);
+                            var o = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(item));
                             var r = scope.rexNavInverse
                                 ? new jassa.rdf.Triple(o, p, s)
                                 : new jassa.rdf.Triple(s, p, o)
@@ -95,7 +107,10 @@ angular.module('ui.jassa.rex')
                         });
 
                         // TODO: We must check whether that triple already exists, and if it does not, insert it
-                        jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(triples, scope.rexContext.override);
+                        //jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(triples, scope.rexContext.override);
+
+                        // Notify the context about the triples which we require to exist
+                        slot.triples = triples;
                     };
 
                     // TODO Check for changes in the target array, and update
