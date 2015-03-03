@@ -608,6 +608,7 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 
 // TODO Create a util for id allocation
 
-angular.module('ui.jassa.rex', ['dddi']);
+// NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
+angular.module('ui.jassa.rex', ['dddi', 'ui.select']);
 
 //var basePriority = 0;
