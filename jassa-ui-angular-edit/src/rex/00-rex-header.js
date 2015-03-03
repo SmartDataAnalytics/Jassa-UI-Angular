@@ -146,6 +146,9 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                         // whenever the coordinate's value changes
 
                         var value = getValueAt(scope.rexContext.json, newCoordinate);
+//                        if(value == null) {
+//                            value = '';
+//                        }
                         modelSetter(scope, value);
                     }
 
@@ -193,13 +196,22 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
 
                     // Note: If the effective value equals the source value, we reset the pristine flag
                     // This way, if the user manually restores changes to a value, the model is considered clean again
-                    // ISSUE: What about null value and empty string? Right now in this regard we treat them as equivalent.
-                    if(ngModel) {
-                        var srcValue = getValueAt(scope.rexContext.json, coordinate);
-                        if(srcValue === value || isEmpty(srcValue) && isEmpty(value)) {
-                            ngModel.$setPristine();
-                        }
-                    }
+                    //  Right now, we treat null and '' as equivalent.
+                    // ISSUE: Now, we have the undesired effect, that if fields of a resource map to parts of its URI,
+                    // then once data for the URI is retrieved, then the data that is input into the field then matches the data retrieved
+                    // caused the field to be considered pristine - hence, editing any of the fields the URI depends on will
+                    // cause all other fields to go blank again
+                    // I see the following options:
+                    // - We introduce a flag whether equal values count as pristine; e.g. rex-pristine-on-equals
+                    //   Note that this seems similar to the masterValue concept of https://github.com/betsol/angular-input-modified
+                    // - In the form there have to be buttons for resetting the pristine state explicitly
+                    // Anyway, for now we disable the following snipped
+//                    if(ngModel) {
+//                        var srcValue = getValueAt(scope.rexContext.json, coordinate);
+//                        if(srcValue === value || isEmpty(srcValue) && isEmpty(value)) {
+//                            ngModel.$setPristine();
+//                        }
+//                    }
 
                 }, true);
             }

@@ -299,6 +299,8 @@ angular.module('ui.jassa.rex')
                         var targetGraph = dataMapToGraph(dataMap, prefixMapping);
 
                         var enforcedGraph = ctrl.getEnforcedGraph();
+                        // TODO Remove from enforcedGraph those triples that are already present in the source data
+                        //enforcedGraph.removeAll();
                         targetGraph.addAll(enforcedGraph);
 
 
