@@ -28,16 +28,27 @@
         </div>
     </form>
 
-    <form role="form" rex-subject="ex05.subject">
+
+
+    <form role="form" name="editForm" rex-subject="ex05.subject">
+
+        <rdf-term-input ng-init="term={}" name="test" ng-model="foo" ng-model-options="defaultNgModelOptions"></rdf-term-input>
+
+        Pristine overall: <span ng-bind="editForm.test.$pristine"></span>
+        <button class="btn btn-primary" ng-click="editForm.test.$setPristine()"></button>
+
+
         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
             {{rexPrefixMapping.shortForm(property)}}:
 
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
+
                 <div class="form-group">
                   <div class="input-group">
                     <span class="input-group-addon">{{$index + 1}}</span>
                     <rdf-term-input replace ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+<!-- name="field{{property}}-{{$index}}" -->
                     <div class="input-group-btn">
                       <button type="button" ng-click="deleted=!deleted" ng-class="deleted ? 'btn-danger' : 'btn-default'" style="line-height: 1.5;" class="btn margin-left-2"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                       <button type="button" style="line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
