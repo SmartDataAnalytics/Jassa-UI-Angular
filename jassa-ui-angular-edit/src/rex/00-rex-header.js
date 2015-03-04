@@ -115,6 +115,19 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
 
 //console.log('Start: Creating compile component ' + tag);
 
+            // If the pristine state changes to true, reset the value
+            scope.$watch(function() {
+                var r = ngModel && ngModel.$pristine;
+                return r;
+            }, function(after, before) {
+                if(after && after != before) {
+                    if(modelSetter) {
+                        var value = getValueAt(scope.rexContext.json, newCoordinate);
+                        modelSetter(scope, value);
+                    }
+                }
+            });
+
             // If the coordinate changes AND the model is not pristine,
             // we copy the value at the override's old coordinate to the new coordinate
             // This way we ensure we are not overwriting a user's input
