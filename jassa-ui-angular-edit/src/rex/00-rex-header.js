@@ -122,7 +122,8 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
             }, function(after, before) {
                 if(after && after != before) {
                     if(modelSetter) {
-                        var value = getValueAt(scope.rexContext.json, newCoordinate);
+                        var coordinate = createCoordinate(scope, $component$);
+                        var value = getValueAt(scope.rexContext.json, coordinate);
                         modelSetter(scope, value);
                     }
                 }
