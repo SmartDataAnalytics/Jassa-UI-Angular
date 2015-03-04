@@ -56,7 +56,7 @@ angular.module('ui.jassa.rex')
 
                     scope.$watch([
                         function() {
-                            return scope.rexSparqlService
+                            return scope.rexSparqlService;
                         }, function() {
                             return scope.rexLookup;
                         }, function() {
