@@ -47,8 +47,10 @@ angular.module('ui.jassa.rex')
 //                        });
                     };
 
-                    scope.$watchGroup([
+                    scope.$watch([
                         function() {
+                            return scope.rexSparqlService
+                        }, function() {
                             return scope.rexLookup;
                         }, function() {
                             return scope.rexSubject;
