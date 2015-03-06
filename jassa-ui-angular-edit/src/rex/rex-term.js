@@ -16,18 +16,42 @@ angular.module('ui.jassa.rex')
  *
  *
  */
-.directive('rexTerm', ['$parse', function($parse) {
+.directive('rexTerm', ['$parse', '$compile', function($parse, $compile) {
     return {
-        priority: 11,
+        priority: 900,
         restrict: 'A',
         scope: true,
-        require: ['^rexContext', '^rexObject'],
+        terminal: true,
+        //require: ['^rexContext', '^rexObject', '?^ngModel'],
         controller: angular.noop,
         compile: function(ele, attrs) {
-            throw new Error('rex-term is not implemented yet');
-            //return createCompileComponent('rexValue', 'value', $parse);
+            return {
+                pre: function(scope, ele, attrs, ctrls) {
+                    var modelExprStr = attrs.rexTerm;
+
+                    if(jassa.util.ObjectUtils.isEmptyString(modelExprStr)) {
+                        var name = getModelAttribute(attrs);
+                        modelExprStr = attrs[name];
+                    }
+
+                    if(!modelExprStr) {
+                        throw new Error('No model provided and found');
+                    }
+
+                    ele.removeAttr('rex-term');
+
+                    ele.attr('rex-termtype', modelExprStr + '.type');
+                    ele.attr('rex-datatype', modelExprStr + '.datatype');
+                    ele.attr('rex-lang', modelExprStr + '.lang');
+                    ele.attr('rex-value', modelExprStr + '.value');
+
+                    // Continue processing any further directives
+                    $compile(ele)(scope);
+                }
+            };
         }
     };
 }])
 
 ;
+

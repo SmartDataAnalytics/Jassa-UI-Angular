@@ -17,12 +17,13 @@ angular.module('ui.jassa.rex')
             //$scope.override = new jassa.util.HashMap();
 
             //this.rexContext = $scope.rexContext;
-            this.getOverride =    function() {
+            this.getOverride = function() {
                 //return $scope.override;
                 var rexContext = $scope.rexContext;
                 var r = rexContext ? rexContext.override : null;
                 return r;
             };
+
 
 
             // Attribute where child directives can register changes
@@ -39,7 +40,7 @@ angular.module('ui.jassa.rex')
 
             this.allocSlot = function() {
                 var tmp = this.nextSlot++;
-                var id = '' + tmp;
+                var id = 'slot_' + tmp;
 
                 //var self = this;
 
@@ -127,6 +128,26 @@ angular.module('ui.jassa.rex')
                     var initContext = function(rexContext) {
                         rexContext.override = rexContext.override || {};//  new jassa.util.HashMap();
 
+                        // a map from coordinate to slotId to true
+                        rexContext.dirty = {};
+
+                        /**
+                         * Resets the form by iterating over all referenced coordinates
+                         * and setting the override to the corresponding values from the base graph
+                         */
+                        rexContext.reset = function() {
+                            var coordinates = ctrl.getReferencedCoordinates();
+
+                            coordinates.forEach(function(coordinate) {
+                                var currentValue = getEffectiveValue(rexContext, coordinate);
+                                var originalValue = getValueAt(rexContext.json, coordinate);
+                                setValueAt(rexContext.override, coordinate, originalValue);
+                                console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
+                            });
+                        };
+
+
+                        /*
                         rexContext.remove = rexContext.remove || function(coordinate) {
                             // Removes an object
                             var objs = getObjectsAt(rexContext.json, coordinate);
@@ -139,6 +160,7 @@ angular.module('ui.jassa.rex')
                                 objs.splice(coordinate.i, 1);
                             }
                         };
+                        */
 
                         /*
                         rexContext.setObject = function(s, p, i, sourceObj) {
@@ -353,6 +375,8 @@ angular.module('ui.jassa.rex')
                     };
 
 
+                    // NOT NEEDED: The override reflects the state of the form
+                    // it solely depends on the references; not the source data
                     var cleanupOverride = function()
                     {
                         var json = scope.rexContext.json;
@@ -360,6 +384,7 @@ angular.module('ui.jassa.rex')
                         //var override = scope.rexContext.override;
 
                         // Remove values from override that equal the source data
+                        /*
                         var entries = talisRdfJsonToEntries(override);
                         entries.forEach(function(entry) {
                             var coordinate = entry.key;
@@ -370,6 +395,8 @@ angular.module('ui.jassa.rex')
                                 removeValueAt(override, coordinate);
                             }
                         });
+                        */
+
 
                         /*
                         mapDifference(override, function(coordinate) {
@@ -406,6 +433,7 @@ angular.module('ui.jassa.rex')
                             }
                         });
 
+                        //console.log('Cleaned up override from ' + entries.length, entries);
                         //console.log('Override after cleanup', JSON.stringify(scope.rexContext.override.keys()));
                     };
 

@@ -9,7 +9,7 @@ angular.module('ui.jassa.rex')
         priority: 7,
         restrict: 'A',
         scope: true,
-        require: ['^rexContext', '^rexObject'],
+        require: ['^rexContext', '^rexObject', '?ngModel'],
         controller: angular.noop,
         compile: function(ele, attrs) {
             return createCompileComponent('rexDeleted', 'deleted', $parse);

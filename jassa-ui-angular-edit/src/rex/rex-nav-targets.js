@@ -1,6 +1,9 @@
 angular.module('ui.jassa.rex')
 
 /**
+ * TODO rex-results may be conceptually a much cleaner approach - deprecated/remove this directive if it proofs true
+ *
+ *
  * Directive to refer to the set of URIs at a target
  *
  * rexNavTargets="arrayOfTargetIriStrings"

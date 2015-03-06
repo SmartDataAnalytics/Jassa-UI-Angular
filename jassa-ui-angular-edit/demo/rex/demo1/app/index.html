@@ -78,6 +78,11 @@
       float: right;
     }
 
+    .CodeMirror {
+        border: 1px solid #eee;
+        height: auto;
+    }
+
     </style>
 
     <script src="lib/turtle-codemirror-mode/turtle-codemirror-mode.js"></script>
@@ -96,14 +101,19 @@
 
     angular.module(
         'jassa.ui.edit.demo.widgets',
-        ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.rex', 'ui.codemirror', 'ngAnimate'])
+        ['dddi', 'ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.rex', 'ui.codemirror', 'ngAnimate'])
 
 // This is deprecated
 //     .config(['$parseProvider', function($parseProvider) {
 //         $parseProvider.unwrapPromises(true);
 //     }])
 
-    .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
+    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http',
+        function($scope, $dddi, $location, $anchorScroll, $timeout, $http) {
+
+        var dddi = $dddi($scope);
+
+        $scope.JSON = JSON;
 
         // Begin of REX Setup
 
@@ -115,19 +125,26 @@
             }
         };
 
+        $scope.editCounter = 0;
 
         $scope.datasetSparqlService = jassa.service.SparqlServiceBuilder
             .http('http://localhost:8870/sparql', ['http://datasets.org/'], {type: 'POST'})
             .create();
 
 
-        var sparqlService = jassa.service.SparqlServiceBuilder
-            //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            .http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
-            //.http('http://localhost/data/pokedex/sparql', ['http://pokedex.org/'], {type: 'POST'})
-            .virtFix().paginate(50000).pageExpand(100).create();
 
-        $scope.sparqlService = sparqlService;
+
+
+        dddi.register('sparqlService', ['editCounter', function() {
+            var r = jassa.service.SparqlServiceBuilder
+                //.http('http://dbpedia.org/sparql', ['http://dbpedia.org'], {type: 'POST'})
+                .http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://dbpedia.org'], {type: 'POST'})
+                //.http('http://localhost/data/pokedex/sparql', ['http://pokedex.org/'], {type: 'POST'})
+                .virtFix().paginate(50000).pageExpand(100).create();
+
+            return r;
+        }]);
+
 
         // TODO Somehow update .cache() on update
 

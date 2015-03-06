@@ -6,7 +6,21 @@
     rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
     rex-lookup="true">
 
-    <div rex-lookup="lookupFn"></div>
+
+<div ng-if="false">
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="addedStr"
+        sync-template="{{JSON.stringify(rexContext.override, null, 4)}}"
+    ></div>
+
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="addedStr"
+        sync-template="{{JSON.stringify(rexContext.dirty, null, 4)}}"
+    ></div>
+</div>
+<!--     Dirty state: {{rexContext.dirty}} -->
 
     <div class="col-md-6">
 
@@ -14,9 +28,20 @@
         <div class="alert alert-info" role="alert">
             <h3>Dataset Editor</h3>
 
-            <form name="datasetForm" role="form" rex-subject="data.subject" rex-typeof="'dcat:Dataset'">
+            <form
+                name="datasetForm"
+                role="form"
+                rex-subject="data.subject"
+                rex-typeof="'dcat:Dataset'"
+                ng-init="addedDists=[]"
+            >
+
+            <button class="btn btn-primary" ng-click="data.group='org.dbpedia'; data.artifact='dbpedia-essential'; data.version='2014'; datasetForm.group.$setDirty(); datasetForm.artifact.$setDirty(); datasetForm.version.$setDirty()">Test</button>
+
 <!--                 <input type="hidden" rex-predicate="theme:primary" rex-iri="theme:primary"> -->
 
+<button class="btn btn-primary" ng-click="rexContext.reset()">Reset state</button>
+<button class="btn btn-primary" ng-click="datasetForm.$setPristine()">Set pristine</button>
 
                 <div class="form-group">
                     <div class="input-group">
@@ -41,45 +66,51 @@
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Group: </span>
-                        <input type="text" class="form-control" ng-model="data.group" ng-model-options="defaultNgModelOptions" rex-predicate="'o:group'" rex-deleted="!data.group" rex-literal>
+                        <input type="text" name="group" class="form-control" ng-model="data.group" ng-model-options="defaultNgModelOptions" rex-predicate="'o:group'" rex-deleted="!data.group" rex-literal>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Artefact: </span>
-                        <input type="text" class="form-control" ng-model="data.artifact" ng-model-options="defaultNgModelOptions" rex-predicate="'o:artifact'" rex-deleted="!data.artifact" rex-literal>
+                        <input type="text" name="artifact" class="form-control" ng-model="data.artifact" ng-model-options="defaultNgModelOptions" rex-predicate="'o:artifact'" rex-deleted="!data.artifact" rex-literal>
+                        <span class="input-group-addon">Deleted: {{!data.artifact}}</span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Version: </span>
-                        <input type="text" class="form-control" ng-model="data.version" ng-model-options="defaultNgModelOptions"rex-predicate="'o:version'" rex-deleted="!data.version" rex-literal>
+                        <input type="text" name="version" class="form-control" ng-model="data.version" ng-model-options="defaultNgModelOptions" rex-predicate="'o:version'" rex-deleted="!data.version" rex-literal>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">Comment: </span>
-                        <input type="text" class="form-control" ng-model="data.comment" ng-model-options="defaultNgModelOptions"rex-predicate="'rdfs:comment'" rex-literal>
+                        <input type="text" name="comment" class="form-control" ng-model="data.comment" ng-model-options="defaultNgModelOptions"rex-predicate="'rdfs:comment'" rex-literal>
+                        <span class="input-group-addon">Pristine: {{datasetForm.comment.$pristine}}</span>
                     </div>
                 </div>
 
-                <div rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-nav-targets="data.dists">
+                <div rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-add-items="addedDists" rex-nav-targets="data.dists">
                     <ul class="list">
-                        <li ng-repeat="distIri in data.dists track by $index" rex-subject="distIri" ng-init="dist={}">{{distIri}}
+                        <li ng-repeat="distIri in data.dists track by $index" rex-subject="distIri" ng-init="dist={};">{{distIri}}
 
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-addon">Access URL: </span>
-                                    <input type="text" class="form-control" ng-model="dist.accessURL" ng-model-options="defaultNgModelOptions" rex-predicate="'dcat:accessURL'" rex-iri>
+                                    <input type="text" class="form-control" ng-model="dist.accessURL" ng-model-options="defaultNgModelOptions" rex-predicate="'dcat:accessURL'" rex-iri rex-deleted="dist.deleted">
                                 </div>
                             </div>
 
+                            <button class="btn" ng-class="dist.deleted ? 'btn-warning' : 'btn-primary'" ng-click="dist.deleted=!dist.deleted">Toggle Delete Distribution</button>
+
                         </li>
                     </ul>
-                    <button class="btn btn-primary" ng-click="data.dists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button>
+<!--                     <button class="btn btn-primary" ng-click="data.dists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button> -->
+
+                    <button class="btn btn-primary" ng-click="addedDists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button>
 
 <!--                     <ul> -->
 <!--                         <li ng-repeat="distNode in rexContext.navigate(rexSubject, '<o:isDistributionOf') | filter:distNode.isUri()" rex-subject="distNode.getUri()" ng-init="dist={}"> -->
