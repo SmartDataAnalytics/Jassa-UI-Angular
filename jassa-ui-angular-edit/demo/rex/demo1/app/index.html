@@ -98,6 +98,85 @@
         'jassa.ui.edit.demo.widgets',
         ['ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.edit.tpls', 'ui.codemirror', 'ngAnimate'])
 
+    .config(function(GeocodingLookupProvider) {
+/*
+      GeocodingLookupProvider.setConfiguration({
+        service: ['LinkedGeoData', 'Nominatim'],
+        defaultService: true
+      });
+*/
+      // set NOKIA service
+      GeocodingLookupProvider.setService({
+        label: 'Nokia HERE',
+        serviceType: 'rest',
+        url: 'http://geocoder.cit.api.here.com/6.2/geocode.json',
+        data: {
+          app_id: 'DemoAppId01082013GAL',
+          app_code: 'AJKnXv84fjrb0KIHawS0Tg',
+          additionaldata: 'IncludeShapeLevel,default',
+          mode: 'retrieveAddresses',
+          searchtext: '%KEYWORD%'
+        },
+        fnSuccess: function(response) {
+          var data = response.data.Response.View.length > 0 ? response.data.Response.View[0].Result : [];
+          var resultSet = [];
+          for(var i in data) {
+            if(data[i].Location.hasOwnProperty('Shape')) {
+              resultSet.push({
+                'firstInGroup': false,
+                'wkt': data[i].Location.Shape.Value,
+                'label': data[i].Location.Address.Label,
+                'group': 'Nokia HERE'
+              });
+            }
+          }
+          return resultSet;
+        }
+      });
+
+      // set LINKEDGEODATA service
+      GeocodingLookupProvider.setService({
+        label: 'LinkedGeoData (User Config)',
+        serviceType: 'sparql',
+        endpoint: 'http://linkedgeodata.org/vsparql',
+        graph: 'http://linkedgeodata.org/ne/',
+        prefix: {
+          ogc: 'http://www.opengis.net/ont/geosparql#',
+          geom: 'http://geovocab.org/geometry#'
+        },
+        query: '{'
+          +' Graph <http://linkedgeodata.org/ne/> {'
+          +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
+          +' rdfs:label ?l ;'
+          +' geom:geometry ['
+          +'  ogc:asWKT ?g'
+          +' ] '
+          +' FILTER regex(?l, "%KEYWORD%", "i") '
+          +' } '
+          +'}',
+        sponateTemplate: [{
+          id: '?s',
+          label: '?l',
+          wkt: '?g'
+        }],
+        limit: 5,
+        fnSuccess: function(response) {
+          var data = response;
+          var resultSet = [];
+          if (data.length > 0) {
+            for(var i in data) {
+              resultSet.push({
+                'firstInGroup': false,
+                'wkt': data[i].val.wkt,
+                'label': data[i].val.label,
+                'group': 'LinkedGeoData (User Config)'
+              });
+            }
+          }
+          return resultSet;
+        }
+      });
+    })
     .controller('AppCtrl', ['$scope', '$location', '$anchorScroll', '$timeout', '$http', function($scope, $location, $anchorScroll, $timeout, $http) {
 
         // Begin of REX Setup
@@ -259,44 +338,6 @@
         $scope.dateOptions = {
             formatYear: 'yyyy',
             startingDay: 1
-        };
-
-        // Geocoding APIs
-        $scope.mGeocodingServices = {
-          restService: [
-            {
-              name: 'Nominatim',
-              endpoint: 'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q='
-            },
-            {
-              name: 'Nokia HERE',
-              endpoint: 'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
-            }
-          ],
-          sparqlService: [
-            {
-              'name' : 'LinkedGeoData (Natural Earth)',
-              'endpoint' : 'http://linkedgeodata.org/vsparql',
-              'graph' : 'http://linkedgeodata.org/ne/',
-              'type' : 'http://linkedgeodata.org/ne/ontology/Country',
-              'active' : false,
-              'facets' : false,
-              'prefix' : {
-                ogc: 'http://www.opengis.net/ont/geosparql#',
-                geom: 'http://geovocab.org/geometry#'
-              },
-              'query' : '{'
-                +' Graph <http://linkedgeodata.org/ne/> {'
-                +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
-                +' rdfs:label ?l ;'
-                +' geom:geometry ['
-                +'  ogc:asWKT ?g'
-                +' ] '
-                +' FILTER regex(?l, "%SEARCHSTRING%", "i") '
-                +' } '
-                +'}'
-            }
-          ]
         };
 
         $scope.copy = angular.copy;
