@@ -1,4 +1,11 @@
-<div class="row" ng-init="ex04={}; ex04.context={}; ex04.baseIri='dbr:'" rex-context rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-lookup="lookupFn">
+<div
+    class="row"
+    ng-init="ex04={}; ex04.context={}; ex04.baseIri='dbr:'"
+    rex-context
+    rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
+    rex-sparql-service="sparqlService"
+    rex-lookup="true">
+
     <div class="col-md-6">
 
 
@@ -95,7 +102,7 @@
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="turtle"
-                sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
             ></div>
 
             <hr />
@@ -103,11 +110,11 @@
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="turtle"
-                sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
             ></div>
 
 
-            <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.length && !rexContext.diff.added.length }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
+            <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
 
         </div>
     </div>

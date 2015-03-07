@@ -1,4 +1,5 @@
 
+
 /**
  * Falsy valued arguments will be replaced with empty strings or 0
  */
@@ -32,6 +33,8 @@ var Coordinate = Jassa.ext.Class.create({
         return result;
     },
 });
+
+
 
 // Prefix str:
 var parsePrefixStr = function(str) {
@@ -75,15 +78,19 @@ function capitalize(s)
 
 // TODO We need to expand prefixed values if the termtype is IRI
 
+/**
+ *
+ * @param oneWay If true, the model is not updated on rexContext changes for the respective coordinate
+ *
+ */
 var createCompileComponent = function($rexComponent$, $component$, $parse, oneWay) {
-    //var $rexComponent$ = 'rex' + capitalize($component$);
-//if(true) { return; }
 
     var tag = '[' + $component$ + ']';
 
     return {
         pre: function(scope, ele, attrs, ctrls) {
 
+            //if($component$ != 'deleted') { return; }
 
             var modelExprStr = attrs[$rexComponent$];
             var modelGetter = $parse(modelExprStr);
@@ -94,102 +101,157 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
             }
 
             var contextCtrl = ctrls[0];
-            //var objectCtrl = ctrls[1];
+
+            // ngModel is optionally referenced for dirty checking
+            var ngModel = ctrls[2];
 
             var slot = contextCtrl.allocSlot();
             slot.entry = {};
 
             scope.$on('$destroy', function() {
-//console.log('Destroying compile component ' + tag);
-
                 slot.release();
+                unsetDirty();
             });
 
-//console.log('Start: Creating compile component ' + tag);
 
-            // If the coordinate changes, we copy the value at the override's old coordinate to the new coordinate
+            // Immediately set the initial coordinate and set the model value
+            // If we don't do it now we will lose any present model values should the coordinate change
+            {
+                slot.entry.key = createCoordinate(scope, $component$);
+                var value = modelGetter(scope);
+                if(value) {
+                    setValueAt(contextCtrl.getOverride(), slot.entry.key, value);
+                }
+            }
+
+
+            var setDirty = function() {
+                var coordinate = slot.entry.key;
+                //console.log('>> DIRTY   : ' + coordinate);
+
+                var dirty = scope.rexContext.dirty;
+                var dirtySlotIds = dirty[coordinate] = dirty[coordinate] || {};
+                dirtySlotIds[slot.id] = true;
+            };
+
+            var unsetDirty = function(coordinate) {
+                coordinate = coordinate || slot.entry.key;
+                //console.log('>> PRISTINE: ' + coordinate);
+
+                var dirty = scope.rexContext.dirty;
+                var dirtySlotIds = dirty[coordinate];
+                if(dirtySlotIds) {
+                    delete dirtySlotIds[slot.id];
+
+                    //console.log('>> PRISTINE SLOT: ' + coordinate + ' [' + slot.id + ']');
+
+                    if(Object.keys(dirtySlotIds).length === 0) {
+                        delete dirty[coordinate];
+
+                        //console.log('>> PRISTINE COORD: ' + coordinate);
+                    }
+                }
+            };
+
+            /**
+             * This is a bit hacky:
+             *
+             * The deleted attribute is always transferred when the coordinate changes
+             *
+             */
+            var checkDirty = function(coordinate) {
+                var result;
+                if($component$ === 'deleted') {
+                    result = true;
+                } else {
+
+                    coordinate = coordinate || slot.entry.key;
+                    var dirty = scope.rexContext.dirty;
+                    var dirtySlotIds = dirty[coordinate];
+                    result = !!dirtySlotIds;
+                }
+                return result;
+            };
+
+
+
+            // If there is a model, take the pristine state into account
+            if(ngModel) {
+                var updateDirtyState = function() {
+                    if(ngModel.$pristine) {
+                        unsetDirty();
+                    } else {
+                        setDirty();
+                    }
+                };
+
+                scope.$watch(updateDirtyState);
+            }
+
+            // If the coordinate changes AND the target is not dirty,
+            // we copy the value at the override's old coordinate to the new coordinate
+            // This way we ensure we are not overwriting a user's input
+            // Otherwise (if the model is pristine), just set the model to the value of the current base data
             scope.$watch(function() {
                 var r = createCoordinate(scope, $component$);
                 return r;
             }, function(newCoordinate, oldCoordinate) {
-                slot.entry.key = newCoordinate;
 
-                var oldValue = getEffectiveValue(scope.rexContext, oldCoordinate); //scope.rexContext.getValue(oldCoordinate);
-                if(oldValue) {
-                    var entry = {
-                        key: newCoordinate,
-                        val: oldValue
-                    };
+                // TODO This handler often gets called even if the coordinates actually equal - can we optimize it?
+                if(newCoordinate && !newCoordinate.equals(oldCoordinate)) {
+                    //console.log('>> Coordinate change from [' + oldCoordinate + '] to ' + ' [' + newCoordinate + ']');
 
-                    //contextCtrl.getOverride().putEntries([entry]);
-                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
+                    // Check the dirty state at the old coordinate
+                    var isDirty = checkDirty(oldCoordinate);
+
+                    // Inform the context about the current coordinate we are referring to
+                    // TODO: If we did slot.setCoordinate(newCoordinate) then the context could immediately perform actions
+                    slot.entry.key = newCoordinate;
+
+                    var value = isDirty
+                        ? getEffectiveValue(scope.rexContext, oldCoordinate)
+                        : getEffectiveValue(scope.rexContext, newCoordinate)
+                        ;
+
+                    //console.log('## Watch 1: Transferring value [' + value + '] from coordinate [' + oldCoordinate + '] to [' + newCoordinate + ']');
+                    setValueAt(contextCtrl.getOverride(), newCoordinate, value);
+
+                    //console.log('>> UNDIRTY : ' + oldCoordinate);
+                    unsetDirty(oldCoordinate);
                 }
             }, true);
 
 
+            // If the effective value at a coordinate changes, set the model to that value
             if(!oneWay) {
                 scope.$watch(function() {
                     var coordinate = slot.entry.key;
-                    var r = getEffectiveValue(scope.rexContext, coordinate); //scope.rexContext.getValue(coordinate);
+                    var r = getEffectiveValue(scope.rexContext, coordinate);
                     return r;
 
                 }, function(value) {
                     var coordinate = slot.entry.key;
 
-                    var entry = {
-                        key: coordinate,
-                        val: value
-                    };
-
-                    //console.log('Value at coordinate ')
-
-                    if(value != null) {
-                        //contextCtrl.getOverride().putEntries([entry]);
-                        setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
-                    }
-
-                    slot.entry.value = value;
-
                     if(modelSetter) {
-                        // If the given model is writeable, then we need to update it
-                        // whenever the coordinate's value changes
-
-                        if(value != null) {
-                            modelSetter(scope, value);
-                        }
+                        //console.log('## Watch 2: Setting model value [' + value + '] from coordinate [' + coordinate + ']');
+                        modelSetter(scope, value);
                     }
 
                 }, true);
             }
 
-            // Forwards: If the model changes, we need to update the
-            // change object in the scope
+            // If the model value changes, set the value in the override
+            // at that coordinate to reflect this
             scope.$watch(function() {
                 var r = modelGetter(scope);
-
                 return r;
-            }, function(newVal, oldVal) {
+            }, function(value) {
+                var coordinate = slot.entry.key;
 
-                var coordinate = slot.entry.key;//createCoordinate(scope, $component$);
-                var entry = {
-                    key: coordinate,
-                    val: newVal
-                };
-                slot.entry.val = newVal;
+                //console.log('## Watch 3: Setting shadow value [' + value + '] at coordinate [' + coordinate + ']');
+                setValueAt(contextCtrl.getOverride(), coordinate, value);
 
-                if(newVal != null) {
-                    //contextCtrl.getOverride().putEntries([entry]);
-                    setValueAt(contextCtrl.getOverride(), entry.key, entry.val);
-                }
-//                else {
-//                    // Remove null values
-//                    // TODO Can this happen?
-//                    contextCtrl.getOverride().remove(coordinate);
-//                }
-
-                //console.log(tag + ' Model changed to ', newVal, ' from ', oldVal, ' at coordinate ', coordinate, '; updating override ', slot.entry);
             }, true);
-//console.log('Done: Creating compile component ' + tag);
 
         }
 
@@ -223,6 +285,8 @@ var assembleTalisRdfJson = function(map) {
             var o = x[coordinate.i] = x[coordinate.i] || {};
 
             o[coordinate.c] = str;
+        } else {
+            //console.log('<< DELETED: ' + coordinate);
         }
     });
 
@@ -397,7 +461,7 @@ var talisRdfJsonToEntries = function(talisRdfJson) {
 
 // Returns the object array at a given predicate
 var getObjectsAt = function(talisRdfJson, coordinate) {
-    var s = talisRdfJson[coordinate.s];
+    var s = coordinate ? talisRdfJson[coordinate.s] : null;
     var result = s ? s[coordinate.p] : null;
     return result;
 };
@@ -417,6 +481,7 @@ var getOrCreateObjectAt = function(talisRdfJson, coordinate, obj) {
     return result;
 };
 
+/* Dangerous: splicing breaks references by index
 var removeObjectAt = function(talisRdfJson, coordinate) {
     var s = talisRdfJson[coordinate.s];
     var p = s ? s[coordinate.p] : null;
@@ -430,31 +495,45 @@ var removeObjectAt = function(talisRdfJson, coordinate) {
         }
     }
 };
+*/
+
+var compactTrailingNulls = function(arr) {
+    while(arr.length && arr[arr.length-1] == null){
+        arr.pop();
+    }
+};
 
 var removeValueAt = function(talisRdfJson, coordinate) {
 
-    var s = talisRdfJson[coordinate.s];
-    var p = s ? s[coordinate.p] : null;
-    var i = p ? p[coordinate.i] : null;
-    //var c = i ? i[coordinate.c] : null;
+    var ps = talisRdfJson[coordinate.s];
+    var is = ps ? ps[coordinate.p] : null;
+    var cs = is ? is[coordinate.i] : null;
 
-    if(i) {
-        delete i[coordinate.c];
+    if(cs) {
+        delete cs[coordinate.c];
 
-        if(i.length === 0) {
-            delete p[coordinate.p];
+        if(Object.keys(cs).length === 0) {
 
-            if(Object.keys(p).length === 0) {
-                delete s[coordinate.s];
+            delete is[coordinate.i];
+            compactTrailingNulls(is);
+
+            if(is.length === 0) {
+                delete ps[coordinate.p];
+
+                if(Object.keys(ps).length === 0) {
+                    delete talisRdfJson[coordinate.s];
+                }
             }
         }
     }
 };
 
 var setValueAt = function(talisRdfJson, coordinate, value) {
-    if(value != null) {
+    //if(value != null) {
+    if(coordinate != null) {
         var o = getOrCreateObjectAt(talisRdfJson, coordinate);
         o[coordinate.c] = value;
+    //}
     }
 };
 
@@ -553,6 +632,7 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 
 // TODO Create a util for id allocation
 
-angular.module('ui.jassa.rex', []);
+// NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
+angular.module('ui.jassa.rex', ['dddi', 'ui.select']);
 
-var basePriority = 0;
+//var basePriority = 0;

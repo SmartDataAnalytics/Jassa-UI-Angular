@@ -1,4 +1,11 @@
-<div class="alert alert-info" role="alert" ng-init="ex05={}; ex05.subject='http://dbpedia.org/resource/Leipzig'" rex-context rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'" rex-lookup="lookupFn">
+<div
+    class="alert alert-info"
+    role="alert"
+    ng-init="ex05={}; ex05.subject='http://dbpedia.org/resource/Leipzig'"
+    rex-context
+    rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
+    rex-sparql-service="sparqlService"
+    rex-lookup="true">
 
     <h3>Generic Resource Editor</h3>
 
@@ -21,17 +28,29 @@
         </div>
     </form>
 
-    <form role="form" rex-subject="ex05.subject">
+
+
+    <form role="form" name="editForm" rex-subject="ex05.subject">
+
+        <rdf-term-input ng-init="term={}" name="test" ng-model="foo" ng-model-options="defaultNgModelOptions"></rdf-term-input>
+
+        Is field pristine? <span ng-bind="editForm.test.$pristine"></span>
+        Is form pristine? <span ng-bind="editForm.$pristine"></span>
+        <button class="btn btn-primary" ng-click="editForm.test.$setPristine()">field</button>
+        <button class="btn btn-primary" ng-click="editForm.$setPristine()">form</button>
+
+
         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
             {{rexPrefixMapping.shortForm(property)}}:
 
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
+
                 <div class="form-group">
                   <div class="input-group">
                     <span class="input-group-addon">{{$index + 1}}</span>
-                    <rdf-term-input replace ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang">
-                    </rdf-term-input>
+                    <rdf-term-input replace ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+<!-- name="field{{property}}-{{$index}}" -->
                     <div class="input-group-btn">
                       <button type="button" ng-click="deleted=!deleted" ng-class="deleted ? 'btn-danger' : 'btn-default'" style="line-height: 1.5;" class="btn margin-left-2"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                       <button type="button" style="line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -72,7 +91,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
     ></div>
 
     <hr />
@@ -80,10 +99,10 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
     ></div>
 
 
-    <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.length && !rexContext.diff.added.length }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
+    <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext.diff, rexPrefixMapping)">Perform Update</button>
 
 </div>

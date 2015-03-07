@@ -32,11 +32,11 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexObject', ['$parse', function($parse) {
     return {
-        priority: basePriority + 13,
+        priority: 13,
         restrict: 'A',
         scope: true,
         require: ['^rexContext', '^rexPredicate'],
-        controller: function() {},
+        controller: angular.noop,
         compile: function(ele, attrs) {
 
 //            var modelExprStr = ele.attr('rex-object');

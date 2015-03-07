@@ -11,11 +11,11 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexLookup', ['$parse', function($parse) {
     return {
-        priority: basePriority + 26,
+        priority: 26,
         restrict: 'A',
         scope: true,
         require: '^rexContext',
-        controller: function() {},
+        controller: angular.noop,
         //require: ['^?rexSubject', '^?rexObject']
 //        controller: ['$scope', function($scope) {
 //        }],

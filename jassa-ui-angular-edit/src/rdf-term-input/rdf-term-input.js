@@ -1,3 +1,6 @@
+
+var rdfTermInputCounter = 0;
+
 angular.module('ui.jassa.rdf-term-input', [])
 
 .directive('rdfTermInput', ['$parse', function($parse) {
@@ -11,9 +14,10 @@ angular.module('ui.jassa.rdf-term-input', [])
 
     return {
         restrict: 'EA',
-        priority: 4,
-        transclude: true,
-        require: '^ngModel',
+        priority: 0,
+        //transclude: true,
+        //require: ['?^ngForm', 'ngModel'],
+        require: 'ngModel',
         templateUrl: 'template/rdf-term-input/rdf-term-input.html',
         replace: true,
         //scope: true,
@@ -27,6 +31,9 @@ angular.module('ui.jassa.rdf-term-input', [])
             rightButton: '=?'
         },
         controller: ['$scope', function($scope) {
+
+            // The sub widgets will register themselves here
+            $scope.forms = {};
 
             $scope.state = $scope.$state || {};
             $scope.ngModelOptions = $scope.ngModelOptions || {};
@@ -96,7 +103,80 @@ angular.module('ui.jassa.rdf-term-input', [])
         }],
         compile: function(ele, attrs) {
             return {
+                //pre: function(scope, ele, attrs, ctrls) {//ngModel) {
+//                var ngForm = ctrls[0];
+//                var ngModel = ctrls[1];
+//
+//                if(ngForm) {
+//                    console.log(ngForm.$name);
+//                }
+
                 pre: function(scope, ele, attrs, ngModel) {
+
+                    ngModel.$name = scope.$eval(attrs.name);
+
+                    // This pristine watching seems like an aweful hack to me :/
+                    // But oh well
+
+                    var getSubForms = function() {
+                        var r = [
+                            scope.forms.type.value,
+                            scope.forms.datatype.value,
+                            scope.forms.lang.value,
+                            scope.forms.value.value
+                        ];
+
+                        return r;
+                    };
+
+                    var checkPristine = function() {
+                        var cs = getSubForms();
+
+                        var r = !cs.some(function(c) {
+                            return !c.$pristine;
+                        });
+
+                        return r;
+                    };
+
+                    scope.$watch(function() {
+                        return ngModel.$pristine;
+                    }, function(isPristine) {
+                        if(isPristine) {
+                            var cs = getSubForms();
+                            cs.forEach(function(c) {
+                                c.$setPristine();
+                            });
+                        }
+                    });
+
+                    scope.$watch(checkPristine, function(isPristine) {
+                        if(isPristine) {
+                            ngModel.$setPristine();
+                        } else {
+                            ngModel.$setDirty();
+                        }
+                    });
+
+//                    scope.$watch('forms.type.value.$pristine', function() {
+//                        console.log('YAAAY type' + scope.forms.type.value.$pristine);
+//                    });
+//
+//                    scope.$watch('forms.value.value.$pristine', function() {
+//                        console.log('Wooo value' + scope.forms.value.value.$pristine);
+//                    });
+
+                    //ngModel.$name = scope.$eval(attrs.name);
+
+                    /*
+                    console.log(scope.state);
+                    scope.$watch(function() {
+                        return ngModel.$pristine;
+                    }, function(pristine) {
+
+                    });
+                    */
+
 
                     scope.rightButton = false;
 
@@ -287,12 +367,20 @@ angular.module('ui.jassa.rdf-term-input', [])
                             if(newValue) {
                                 //modelSetter(scope, newValue);
                                 //scope.bindModel = newValue;
+
                                 angular.copy(newValue, scope.bindModel);
+                                //ngModel.$setViewValue(newValue);
 
                                 //if(!scope.$phase) { scope.$apply(); }
                                 //console.log('EXPOSED', scope.bindModel);
                             }
                         }, true);
+
+
+//                        scope.$watch('state', function(state) {
+//                            ngModel.$setViewValue(state);
+//                        });
+
                     //}
                 }
 

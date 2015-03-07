@@ -5,8 +5,8 @@ angular.module('ui.jassa.rex')
         priority: 7,
         restrict: 'A',
         scope: true,
-        require: ['^rexContext', '^rexObject'],
-        controller: function() {},
+        require: ['^rexContext', '^rexObject', '?ngModel'],
+        controller: angular.noop,
         compile: function(scope, ele, attrs, ctrls) {
             return createCompileComponent('rexLang', 'lang', $parse);
         }
