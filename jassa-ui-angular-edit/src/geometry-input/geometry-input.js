@@ -1,6 +1,253 @@
 angular.module('ui.jassa.geometry-input', [])
 
-  .directive('geometryInput', ['$http', '$q', function($http, $q) {
+  .provider('GeocodingLookup', function() {
+
+    this.config = {
+      service: ['Nominatim', 'LinkedGeoData'],
+      defaultService: false
+    };
+
+    // a collection of pre-set service configs
+    this.defaultServices = {
+      Nominatim: {
+        label: 'Nominatim',
+        serviceType: 'rest',
+        url: 'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q=',
+        data: {
+          format: 'json',
+          polygon_text: '1',
+          q: '%KEYWORD%'
+        },
+        fnSuccess: function(response) {
+          var data = response.data;
+          var resultSet = [];
+          for (var i in data) {
+            if (data[i].hasOwnProperty('geotext')) {
+              resultSet.push({
+                firstInGroup: false,
+                wkt: data[i].geotext,
+                label: data[i].display_name,
+                group: 'Nominatim'
+              });
+            }
+          }
+          return resultSet;
+        }
+      },
+      LinkedGeoData: {
+        label: 'LinkedGeoData',
+        serviceType: 'sparql',
+        endpoint: 'http://linkedgeodata.org/vsparql',
+        graph: 'http://linkedgeodata.org/ne/',
+        prefix: {
+          ogc: 'http://www.opengis.net/ont/geosparql#',
+          geom: 'http://geovocab.org/geometry#'
+        },
+        query: '{'
+          +' Graph <http://linkedgeodata.org/ne/> {'
+          +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
+          +' rdfs:label ?l ;'
+          +' geom:geometry ['
+          +'  ogc:asWKT ?g'
+          +' ] '
+          +' FILTER regex(?l, "%KEYWORD%", "i") '
+          +' } '
+          +'}',
+        sponateTemplate: [{
+          id: '?s',
+          label: '?l',
+          wkt: '?g'
+        }],
+        limit: 5,
+        fnSuccess: function(response) {
+          var data = response;
+          var resultSet = [];
+          if (data.length > 0) {
+            for(var i in data) {
+              resultSet.push({
+                'firstInGroup': false,
+                'wkt': data[i].val.wkt,
+                'label': data[i].val.label,
+                'group': 'LinkedGeoData'
+              });
+            }
+          }
+          return resultSet;
+        }
+      }
+    };
+
+    // stores service configs which are set by the
+    // GeocodingLookupProvider.setService function call
+    this.userServices = {};
+
+    this.$get = function() {
+      // inject $http and $q
+      var initInjector = angular.injector(['ng']);
+      var $http = initInjector.get('$http');
+      var $q = initInjector.get('$q');
+
+      var promiseCache = {
+        /** Meta Information
+         * [{
+         *   label: x,
+         *   promiseID: y
+         * }]
+         */
+        promisesMetaInformation: [],
+        promises: []
+      };
+
+      // use default config of geocoding services when no services are set by user
+      var useServiceConfig = {};
+
+      for (var i in this.config.service) {
+        var serviceLabel = this.config.service[i];
+        useServiceConfig[serviceLabel] = this.defaultServices[serviceLabel];
+      }
+
+      if(!_(this.userServices).isEmpty()) {
+        if (this.config.defaultService) {
+          _(useServiceConfig).extend(this.userServices);
+        } else {
+          useServiceConfig = this.userServices;
+        }
+      }
+
+      var setPromise = function(serviceLabel, promise) {
+        // needed for identify a promise to a service
+        // the first promise matches the first promiseMetaInformation
+        var promiseID = promiseCache.promises.length;
+        promiseCache.promisesMetaInformation.push({
+          label: serviceLabel,
+          promiseID: promiseID
+        });
+        promiseCache.promises.push(promise);
+      };
+
+      // returns the promiseCache
+      var getPromises = function() {
+        return promiseCache;
+      };
+
+      var clearPromiseCache = function() {
+        promiseCache.promises = [];
+        promiseCache.promisesMetaInformation = [];
+      };
+
+      var createSparqlService = function(url, graphUris) {
+        var result = jassa.service.SparqlServiceBuilder.http(url, graphUris, {type: 'POST'})
+          .cache().virtFix().paginate(1000).pageExpand(100).create();
+        return result;
+      };
+
+      var requestGeocodingService = function(service, keyword) {
+        if (service.serviceType === 'rest') {
+          return restServiceRequest(service, keyword);
+        }
+        if (service.serviceType === 'sparql') {
+          return sparqlServiceRequest(service, keyword);
+        }
+      };
+
+      var restServiceRequest = function(service, keyword) {
+        var queryString = queryData(service.data).replace(/%KEYWORD%/gi,keyword);
+        return $http({
+          'method': 'GET',
+          'url': service.url+'?'+queryString,
+          'cache': true,
+          'headers' : {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+      };
+
+      var sparqlServiceRequest = function(service, keyword) {
+
+        var sparqlService = createSparqlService(service.endpoint, service.graph);
+
+        var store = new jassa.sponate.StoreFacade(sparqlService, _(service.prefix)
+          .defaults(jassa.vocab.InitialContext));
+
+        var query = service.query.replace(/%KEYWORD%/gi,keyword);
+
+        var limit = service.limit || 10;
+
+        store.addMap({
+          name: 'sparqlService',
+          template: service.sponateTemplate,
+          from: query
+        });
+
+        return store.sparqlService.getListService().fetchItems(null, limit);
+      };
+
+      var queryData = function(data) {
+        var ret = [];
+        for (var d in data) {
+          ret.push(d + '=' + data[d]);
+        }
+        return ret.join('&');
+      };
+
+      var firstInGroupTrue = function(results) {
+        results = _(results).flatten();
+        // mark the first of each group for headlines
+        results = _(results).groupBy('group');
+        results = _(results).map(function(g) {
+          g[0].firstInGroup = true;
+          return g;
+        });
+        results = _(results).flatten();
+        results = _(results).value();
+        return results;
+      };
+
+      return {
+        findByKeyword: function(keyword) {
+          // clear promise cache for new requests
+          clearPromiseCache();
+
+          // start requesting the services and collect the promises
+          for(var serviceLabel in useServiceConfig) {
+            var service = useServiceConfig[serviceLabel];
+            var promise = requestGeocodingService(service, keyword);
+            setPromise(serviceLabel, promise);
+          }
+
+          // wait until all requests are done and return final resultSet
+          var promiseCache = getPromises();
+          var resultPromise = $q.all(promiseCache.promises).then(function(response) {
+            var results = [];
+            // iterate through all responses and insert the result into results
+            for (var i in response) {
+              var data = response[i];
+              var serviceLabel = promiseCache.promisesMetaInformation[i].label;
+              // insert the result of a response into the final results-array
+              var result = useServiceConfig[serviceLabel].fnSuccess(data);
+              results.push(result);
+            }
+
+            return firstInGroupTrue(results);
+          });
+
+          return resultPromise;
+        }
+      };
+    };
+
+    this.setService = function(serviceConfig) {
+      this.userServices[serviceConfig.label] = serviceConfig;
+    };
+
+    this.setConfiguration = function(userConfig) {
+      _(this.config).extend(userConfig);
+    };
+
+  })
+
+  .directive('geometryInput', ['$http', '$q', 'GeocodingLookup', function($http, $q, GeocodingLookup) {
 
     var uniqueId = 1;
 
@@ -16,228 +263,13 @@ angular.module('ui.jassa.geometry-input', [])
         geocodingServices: '=geocodingServices'
       },
       controller: ['$scope', function($scope) {
+
         $scope.ngModelOptions = $scope.ngModelOptions || {};
         $scope.geometry = 'point';
         $scope.isLoading = false;
 
-        $scope.getGeocodingInformation = function(searchString, successCallback) {
-
-          var url = 'http://nominatim.openstreetmap.org/search/?q='+searchString+'&format=json&polygon_text=1';
-
-          var responsePromise = $http({
-            'method': 'GET',
-            'url': url,
-            'cache': true,
-            'headers' : {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-
-          responsePromise.success(function(data, status, headers, config) {
-            if(angular.isFunction(successCallback)) {
-              successCallback(data, responsePromise);
-            }
-
-          });
-          responsePromise.error(function(data, status, headers, config) {
-            alert('AJAX failed!');
-          });
-        };
-
-        var createSparqlService = function(url, graphUris) {
-          var result = jassa.service.SparqlServiceBuilder.http(url, graphUris, {type: 'POST'})
-            .cache().virtFix().paginate(1000).pageExpand(100).create();
-
-          return result;
-        };
-
-        $scope.fetchResultsForRestService = function(restServiceConfig, searchString) {
-          return $http({
-            'method': 'GET',
-            'url': restServiceConfig.endpoint+searchString,
-            'cache': true,
-            'headers' : {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-        };
-
-        $scope.fetchResultsForSparqlService = function(sparqlServiceConfig, searchString) {
-
-          var sparqlService = createSparqlService(sparqlServiceConfig.endpoint, sparqlServiceConfig.graph);
-
-          var store = new jassa.sponate.StoreFacade(sparqlService, _(sparqlServiceConfig.prefix)
-            .defaults(jassa.vocab.InitialContext));
-
-          var query = sparqlServiceConfig.query.replace(/%SEARCHSTRING%/gi,searchString);
-
-          store.addMap({
-            name: 'sparqlService',
-            template: [{
-              id: '?s',
-              label: '?l', // kann man dann noch besser machen - aber fürs erste passts
-              wkt: '?g',
-              group: '' + sparqlServiceConfig.name
-            }],
-            from: query
-          });
-
-          return store.sparqlService.getListService().fetchItems(null, 10);
-        };
-
         $scope.fetchResults = function(searchString) {
-          // Geocoding APIs
-          var sources = {
-            restService: [
-              {
-                name: 'Nominatim',
-                endpoint: 'http://nominatim.openstreetmap.org/search/?format=json&polygon_text=1&q='
-              },
-              {
-                name: 'Nokia HERE',
-                endpoint: 'http://geocoder.cit.api.here.com/6.2/geocode.json?app_id=DemoAppId01082013GAL&app_code=AJKnXv84fjrb0KIHawS0Tg&additionaldata=IncludeShapeLevel,default&mode=retrieveAddresses&searchtext='
-              }
-            ],
-            sparqlService: [
-              {
-                'name' : 'LinkedGeoData (Natural Earth)',
-                'endpoint' : 'http://linkedgeodata.org/vsparql',
-                'graph' : 'http://linkedgeodata.org/ne/',
-                'type' : 'http://linkedgeodata.org/ne/ontology/Country',
-                'active' : false,
-                'facets' : false,
-                'prefix' : {
-                  ogc: 'http://www.opengis.net/ont/geosparql#',
-                  geom: 'http://geovocab.org/geometry#'
-                },
-                'query' : '{'
-                  +' Graph <http://linkedgeodata.org/ne/> {'
-                  +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
-                  +' rdfs:label ?l ;'
-                  +' geom:geometry ['
-                  +'  ogc:asWKT ?g'
-                  +' ] '
-                  +' FILTER regex(?l, "'+ searchString +'", "i") '
-                  +' } '
-                  +'}'
-              }
-            ]
-          };
-
-          // stores promises for each geocoding api
-          var promiseCache = {
-            promisesMetaInformation: {
-              /**
-               * [{
-               *   name: x,
-               *   promiseID: y
-               * }]
-               */
-              restService: [],
-              sparqlService: []
-            },
-            promises: []
-          };
-          for (var serviceType in $scope.geocodingServices) {
-            if (serviceType === 'restService') {
-              for(var r in sources.restService) {
-                var restService = sources.restService[r];
-                promiseCache.promisesMetaInformation.restService.push({
-                  name: restService.name,
-                  id: promiseCache.promises.length
-                });
-                promiseCache.promises.push($scope.fetchResultsForRestService(restService, searchString));
-              }
-            }
-
-            if (serviceType === 'sparqlService') {
-              for(var s in sources.sparqlService) {
-                var sparqlService = sources.sparqlService[s];
-                promiseCache.promisesMetaInformation.sparqlService.push({
-                  name: sparqlService.name,
-                  id: promiseCache.promises.length
-                });
-                promiseCache.promises.push($scope.fetchResultsForSparqlService(sparqlService, searchString));
-              }
-            }
-
-          }
-
-          // after getting the response then process the response promise
-          var resultPromise = $q.all(promiseCache.promises).then(function(responses){
-
-            console.log('promiseCache', promiseCache);
-
-            var results = [];
-
-            for (var i in responses) {
-              // used to grab the hostname a.href = url -> a.hostname
-              var a = document.createElement('a');
-
-              for (var j in responses[i].data) {
-                // Nominatim
-                if(i==='0') {
-                  a.href = responses[i].config.url;
-                  if (responses[i].data[j].hasOwnProperty('geotext')) {
-                    results.push({
-                      'firstInGroup': false,
-                      'wkt': responses[i].data[j].geotext,
-                      'label': responses[i].data[j].display_name,
-                      'group': $scope.geocodingServices.restService[i].name || a.hostname
-                    });
-                  }
-                }
-
-                // Nokia HERE Maps Sample
-                if(i==='1') {
-                  a.href = responses[i].config.url;
-                  if (responses[i].data[j].View.length > 0) {
-                    for(var k in responses[i].data[j].View[0].Result) {
-                      if(responses[i].data[j].View[0].Result[k].Location.hasOwnProperty('Shape')) {
-                        results.push({
-                          'firstInGroup': false,
-                          'wkt': responses[i].data[j].View[0].Result[k].Location.Shape.Value,
-                          'label': responses[i].data[j].View[0].Result[k].Location.Address.Label,
-                          'group': $scope.geocodingServices.restService[i].name || a.hostname
-                        });
-                      }
-                    }
-                  }
-                }
-              }
-
-              // LinkedGeoData
-              if(i==='2') {
-                if (responses[i].length > 0) {
-                  for(var l in responses[i]) {
-                    results.push({
-                      'firstInGroup': false,
-                      'wkt': responses[i][l].val.wkt,
-                      'label': responses[i][l].val.label,
-                      'group': responses[i][l].val.group
-                    });
-                  }
-                }
-              }
-            }
-
-            // mark the first of each group for headlines
-            results = _(results).groupBy('group');
-            results = _(results).map(function(g) {
-              g[0].firstInGroup = true;
-              return g;
-            });
-            results = _(results).flatten();
-            results = _(results).value();
-
-            //console.log('results', results);
-
-            return results;
-          });
-
-          return resultPromise;
+          return GeocodingLookup.findByKeyword(searchString);
         };
 
         $scope.onSelectGeocode = function(item) {
@@ -273,25 +305,6 @@ angular.module('ui.jassa.geometry-input', [])
               //scope.geometry-input-input = newValue;
               toggleControl();
             });
-
-            /** Disabled
-            scope.$watch(function () {
-              return scope.searchString;
-            }, function (newValue) {
-              console.log('searchString', newValue);
-              if (newValue.length > 3) {
-                scope.getGeocodingInformation(newValue, function(data) {
-                  console.log('getGeocodingInformation', data);
-                  for (var i in data) {
-                    if(data[i].geotext != null) {
-                      parseWKT(data[i].geotext);
-                    }
-                  }
-                });
-              }
-              //scope.searchResults = scope.fetchGeocodingResults(newValue);
-            });
-            */
 
             function init() {
               // generate custom map id
