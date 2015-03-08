@@ -7,6 +7,13 @@
     rex-lookup="true">
 
 
+<div ng-init="a=[1,2,3]; b=[4,5,6]">
+    <ul>
+        <li ng-repeat="x in foo = a.concat(b)">{{x}}</li>
+    </ul>
+    <button ng-click="b.push(foo.length + 1)">Add</button>
+</div>
+
 <div ng-if="false">
     <div
         ui-codemirror="editorOptions.ttl"
