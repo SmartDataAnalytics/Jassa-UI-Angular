@@ -340,13 +340,22 @@ var processPrefixes = function(talisRdfJson, prefixMapping) {
 
 //var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
 
-var createCoordinate = function(scope, component) {
-    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
-    //__defaultPrefixMapping;
 
+//var createCoordinate = function(scope, component) {
+//    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+//
+//    return new Coordinate(
+//        pm.expandPrefix(scope.rexSubject),
+//        pm.expandPrefix(scope.rexPredicate),
+//        scope.rexObject,
+//        component
+//    );
+//};
+
+var createCoordinate = function(scope, component) {
     return new Coordinate(
-        pm.expandPrefix(scope.rexSubject),
-        pm.expandPrefix(scope.rexPredicate),
+        scope.rexSubject,
+        scope.rexPredicate,
         scope.rexObject,
         component
     );
@@ -591,23 +600,19 @@ var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
     var attr = attrs[attrName];
     var getterFn = $parse(attr);
 
-    var updateScopeVal = function(val) {
-        var v = transformFn ? transformFn(val) : val;
-
-        $scope[attrName] = v;
+    var getEffectiveValue = function() {
+        var v = getterFn($scope);
+        var r = transformFn ? transformFn(v) : v;
+        return r;
     };
 
-    $scope.$watch(function() {
-        var r = getterFn($scope);
-        return r;
-    }, function(newVal, oldVal) {
-        //console.log('Syncing: ', attrName, ' to ', newVal, ' in ', $scope);
-        updateScopeVal(newVal);
+    $scope.$watch(getEffectiveValue, function(v) {
+        $scope[attrName] = v;
     }, deep);
 
-    var result = getterFn($scope);
+    var result = getEffectiveValue();
     // Also init the value immediately
-    updateScopeVal(result);
+    $scope[attrName] = result;
 
     return result;
 };

@@ -12,7 +12,14 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs){
             return {
                 pre: function(scope, ele, attrs, ctrls) {
-                    syncAttr($parse, scope, attrs, 'rexPredicate');
+
+                    // Sync rex-predicate to its resolved value
+                    syncAttr($parse, scope, attrs, 'rexPredicate', false, function(predicate) {
+                        var pm = scope.rexPrefixMapping;
+                        var r = pm ? pm.expandPrefix(predicate) : predicate;
+                        return r;
+                    });
+
                 }
             };
         }

@@ -102,7 +102,7 @@
 
                 <div rex-nav-predicate="'o:distributionOf'" rex-nav-inverse="true" rex-add-items="addedDists" rex-nav-targets="data.dists">
                     <ul class="list">
-                        <li ng-repeat="distIri in data.dists track by $index" rex-subject="distIri" ng-init="dist={};">{{distIri}}
+                        <li ng-repeat="distIri in allDists = data.dists.concat(addedDists) track by $index" rex-subject="distIri" ng-init="dist={};">{{distIri}}
 
                             <div class="form-group">
                                 <div class="input-group">

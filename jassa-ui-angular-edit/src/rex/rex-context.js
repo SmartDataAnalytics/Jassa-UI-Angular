@@ -1,7 +1,7 @@
 angular.module('ui.jassa.rex')
 
 
-.directive('rexContext', ['$parse', function($parse) {
+.directive('rexContext', ['$parse', '$q', function($parse, $q) {
     return {
         priority: 30,
         restrict: 'A',
@@ -116,6 +116,8 @@ angular.module('ui.jassa.rex')
             return {
                 pre: function(scope, ele, attrs, ctrl) {
 
+                    //dddi = $dddi(scope);
+
                     // If no context object is provided, we create a new one
 //                    if(!attrs.rexContext) {
 //                        scope.rexContextAnonymous = {};
@@ -131,18 +133,26 @@ angular.module('ui.jassa.rex')
                         // a map from coordinate to slotId to true
                         rexContext.dirty = {};
 
+
+                        rexContext.refSubjects = {}; // a map from subject to reference count. Filled out by rexSubject.
+
+
+
                         /**
                          * Resets the form by iterating over all referenced coordinates
                          * and setting the override to the corresponding values from the base graph
                          */
                         rexContext.reset = function() {
+                            // TODO Reload all data for referenced resources
+                            // This essentially means that rexSubject has to registered referenced resources here...
+
                             var coordinates = ctrl.getReferencedCoordinates();
 
                             coordinates.forEach(function(coordinate) {
                                 var currentValue = getEffectiveValue(rexContext, coordinate);
                                 var originalValue = getValueAt(rexContext.json, coordinate);
                                 setValueAt(rexContext.override, coordinate, originalValue);
-                                console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
+                                //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
                             });
                         };
 
@@ -197,6 +207,71 @@ angular.module('ui.jassa.rex')
 */
 
                     };
+
+                    var updateArray = function(arrFn) {
+                        var result = [];
+
+                        return function() {
+                            var items = arrFn();
+
+                            while(result.length) { result.pop(); }
+
+                            result.push.apply(result, items);
+
+                            return result;
+                        };
+                    };
+
+                   var getSubjects = updateArray(function() {
+                       var r = Object.keys(scope.rexContext.refSubjects);
+                       //console.log('Subjects:' + JSON.stringify(r));
+                       return r;
+                   });
+
+                   var updateSubjectGraphs = function() {
+                       var lookupEnabled = scope.rexLookup;
+                       var sparqlService = scope.rexSparqlService;
+                       var subjectStrs = scope.rexContext.subjects;
+
+                       if(lookupEnabled && sparqlService && subjectStrs) {
+                           var subjects = subjectStrs.map(function(str) {
+                               return jassa.rdf.NodeFactory.createUri(str);
+                           });
+
+                           var lookupService = new jassa.service.LookupServiceGraphSparql(sparqlService);
+
+                           var promise = lookupService.lookup(subjects);
+
+                           $q.when(promise).then(function(subjectToGraph) {
+                               var contextScope = scope.rexContext;
+                               var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();
+
+                               subjectToGraph.forEach(function(graph, subject) {
+                                   // Remove prior data from the graph
+                                   var pattern = new jassa.rdf.Triple(subject, null, null);
+                                   baseGraph.removeMatch(pattern);
+
+                                   baseGraph.addAll(graph);
+                               });
+
+                               // Add the updated data
+                               // TODO Add the data to the context
+                           });
+                       }
+                   };
+
+
+                    scope.$watchCollection('[rexSparqlService, rexLookup, rexPrefixMapping]', function() {
+                        updateSubjectGraphs();
+                    });
+
+                    scope.$watchCollection(getSubjects, function(subjects) {
+                        scope.rexContext.subjects = subjects;
+
+                        console.log('Subjects: ' + JSON.stringify(subjects));
+                        updateSubjectGraphs();
+                    });
+
 
                     // Make sure to initialize any provided context object
                     // TODO: The status should probably be part of the context directive, rather than a context object

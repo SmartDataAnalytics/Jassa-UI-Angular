@@ -254,7 +254,7 @@ angular.module('ui.jassa.geometry-input', [])
     return {
       restrict: 'EA',
       priority: 4,
-      require: ['^ngModel'],
+      require: '?ngModel',
       templateUrl: 'template/geometry-input/geometry-input.html',
       replace: true,
       scope: {
@@ -279,7 +279,9 @@ angular.module('ui.jassa.geometry-input', [])
       }],
       compile: function(ele, attrs) {
         return {
-          pre: function (scope, ele, attrs) {
+          pre: function (scope, ele, attrs, ngModel) {
+            ngModel.$name = scope.$eval(attrs.name);
+
             scope.searchString = '';
 
             var map, drawControls, polygonLayer, panel, wkt, vectors;
@@ -438,14 +440,19 @@ angular.module('ui.jassa.geometry-input', [])
             function onModificationStart(feature) {
               //console.log(feature.id + ' is ready to be modified');
               drawControls[scope.geometry].deactivate();
-
             }
 
             function onModification(feature) {
               //console.log(feature.id + ' has been modified');
               var wktValue = generateWKT(feature);
               scope.bindModel = wktValue;
-              scope.$apply();
+
+              // A modification makes this control dirty
+              ngModel.$setDirty();
+
+              if(scope.$$phase) {
+                  scope.$apply();
+              }
             }
 
             function onModificationEnd(feature) {
