@@ -157,6 +157,8 @@ angular.module('ui.jassa.rex')
                                     setValueAt(rexContext.override, coordinate, originalValue);
                                     //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
                                 });
+
+                                return true;
                             });
 
                             return r;
@@ -250,7 +252,7 @@ angular.module('ui.jassa.rex')
 
                            var promise = lookupService.lookup(subjects);
 
-                           r = $q.when(promise).then(function(subjectToGraph) {
+                           r = promise.then(function(subjectToGraph) {
                                var contextScope = scope.rexContext;
                                var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();
 
@@ -274,14 +276,14 @@ angular.module('ui.jassa.rex')
 
 
                     scope.$watchCollection('[rexSparqlService, rexLookup, rexPrefixMapping]', function() {
-                        updateSubjectGraphs();
+                        $q.when(updateSubjectGraphs());
                     });
 
                     scope.$watchCollection(getSubjects, function(subjects) {
                         scope.rexContext.subjects = subjects;
 
                         console.log('Subjects: ' + JSON.stringify(subjects));
-                        updateSubjectGraphs();
+                        $q.when(updateSubjectGraphs());
                     });
 
 
