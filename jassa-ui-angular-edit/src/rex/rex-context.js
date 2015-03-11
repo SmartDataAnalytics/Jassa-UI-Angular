@@ -143,17 +143,23 @@ angular.module('ui.jassa.rex')
                          * and setting the override to the corresponding values from the base graph
                          */
                         rexContext.reset = function() {
-                            // TODO Reload all data for referenced resources
-                            // This essentially means that rexSubject has to registered referenced resources here...
 
-                            var coordinates = ctrl.getReferencedCoordinates();
+                            var r = updateSubjectGraphs().then(function() {
 
-                            coordinates.forEach(function(coordinate) {
-                                var currentValue = getEffectiveValue(rexContext, coordinate);
-                                var originalValue = getValueAt(rexContext.json, coordinate);
-                                setValueAt(rexContext.override, coordinate, originalValue);
-                                //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
+                                // TODO Reload all data for referenced resources
+                                // This essentially means that rexSubject has to registered referenced resources here...
+
+                                var coordinates = ctrl.getReferencedCoordinates();
+
+                                coordinates.forEach(function(coordinate) {
+                                    var currentValue = getEffectiveValue(rexContext, coordinate);
+                                    var originalValue = getValueAt(rexContext.json, coordinate);
+                                    setValueAt(rexContext.override, coordinate, originalValue);
+                                    //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
+                                });
                             });
+
+                            return r;
                         };
 
 
@@ -233,6 +239,8 @@ angular.module('ui.jassa.rex')
                        var sparqlService = scope.rexSparqlService;
                        var subjectStrs = scope.rexContext.subjects;
 
+                       var r;
+
                        if(lookupEnabled && sparqlService && subjectStrs) {
                            var subjects = subjectStrs.map(function(str) {
                                return jassa.rdf.NodeFactory.createUri(str);
@@ -242,7 +250,7 @@ angular.module('ui.jassa.rex')
 
                            var promise = lookupService.lookup(subjects);
 
-                           $q.when(promise).then(function(subjectToGraph) {
+                           r = $q.when(promise).then(function(subjectToGraph) {
                                var contextScope = scope.rexContext;
                                var baseGraph = contextScope.baseGraph = contextScope.baseGraph || new jassa.rdf.GraphImpl();
 
@@ -257,7 +265,11 @@ angular.module('ui.jassa.rex')
                                // Add the updated data
                                // TODO Add the data to the context
                            });
+                       } else {
+                           r = Promise.resolve();
                        }
+
+                       return r;
                    };
 
 
