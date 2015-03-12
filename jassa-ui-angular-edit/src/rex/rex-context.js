@@ -154,6 +154,8 @@ angular.module('ui.jassa.rex')
                                 return true;
                             });
 
+                            r = $q.when(r);
+
                             return r;
                         };
 
@@ -341,7 +343,6 @@ angular.module('ui.jassa.rex')
                     }, function() {
                         //console.log('Override', scope.rexContext.override);
                         cleanupReferences(currentCoordinateSet);
-                        cleanupOverride();
                     }, true);
 
 
