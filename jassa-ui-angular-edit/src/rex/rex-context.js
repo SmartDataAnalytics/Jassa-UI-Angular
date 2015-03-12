@@ -1,7 +1,7 @@
 angular.module('ui.jassa.rex')
 
 
-.directive('rexContext', ['$parse', '$q', function($parse, $q) {
+.directive('rexContext', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
     return {
         priority: 30,
         restrict: 'A',
@@ -131,11 +131,12 @@ angular.module('ui.jassa.rex')
                         rexContext.override = rexContext.override || {};//  new jassa.util.HashMap();
 
                         // a map from coordinate to slotId to true
-                        rexContext.dirty = {};
+                        rexContext.dirty = rexContext.dirty || {};
 
 
-                        rexContext.refSubjects = {}; // a map from subject to reference count. Filled out by rexSubject.
+                        rexContext.refSubjects = rexContext.refSubjects || {}; // a map from subject to reference count. Filled out by rexSubject.
 
+                        rexContext.srcGraph = rexContext.srcGraph || new jassa.rdf.GraphImpl();
 
 
                         /**
@@ -157,6 +158,8 @@ angular.module('ui.jassa.rex')
                                     setValueAt(rexContext.override, coordinate, originalValue);
                                     //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
                                 });
+
+                                // Reset the diff
 
                                 return true;
                             });
@@ -270,6 +273,11 @@ angular.module('ui.jassa.rex')
                        } else {
                            r = Promise.resolve();
                        }
+
+                       r = r.then(function() {
+                           var rexContext = scope.rexContext;
+                           rexContext.json = rexContext.baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(rexContext.baseGraph) : {};
+                       });
 
                        return r;
                    };
@@ -398,30 +406,9 @@ angular.module('ui.jassa.rex')
                         return result;
                     };
 
-                    var updateDerivedValues = function(dataMap, prefixMapping) {
-//console.log('Start update derived');
-                        /*
-                        var talis = assembleTalisRdfJson(dataMap);
-                        processPrefixes(talis, prefixMapping);
-
-                        // Update the final RDF graph
-                        var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
-                        */
-                        var targetGraph = dataMapToGraph(dataMap, prefixMapping);
-
-                        var enforcedGraph = ctrl.getEnforcedGraph();
-                        // TODO Remove from enforcedGraph those triples that are already present in the source data
-                        //enforcedGraph.removeAll();
-                        targetGraph.addAll(enforcedGraph);
-
-
-
-                        scope.rexContext.graph = targetGraph;
-
-                        scope.rexContext.targetJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(targetGraph);
-
-                        // Update the referenced sub graph
-                        var refGraph = new jassa.rdf.GraphImpl();
+                    // Update the referenced sub graph
+                    var createRefGraph = function() {
+                        var result = new jassa.rdf.GraphImpl();
                         var coordinates = ctrl.getReferencedCoordinates();
 
                         var srcJson = scope.rexContext.json;
@@ -435,13 +422,27 @@ angular.module('ui.jassa.rex')
                                 var p = jassa.rdf.NodeFactory.createUri(coordinate.p);
 
                                 var t = new jassa.rdf.Triple(s, p, o);
-                                refGraph.add(t);
+                                result.add(t);
                             }
                         });
 
-                        scope.rexContext.srcGraph = refGraph;
+                        return result;
+                    };
 
-                        scope.rexContext.diff = setDiff(refGraph, targetGraph);
+
+
+                    var updateDerivedValues = function(dataMap, prefixMapping) {
+//console.log('Start update derived');
+                        /*
+                        var talis = assembleTalisRdfJson(dataMap);
+                        processPrefixes(talis, prefixMapping);
+
+                        // Update the final RDF graph
+                        var targetGraph = jassa.io.TalisRdfJsonUtils.talisRdfJsonToGraph(talis);
+                        */
+
+
+
 //console.log('End update derived');
 
 
@@ -560,20 +561,82 @@ angular.module('ui.jassa.rex')
                         cleanupOverride();
                     }, true);
 
-                    var currentDataMap = new jassa.util.HashMap();
 
-                    scope.$watch(function() {
-                        currentDataMap = createDataMap(currentCoordinateSet);
-                        var r = currentDataMap.hashCode();
-                        //console.log('dataMapHash: ', r);
+                    var dddi = $dddi(scope);
+
+                    scope.currentDataMap = new jassa.util.HashMap();
+
+                    dddi.register('currentDataMap', function() {
+                        var r = createDataMap(currentCoordinateSet);
+
+                        r = r.hashCode() === scope.currentDataMap.hashCode()
+                            ? scope.currentDataMap
+                            : r;
+
                         return r;
-                    }, function(dataMap) {
+                    });
 
-                        var rexContext = scope.rexContext;
-                        var prefixMapping = rexContext ? rexContext.prefixMapping : null;
+                    dddi.register('rexContext.graph', ['currentDataMap.hashCode()', function() {
+                        var r = dataMapToGraph(scope.currentDataMap, scope.rexContext.prefixMapping);
 
-                        updateDerivedValues(currentDataMap, prefixMapping);
-                    }, true);
+                        var enforcedGraph = ctrl.getEnforcedGraph();
+                        // TODO Remove from enforcedGraph those triples that are already present in the source data
+                        //enforcedGraph.removeAll();
+                        r.addAll(enforcedGraph);
+
+                        return r;
+                    }]);
+
+                    dddi.register('rexContext.targetJson', ['rexContext.graph.hashCode()',
+                        function() {
+                            var r = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(scope.rexContext.graph);
+                            return r;
+                        }]);
+
+                    dddi.register('rexContext.srcGraph',
+                        function() {
+                            var r = createRefGraph();
+
+                            r = r.hashCode() === scope.rexContext.srcGraph.hashCode()
+                                ? scope.rexContext.srcGraph
+                                : r;
+
+                            return r;
+                        });
+
+                    dddi.register('rexContext.diff', ['rexContext.srcGraph.hashCode()', 'rexContext.graph.hashCode()',
+                        function() {
+                            var r = setDiff(scope.rexContext.srcGraph, scope.rexContext.graph);
+                            return r;
+                        }]);
+
+
+//                  scope.$watch(function() {
+//                  currentDataMap = createDataMap(currentCoordinateSet);
+//                  var r = currentDataMap.hashCode();
+//                  //console.log('dataMapHash: ', r);
+//                  return r;
+//              }, function(dataMap) {
+//
+//                  var rexContext = scope.rexContext;
+//                  var prefixMapping = rexContext ? rexContext.prefixMapping : null;
+//
+//                  updateDerivedValues(currentDataMap, prefixMapping);
+//              }, true);
+
+
+//                    scope.$watch(function() {
+//                        currentDataMap = createDataMap(currentCoordinateSet);
+//                        var r = currentDataMap.hashCode();
+//                        //console.log('dataMapHash: ', r);
+//                        return r;
+//                    }, function(dataMap) {
+//
+//                        var rexContext = scope.rexContext;
+//                        var prefixMapping = rexContext ? rexContext.prefixMapping : null;
+//
+//                        updateDerivedValues(currentDataMap, prefixMapping);
+//                    }, true);
 
 
                 }

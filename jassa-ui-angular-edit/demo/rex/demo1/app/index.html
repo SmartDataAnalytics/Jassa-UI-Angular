@@ -188,8 +188,8 @@
       });
     })
 
-    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http',
-        function($scope, $dddi, $location, $anchorScroll, $timeout, $http) {
+    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http', '$q',
+        function($scope, $dddi, $location, $anchorScroll, $timeout, $http, $q) {
 
         var dddi = $dddi($scope);
 
@@ -233,6 +233,29 @@
         $scope.UpdateUtils = jassa.service.UpdateUtils;
 
         console.log('UpdateUtils: ', $scope.UpdateUtils);
+
+
+        $scope.performUpdate = function(rexContext, prefixMapping, form) {
+            //var updateService = $scope.active.service.updateService;
+
+            var x = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, prefixMapping)
+            .then(function() {
+                form.$setPristine();
+                var r = rexContext.reset();
+                return r;
+            });
+
+            // Note: Only when the update is successful do we reset the form to pristine
+            // This will retain edits in case of failure
+            $q.when(x).then(function() {
+                ++$scope.editCounter;
+                //alert('Update successful');
+            }, function(e) {
+                ++$scope.editCounter;
+                //alert('Update failed with reason: ' + e.responseText);
+            });
+        };
+
 /*
         $scope.performUpdate = function(diff, prefixMapping) {
             var str;
@@ -390,13 +413,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <div ng-include="'forms/dataset-editor.html'"></div>
+<!--             <div ng-include="'forms/dataset-editor.html'"></div> -->
 
-            <div ng-include="'forms/dynamic.html'"></div>
+<!--             <div ng-include="'forms/dynamic.html'"></div> -->
 
-            <div ng-include="'forms/geo.html'"></div>
+<!--             <div ng-include="'forms/geo.html'"></div> -->
 
-            <div ng-include="'forms/person-form.html'"></div>
+<!--             <div ng-include="'forms/person-form.html'"></div> -->
             <div ng-include="'forms/simple-editor.html'"></div>
 
         </div>
