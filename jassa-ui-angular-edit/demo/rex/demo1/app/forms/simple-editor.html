@@ -44,7 +44,7 @@
         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
 
 
-<div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'">
+<!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
             {{rexPrefixMapping.shortForm(property)}}:
 
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
@@ -78,7 +78,7 @@
             </div>
             <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
         </div>
-</div>
+<!-- </div> -->
 
 
         <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button>
