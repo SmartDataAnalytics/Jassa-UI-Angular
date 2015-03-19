@@ -17,9 +17,8 @@ angular.module('ui.jassa.dataset-browser', ['ui.jassa.replace'])
             'o': 'http://example.org/ontology/'
         });
 
-        var labelConfig = new jassa.sparql.BestLabelConfig(langs);
-        var labelTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig); };
-        var commentTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment])); };
+        var labelTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptLiteralPreference(new jassa.sparql.LiteralPreference(langs)); };
+        var commentTemplateFn = function() { return jassa.sponate.MappedConceptUtils.createMappedConceptLiteralPreference(new jassa.sparql.LiteralPreference(langs, [jassa.vocab.rdfs.comment])); };
 
         var template = [{
             id: '?s',
@@ -70,8 +69,8 @@ angular.module('ui.jassa.dataset-browser', ['ui.jassa.replace'])
         var result = store.primaryDatasets.getListService();
 
         result = new jassa.service.ListServiceTransformConceptMode(result, function() {
-            var searchConfig = new jassa.sparql.BestLabelConfig(langs, [jassa.vocab.rdfs.comment, jassa.vocab.rdfs.label]);
-            var labelRelation = jassa.sparql.LabelUtils.createRelationPrefLabels(searchConfig);
+            var searchConfig = new jassa.sparql.LiteralPreference(langs, [jassa.vocab.rdfs.comment, jassa.vocab.rdfs.label]);
+            var labelRelation = jassa.sparql.LabelUtils.createRelationLiteralPreference(searchConfig);
             return labelRelation;
         });
 
