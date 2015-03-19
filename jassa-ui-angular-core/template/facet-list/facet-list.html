@@ -101,8 +101,9 @@
 
 <!--                 <div class="clearfix"></div> -->
 
-            <div ng-show="facetValuePath!=null">
-                <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="margin-bottom: -1px; text-align: left;" class="btn btn-label facet-list-item-btn" type="button" ng-click="toggleConstraint(item.node)">
+<!-- style="margin-bottom: -1px; text-align: left;" -->
+            <div ng-show="facetValuePath!=null" style="width: 100%">
+                <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="text-align: left; width: 100%" class="btn btn-label facet-list-item-btn" type="button" ng-click="toggleConstraint(item.node)">
                     <span class="glyphicon glyphicon glyphicon-record facet-value"></span>
                     {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.node)}}
                     <span class="counter"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
