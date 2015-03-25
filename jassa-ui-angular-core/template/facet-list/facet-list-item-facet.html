@@ -1,0 +1,21 @@
+<div class="input-group">
+
+    <button style="text-align: left; width: 100%" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="breadcrumb.property = item.property.getUri()">
+        <span class="glyphicon glyphicon glyphicon-record"></span>
+        {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.property)}}
+        <span class="counter"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
+    </button>
+
+    <div class="input-group-btn">
+        <ul class="list-inline">
+            <li ng-repeat="facetPlugin in facetPlugins" compile="facetPlugin">
+    <!--                             <ng-include src="plugin"></ng-include> -->
+            </li>
+            <li>
+                <button class="btn btn-default facet-list-item-btn visible-on-hover-child" type="button" ng-click="descendFacet(item.property)">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>

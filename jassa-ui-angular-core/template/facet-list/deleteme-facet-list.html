@@ -8,7 +8,7 @@
 
     <!-- Breadcrumb -->
 <!--     <breadcrumb sparql-service="sparqlService" ng-model="breadcrumb"></breadcrumb> -->
-    <breadcrumb ng-show="!showConstraints" lookup-service="lookupServiceNodeLabels" ng-model="breadcrumb"></breadcrumb>
+    <breadcrumb lookup-service="lookupService" ng-model="breadcrumb"></breadcrumb>
 
 
     <!-- Filter and Limit -->
@@ -71,12 +71,58 @@
     </ul>
 
     <!-- Data list -->
-    <ul ng-show="!ls.loading.data" class="list-group facet-list">
+    <ul ng-show="!showConstraints && !ls.loading.data" class="list-group facet-list">
         <li ng-repeat="item in ls.state.items" class="list-group-item facet-list-item visible-on-hover-parent" ng-class="facetValuePath==null?'facet':'facet-value'">
 
-            <div ng-include="mode.itemTemplate"></div>
+            <div ng-show="facetValuePath==null" class="input-group">
+
+                <button style="text-align: left; width: 100%" class="btn btn-default btn-label facet-list-item-btn" type="button" ng-click="breadcrumb.property = item.property.getUri()">
+                    <span class="glyphicon glyphicon glyphicon-record"></span>
+                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.property)}}
+                    <span class="counter"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>
+                </button>
+
+                <div class="input-group-btn">
+                    <ul class="list-inline">
+                        <li ng-repeat="plugin in plugins" compile="plugin">
+<!--                             <ng-include src="plugin"></ng-include> -->
+                        </li>
+                        <li>
+                            <button class="btn btn-default facet-list-item-btn visible-on-hover-child" type="button" ng-click="descendFacet(item.property)">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+<!--             <ul ng-show="plugins.length > 0" class="list-inline"> -->
+<!--                 <li ng-repeat="plugin in plugins"> -->
+<!--                     <div compile="plugin"></div> -->
+<!--                 </li> -->
+<!--             </ul> -->
+
+<!--                 <div class="clearfix"></div> -->
+
+<!-- style="margin-bottom: -1px; text-align: left;" -->
+            <div ng-show="facetValuePath!=null" style="width: 100%">
+                <button ng-class="item.isConstrainedEqual ? 'btn-primary' : 'btn-default'" style="text-align: left; width: 100%" class="btn btn-label facet-list-item-btn" type="button" ng-click="toggleConstraint(item.node)">
+                    <span class="glyphicon glyphicon glyphicon-record facet-value"></span>
+                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.node)}}
+                    <span class="counter"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>
+                </button>
+            </div>
 
         </li>
     </ul>
+
+    <!-- Constraints -->
+<!--     <div class="constraints"> -->
+<!--         <constraint-list -->
+<!--             ng-show="showConstraints" -->
+<!--             lookup-service="lookupService" -->
+<!--             facet-tree-config="facetTreeConfig" -->
+<!--         ></constraint-list> -->
+<!--     </div> -->
 
 </div>

@@ -1,26 +1,23 @@
 angular.module('ui.jassa.constraint-list', [])
 
-.controller('ConstraintListCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
+.controller('ConstraintListCtrl', ['$scope', '$q', '$rootScope', '$dddi', function($scope, $q, $rootScope, $dddi) {
 
-    var self = this;
+    var dddi = $dddi($scope);
 
-    var reset = function() {
-        if($scope.sparqlService && $scope.facetTreeConfig) {
-            //var labelConfig = $scope.facetTreeConfig.getBestLiteralConfig();
-            //var mappedConcept = jassa.sponate.MappedConceptUtils.createMappedConceptBestLabel(labelConfig);
-            /*
-            var ls = jassa.sponate.LookupServiceUtils.createLookupServiceMappedConcept($scope.sparqlService, mappedConcept);
-            ls = new jassa.service.LookupServiceTransform(ls, function(val) {
-                return val.displayLabel || val.id;
-            });
-            */
+    dddi.register('constraintLabelsLookupService', ['lookupService',
+        function(lookupService) {
+            var r = new jassa.facete.LookupServiceConstraintLabels(ls);
+            return r;
+        }]);
 
-            var literalPreference = $scope.facetTreeConfig.getBestLiteralConfig().getLiteralPreference();
-            var ls = jassa.sponate.LookupServiceUtils.createLookupServiceNodeLabels($scope.sparqlService, literalPreference);
+    dddi.register('constraints', ['=constraintManager.getConstraints()',
+        function(constraints) {
+            return constraints;
+        }]);
 
-            $scope.constraintLabelsLookupService = new jassa.facete.LookupServiceConstraintLabels(ls);
-        }
-    };
+    dddi.register('listService', ['constraints', 'constraintLabelsLookupService', function() {
+
+    }]);
 
     var refresh = function() {
 
@@ -50,42 +47,6 @@ angular.module('ui.jassa.constraint-list', [])
         }
     };
 
-    var renderConstraint = function(constraint) {
-        var type = constraint.getName();
-
-        var result;
-        switch(type) {
-        case 'equals':
-            var pathStr = ''  + constraint.getDeclaredPath();
-            if(pathStr === '') {
-                pathStr = '()';
-            }
-            result = pathStr + ' = ' + constraint.getValue();
-        break;
-        default:
-            result = constraint;
-        }
-
-        return result;
-    };
-
-    $scope.$watch('constraintLabelsLookupService', function() {
-        refresh();
-    });
-
-    $scope.$watch('facetTreeConfig.getFacetConfig().getConstraintManager()', function(cm) {
-        $scope.constraintManager = cm;
-        refresh();
-    }, true);
-
-    $scope.$watch('sparqlService', function() {
-        reset();
-    });
-
-    $scope.$watch('facetTreeConfig.getBestLiteralConfig()', function() {
-        reset();
-    }, true);
-
     $scope.removeConstraint = function(item) {
         $scope.constraintManager.removeConstraint(item.constraint);
     };
@@ -107,8 +68,8 @@ angular.module('ui.jassa.constraint-list', [])
         transclude: false,
         require: 'constraintList',
         scope: {
-            sparqlService: '=',
-            facetTreeConfig: '=',
+            lookupService: '=',
+            constraintManager: '=',
             onSelect: '&select'
         },
         controller: 'ConstraintListCtrl'

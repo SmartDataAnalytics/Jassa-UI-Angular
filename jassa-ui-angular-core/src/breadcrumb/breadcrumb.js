@@ -20,18 +20,19 @@ angular.module('ui.jassa.breadcrumb', [])
     };
 
     var update = function() {
-        var sparqlService = $scope.sparqlService;
-
         var propertyName = $scope.model.property;
         var property = (propertyName == null || propertyName === true) ? null : jassa.rdf.NodeFactory.createUri(propertyName);
 
         var pathHead = $scope.model.pathHead;
         var path = pathHead ? pathHead.getPath() : null;
 
-        if(sparqlService && path) {
+        var ls = $scope.lookupService;
+
+        if(ls && path) {
             var steps = path.getSteps();
 
-            var ls = jassa.sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService);
+            //var ls = jassa.sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService);
+
             // Value
             ls = new jassa.service.LookupServiceTransform(ls, function(val) { return val.displayLabel; });
             //ls = new jassa.service.LookupServicePathLabels(ls);
@@ -85,7 +86,7 @@ angular.module('ui.jassa.breadcrumb', [])
         update();
     }, true);
 
-    $scope.$watch('sparqlService', function() {
+    $scope.$watch('lookupService', function() {
         update();
     });
 
@@ -192,7 +193,8 @@ angular.module('ui.jassa.breadcrumb', [])
         replace: true,
         templateUrl: 'template/breadcrumb/breadcrumb.html',
         scope: {
-            sparqlService: '=',
+            //sparqlService: '=',
+            lookupService: '=',
             model: '=ngModel',
             maxSize: '=?',
             onSelect: '&select'

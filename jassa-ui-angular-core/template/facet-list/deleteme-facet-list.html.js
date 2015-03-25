@@ -1,5 +1,5 @@
-angular.module("template/facet-list/facet-list.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/facet-list/facet-list.html",
+angular.module("template/facet-list/deleteme-facet-list.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("template/facet-list/deleteme-facet-list.html",
     "<div>\n" +
     "\n" +
     "    <!-- Notification when service is missing -->\n" +
@@ -10,7 +10,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "\n" +
     "    <!-- Breadcrumb -->\n" +
     "<!--     <breadcrumb sparql-service=\"sparqlService\" ng-model=\"breadcrumb\"></breadcrumb> -->\n" +
-    "    <breadcrumb ng-show=\"!showConstraints\" lookup-service=\"lookupServiceNodeLabels\" ng-model=\"breadcrumb\"></breadcrumb>\n" +
+    "    <breadcrumb lookup-service=\"lookupService\" ng-model=\"breadcrumb\"></breadcrumb>\n" +
     "\n" +
     "\n" +
     "    <!-- Filter and Limit -->\n" +
@@ -73,13 +73,59 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "    </ul>\n" +
     "\n" +
     "    <!-- Data list -->\n" +
-    "    <ul ng-show=\"!ls.loading.data\" class=\"list-group facet-list\">\n" +
+    "    <ul ng-show=\"!showConstraints && !ls.loading.data\" class=\"list-group facet-list\">\n" +
     "        <li ng-repeat=\"item in ls.state.items\" class=\"list-group-item facet-list-item visible-on-hover-parent\" ng-class=\"facetValuePath==null?'facet':'facet-value'\">\n" +
     "\n" +
-    "            <div ng-include=\"mode.itemTemplate\"></div>\n" +
+    "            <div ng-show=\"facetValuePath==null\" class=\"input-group\">\n" +
+    "\n" +
+    "                <button style=\"text-align: left; width: 100%\" class=\"btn btn-default btn-label facet-list-item-btn\" type=\"button\" ng-click=\"breadcrumb.property = item.property.getUri()\">\n" +
+    "                    <span class=\"glyphicon glyphicon glyphicon-record\"></span>\n" +
+    "                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.property)}}\n" +
+    "                    <span class=\"counter\"> {{item.valueCountInfo.hasMoreItems ? '...' : '' + item.valueCountInfo.count}}</span>\n" +
+    "                </button>\n" +
+    "\n" +
+    "                <div class=\"input-group-btn\">\n" +
+    "                    <ul class=\"list-inline\">\n" +
+    "                        <li ng-repeat=\"plugin in plugins\" compile=\"plugin\">\n" +
+    "<!--                             <ng-include src=\"plugin\"></ng-include> -->\n" +
+    "                        </li>\n" +
+    "                        <li>\n" +
+    "                            <button class=\"btn btn-default facet-list-item-btn visible-on-hover-child\" type=\"button\" ng-click=\"descendFacet(item.property)\">\n" +
+    "                                <span class=\"glyphicon glyphicon-chevron-right\"></span>\n" +
+    "                            </button>\n" +
+    "                        </li>\n" +
+    "                    </ul>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "<!--             <ul ng-show=\"plugins.length > 0\" class=\"list-inline\"> -->\n" +
+    "<!--                 <li ng-repeat=\"plugin in plugins\"> -->\n" +
+    "<!--                     <div compile=\"plugin\"></div> -->\n" +
+    "<!--                 </li> -->\n" +
+    "<!--             </ul> -->\n" +
+    "\n" +
+    "<!--                 <div class=\"clearfix\"></div> -->\n" +
+    "\n" +
+    "<!-- style=\"margin-bottom: -1px; text-align: left;\" -->\n" +
+    "            <div ng-show=\"facetValuePath!=null\" style=\"width: 100%\">\n" +
+    "                <button ng-class=\"item.isConstrainedEqual ? 'btn-primary' : 'btn-default'\" style=\"text-align: left; width: 100%\" class=\"btn btn-label facet-list-item-btn\" type=\"button\" ng-click=\"toggleConstraint(item.node)\">\n" +
+    "                    <span class=\"glyphicon glyphicon glyphicon-record facet-value\"></span>\n" +
+    "                    {{item.labelInfo.displayLabel || NodeUtils.toPrettyString(item.node)}}\n" +
+    "                    <span class=\"counter\"> {{item.countInfo.hasMoreItems ? '...' : '' + item.countInfo.count}}</span>\n" +
+    "                </button>\n" +
+    "            </div>\n" +
     "\n" +
     "        </li>\n" +
     "    </ul>\n" +
+    "\n" +
+    "    <!-- Constraints -->\n" +
+    "<!--     <div class=\"constraints\"> -->\n" +
+    "<!--         <constraint-list -->\n" +
+    "<!--             ng-show=\"showConstraints\" -->\n" +
+    "<!--             lookup-service=\"lookupService\" -->\n" +
+    "<!--             facet-tree-config=\"facetTreeConfig\" -->\n" +
+    "<!--         ></constraint-list> -->\n" +
+    "<!--     </div> -->\n" +
     "\n" +
     "</div>");
 }]);
