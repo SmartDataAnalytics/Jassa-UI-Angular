@@ -175,7 +175,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             if(property === true) { // facet values for the empty facet
                 r = modes['facetValue'];
             } else {
-                r = property == null ? modes['facetValue'] : modes['facet'];
+                r = property == null ? modes['facet'] : modes['facetValue'];
             }
             return r;
         }
