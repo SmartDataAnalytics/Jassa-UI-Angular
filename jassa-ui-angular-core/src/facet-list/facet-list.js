@@ -33,6 +33,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
 
     var modes = {
         constraint: {
+            type: 'constraint',
             itemTemplate: 'template/facet-list/facet-list-item-constraint.html',
             listServiceFn: function() {
                 var r = $scope.constraintService;
@@ -40,6 +41,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             }
         },
         facet: {
+            type: 'facet',
             itemTemplate: 'template/facet-list/facet-list-item-facet.html',
             listServiceFn: function() {
                 var r = ( $scope.facetService
@@ -50,6 +52,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             }
         },
         facetValue: {
+            type: 'facetValue',
             itemTemplate: 'template/facet-list/facet-list-item-facet-value.html',
             listServiceFn: function() {
                 var r = ( $scope.facetValueService
@@ -106,7 +109,6 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
         var result = pathHead.getPath().copyAppendStep(new jassa.facete.Step(propertyName, pathHead.isInverse()));
         return result;
     };
-
 
 
     /*
@@ -177,7 +179,6 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             } else {
                 r = property == null ? modes['facet'] : modes['facetValue'];
             }
-            return r;
         }
         return r;
     }]);
@@ -221,14 +222,23 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             return r;
         }]);
 
+    dddi.register('filterModel', ['listFilter.concept', function(concept) {
+        return concept;
+    }]);
+
     dddi.register('ls.ctrl.filter', ['?listFilter',
-        function(r) {
-            return r || $scope.ls.ctrl.filter; // retain the value if the argument is null
+        function(listFilter) {
+            var r = listFilter || $scope.ls.ctrl.filter; // retain the value if the argument is null
+            return r;
         }]);
 
 
     dddi.register('listService', ['mode', 'location', 'facetService', 'facetValueService', 'constraintService', function(mode) {
         var r = mode.listServiceFn();
+        return r;
+    }]);
+
+    dddi.register('totalConstraints', ['constraintManager.getConstraints().length', function(r) {
         return r;
     }]);
 

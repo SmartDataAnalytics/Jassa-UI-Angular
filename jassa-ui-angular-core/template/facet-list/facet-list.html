@@ -40,11 +40,11 @@
 
     <!-- Navigation buttons -->
     <div style="width: 100%">
-        <button ng-show="!showConstraints && facetValuePath" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.property = null"><span class="glyphicon glyphicon-chevron-left"></span> Back</button>
-        <button ng-show="!showConstraints && !facetValuePath && !breadcrumb.pathHead.getPath().isEmpty()" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.pathHead = breadcrumb.pathHead.up()"><span class="glyphicon glyphicon-chevron-left"></span> Up</button>
+        <button ng-show="!showConstraints && mode.type.facetValue" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.property = null"><span class="glyphicon glyphicon-chevron-left"></span> Back</button>
+        <button ng-show="!showConstraints && !mode.type.facetValue && !breadcrumb.pathHead.getPath().isEmpty()" class="btn btn-default facet-list-item-btn pull-left" role="button" ng-click="breadcrumb.pathHead = breadcrumb.pathHead.up()"><span class="glyphicon glyphicon-chevron-left"></span> Up</button>
 
-        <button ng-show="!showConstraints" class="btn btn-default facet-list-item-btn pull-right" href="#" ng-click="showConstraints=!showConstraints">Constraints <span class="glyphicon glyphicon-align-justify"></span></button>
-        <button ng-show="showConstraints" class="btn btn-default facet-list-item-btn pull-right" href="#" ng-click="showConstraints=!showConstraints">Facets <span class="glyphicon glyphicon-th-large"></span></button>
+        <button ng-show="!showConstraints" class="btn btn-default facet-list-item-btn pull-right" href="" ng-click="showConstraints=!showConstraints">Constraints <span class="counter">{{totalConstraints == null ? '?' : totalConstraints}}</span> <span class="glyphicon glyphicon-align-justify"></span></button>
+        <button ng-show="showConstraints" class="btn btn-default facet-list-item-btn pull-right" href="" ng-click="showConstraints=!showConstraints">Facets <span class="glyphicon glyphicon-th-large"></span></button>
 
         <div class="clearfix"></div>
     </div>
@@ -78,5 +78,11 @@
 
         </li>
     </ul>
+
+    <div style="width: 100%">
+        <button style="text-align: left; width: 100%" ng-class="constraintManager.getConstraints().length ? '' : 'disabled'" class="btn btn-warning" type="button" ng-click="constraintManager.clear()">
+            <span class="glyphicon glyphicon-remove-circle"></span> Clear Filters
+        </button>
+    </div>
 
 </div>
