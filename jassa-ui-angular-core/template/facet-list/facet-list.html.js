@@ -85,7 +85,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "\n" +
     "    <ul ng-show=\"ls.loading.data\" class=\"list-group facet-list\">\n" +
     "        <li class=\"list-group-item facet-list-item\" style=\"text-align: center\">\n" +
-    "            <span ng-show=\"ls.loading.pageCount\" class=\"glyphicon glyphicon-refresh\"></span>\n" +
+    "            <span class=\"glyphicon glyphicon-refresh\"></span>\n" +
     "        </li>\n" +
     "    </ul>\n" +
     "\n" +
