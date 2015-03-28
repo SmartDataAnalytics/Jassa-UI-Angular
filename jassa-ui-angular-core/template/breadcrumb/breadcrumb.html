@@ -7,7 +7,7 @@
     </li>
 
     <li>
-        <button class="btn btn-default" ng-disabled="path.isEmpty()" ng-click="setPath(0)">
+        <button class="btn btn-default" ng-disabled="model.pathHead.getPath().isEmpty() && model.property==null" ng-click="setPath(0)">
             <span class="glyphicon glyphicon-home"></span>
         </button>
     </li>
@@ -30,7 +30,8 @@
     </li>
 
     <li ng-show="state.value != null">
-        <button class="btn btn-default" ng-click="model.property = null">
+        <button class="btn btn-default" ng-disabled="true">
+<!--         ng-click="model.property=null" -->
             {{state.value.labelInfo.displayLabel}} {{model.pathHead.isInverse() ? '-1' : ''}}
         </button>
     </li>

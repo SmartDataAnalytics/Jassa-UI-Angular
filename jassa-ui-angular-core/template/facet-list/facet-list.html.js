@@ -8,7 +8,7 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "        No service configured (yet).\n" +
     "    </div>\n" +
     "\n" +
-    "<!-- Loading - data: {{ls.loading.data}} - pages: {{ls.loading.pageCount}} -->\n" +
+    "<!-- Loading - data: {{ls.loading.data}} - pages: {{ls.loading.pageCount}} - mode: {{mode.type}} -->\n" +
     "\n" +
     "    <!-- Breadcrumb -->\n" +
     "<!--     <breadcrumb sparql-service=\"sparqlService\" ng-model=\"breadcrumb\"></breadcrumb> -->\n" +
@@ -68,18 +68,17 @@ angular.module("template/facet-list/facet-list.html", []).run(["$templateCache",
     "    Showing {{ls.state.items.length}} entries in the positions {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + (ls.state.items.length ? 1 : 0)}} - {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + ls.state.items.length}} out of {{ls.state.paging.totalItems}} items in total.\n" +
     "    </span>\n" +
     "\n" +
-    "    <ul ng-show=\"!ls.state.items.length\" class=\"list-group facet-list\">\n" +
-    "        <li class=\"list-group-item facet-list-item\" style=\"text-align: center\">\n" +
-    "            <button class=\"btn btn-default btn-label facet-list-item-btn disabled\" type=\"button\">\n" +
-    "                No results\n" +
-    "            </button>\n" +
-    "        </li>\n" +
-    "    </ul>\n" +
-    "\n" +
     "    <!-- Data list -->\n" +
     "    <ul ng-show=\"!ls.loading.data\" class=\"list-group facet-list\">\n" +
     "        <li ng-repeat=\"item in ls.state.items\" class=\"list-group-item facet-list-item visible-on-hover-parent\" ng-class=\"facetValuePath==null?'facet':'facet-value'\">\n" +
+    "<!--             {{item}} -->\n" +
     "            <div ng-include=\"mode.itemTemplate\"></div>\n" +
+    "        </li>\n" +
+    "\n" +
+    "        <li ng-show=\"!ls.state.items.length\" class=\"list-group-item facet-list-item\" style=\"text-align: center\">\n" +
+    "            <button class=\"btn btn-default btn-label facet-list-item-btn disabled\" type=\"button\">\n" +
+    "                No results\n" +
+    "            </button>\n" +
     "        </li>\n" +
     "    </ul>\n" +
     "\n" +

@@ -6,7 +6,7 @@
         No service configured (yet).
     </div>
 
-<!-- Loading - data: {{ls.loading.data}} - pages: {{ls.loading.pageCount}} -->
+<!-- Loading - data: {{ls.loading.data}} - pages: {{ls.loading.pageCount}} - mode: {{mode.type}} -->
 
     <!-- Breadcrumb -->
 <!--     <breadcrumb sparql-service="sparqlService" ng-model="breadcrumb"></breadcrumb> -->
@@ -66,18 +66,17 @@
     Showing {{ls.state.items.length}} entries in the positions {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + (ls.state.items.length ? 1 : 0)}} - {{(ls.state.paging.currentPage - 1) * ls.state.filter.limit + ls.state.items.length}} out of {{ls.state.paging.totalItems}} items in total.
     </span>
 
-    <ul ng-show="!ls.state.items.length" class="list-group facet-list">
-        <li class="list-group-item facet-list-item" style="text-align: center">
-            <button class="btn btn-default btn-label facet-list-item-btn disabled" type="button">
-                No results
-            </button>
-        </li>
-    </ul>
-
     <!-- Data list -->
     <ul ng-show="!ls.loading.data" class="list-group facet-list">
         <li ng-repeat="item in ls.state.items" class="list-group-item facet-list-item visible-on-hover-parent" ng-class="facetValuePath==null?'facet':'facet-value'">
+<!--             {{item}} -->
             <div ng-include="mode.itemTemplate"></div>
+        </li>
+
+        <li ng-show="!ls.state.items.length" class="list-group-item facet-list-item" style="text-align: center">
+            <button class="btn btn-default btn-label facet-list-item-btn disabled" type="button">
+                No results
+            </button>
         </li>
     </ul>
 

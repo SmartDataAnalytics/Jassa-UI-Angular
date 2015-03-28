@@ -167,7 +167,9 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
 
     var dddi = $dddi($scope);
 
-    dddi.register('mode', ['=showConstraints', '=breadcrumb', function(showConstraints, breadcrumb) {
+    dddi.register('mode', ['showConstraints', 'breadcrumb.pathHead.hashCode()', '?breadcrumb.property', function(showConstraints) {
+        var breadcrumb = $scope.breadcrumb;
+
         var r;
         if(showConstraints === true) {
             r = modes['constraint'];
@@ -183,8 +185,9 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
         return r;
     }]);
 
-    dddi.register('facetValuePath', ['=breadcrumb', // property may be null, but breadcrumb must exist
-        function(breadcrumb) {
+    dddi.register('facetValuePath', ['breadcrumb.pathHead.hashCode()', 'breadcrumb.property', // property may be null, but breadcrumb must exist
+        function() {
+            var breadcrumb = $scope.breadcrumb;
             var property = breadcrumb.property;
 
             var r;
@@ -196,11 +199,11 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
             return r;
         }]);
 
-    dddi.register('location', ['mode', '?=facetValuePath.hashCode()', '?=breadcrumb.pathHead.hashCode()',
+    dddi.register('location', ['mode', '?facetValuePath.hashCode()', '?breadcrumb.pathHead.hashCode()',
         function() {
             var r;
             if($scope.mode.type === 'constraint') {
-                r = 'constraint';
+                r = jassa.facete.Path.parse('constraint'); //'constraint';
             } else {
                 r = $scope.facetValuePath != null ? $scope.facetValuePath : $scope.breadcrumb.pathHead;
             }
@@ -212,7 +215,7 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
     /**
      * Retrieve the filter object for the given location and mode
      */
-    dddi.register('listFilter', ['location',
+    dddi.register('listFilter', ['location.hashCode()',
         function(location) {
             var r = $scope.locationToFilter.get($scope.location);
             if(r == null) {
@@ -226,11 +229,20 @@ angular.module('ui.jassa.facet-list', ['ui.jassa.breadcrumb', 'ui.jassa.paging-s
         return concept;
     }]);
 
+    $scope.$watch('listFilter', function(listFilter) {
+        if(listFilter) {
+            angular.copy(listFilter, $scope.ls.ctrl.filter);
+        }
+    });
+
+    /*
     dddi.register('ls.ctrl.filter', ['?listFilter',
         function(listFilter) {
-            var r = listFilter || $scope.ls.ctrl.filter; // retain the value if the argument is null
+            //var r = listFilter || $scope.ls.ctrl.filter; // retain the value if the argument is null
+            var r = listFilter;
             return r;
         }]);
+    */
 
 
     dddi.register('listService', ['mode', 'location', 'facetService', 'facetValueService', 'constraintService', function(mode) {

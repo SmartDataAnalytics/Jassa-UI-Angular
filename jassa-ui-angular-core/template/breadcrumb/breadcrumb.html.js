@@ -9,7 +9,7 @@ angular.module("template/breadcrumb/breadcrumb.html", []).run(["$templateCache",
     "    </li>\n" +
     "\n" +
     "    <li>\n" +
-    "        <button class=\"btn btn-default\" ng-disabled=\"path.isEmpty()\" ng-click=\"setPath(0)\">\n" +
+    "        <button class=\"btn btn-default\" ng-disabled=\"model.pathHead.getPath().isEmpty() && model.property==null\" ng-click=\"setPath(0)\">\n" +
     "            <span class=\"glyphicon glyphicon-home\"></span>\n" +
     "        </button>\n" +
     "    </li>\n" +
@@ -32,7 +32,8 @@ angular.module("template/breadcrumb/breadcrumb.html", []).run(["$templateCache",
     "    </li>\n" +
     "\n" +
     "    <li ng-show=\"state.value != null\">\n" +
-    "        <button class=\"btn btn-default\" ng-click=\"model.property = null\">\n" +
+    "        <button class=\"btn btn-default\" ng-disabled=\"true\">\n" +
+    "<!--         ng-click=\"model.property=null\" -->\n" +
     "            {{state.value.labelInfo.displayLabel}} {{model.pathHead.isInverse() ? '-1' : ''}}\n" +
     "        </button>\n" +
     "    </li>\n" +
