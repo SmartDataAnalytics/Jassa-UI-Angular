@@ -331,6 +331,8 @@ angular.module('ui.jassa.geometry-input', [])
             }
 
             return firstInGroupTrue(results);
+          }, function(response) {
+            console.err('Error during request', response);
           });
 
           return resultPromise;
@@ -399,6 +401,12 @@ angular.module('ui.jassa.geometry-input', [])
    angular.module(
    'geometryInputExample',
    ['dddi', 'ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.rex', 'ui.codemirror', 'ngAnimate'])
+   .config(function(GeocodingLookupProvider) {
+       GeocodingLookupProvider.setConfiguration({
+       service: ['Nominatim'],
+       defaultService: true
+       });
+   })
    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http', '$q',
    function($scope, $dddi, $location, $anchorScroll, $timeout, $http, $q) {
 
