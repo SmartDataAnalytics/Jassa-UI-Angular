@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-npm install
+sudo npm install
 source ./build.conf
 
 # !! WARNING: We delete the source folder as we assume its a dist folder anyway !!!
-rm -rf "$sourceFolder"
+sudo rm -rf "$sourceFolder"
 
 grunt
 

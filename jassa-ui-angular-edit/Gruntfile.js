@@ -88,6 +88,14 @@ module.exports = function(grunt) {
           cwd: 'misc/demo',
           dest: 'dist/'
         }]
+      },
+      ngdocs: {
+        files: [{
+          cwd: 'ngdocs/js',  // set working folder / root to copy
+          src: '**/*',           // copy all files and subfolders
+          dest: 'dist/docs/js',    // destination folder
+          expand: true           // required when using cwd
+        }]
       }
     },
     uglify: {
@@ -177,19 +185,55 @@ module.exports = function(grunt) {
       options: {
         dest: 'dist/docs',
         scripts: [
-          'angular.js',
+          'demo/rex/demo1/app/bower_components/angular/angular.js',
+          'demo/rex/demo1/app/bower_components/angular-animate/angular-animate.js',
+          'demo/rex/demo1/app/bower_components/angular-sanitize/angular-sanitize.js',
+          'demo/rex/demo1/app/bower_components/jquery/dist/jquery.js',
+          'demo/rex/demo1/app/bower_components/bluebird/js/browser/bluebird.js',
+          'demo/rex/demo1/app/bower_components/jassa/jassa.js',
+          /*'demo/rex/demo1/app/bower_components/bootstrap/dist/js/bootstrap.js',*/
+          'demo/rex/demo1/app/bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js',
+          'demo/rex/demo1/app/bower_components/jquery-ui/ui/jquery-ui.js',
+          'demo/rex/demo1/app/bower_components/angular-ui-sortable/sortable.js',
+          'demo/rex/demo1/app/bower_components/angular-ui-utils/ui-utils.js',
+          'demo/rex/demo1/app/bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js',
+          'demo/rex/demo1/app/bower_components/dddi-angular/dddi-angular.js',
+          'demo/rex/demo1/app/bower_components/angular-ui-select/dist/select.js',
+          'demo/rex/demo1/app/bower_components/sifter/sifter.js',
+          'demo/rex/demo1/app/bower_components/microplugin/src/microplugin.js',
+          'demo/rex/demo1/app/bower_components/selectize/dist/js/selectize.js',
+          'demo/rex/demo1/app/bower_components/moment/moment.js',
+          'demo/rex/demo1/app/bower_components/underscore/underscore.js',
+          'demo/rex/demo1/app/bower_components/codemirror/lib/codemirror.js',
+          'demo/rex/demo1/app/bower_components/angular-ui-codemirror/ui-codemirror.js',
+          '../docs/js/openlayers/lib/OpenLayers.js',
+          'ngdocs/js/app.js',
           '<%= concat.dist_tpls.dest %>'
         ],
         styles: [
-          'docs/css/style.css'
+          'demo/rex/demo1/app/bower_components/openlayers/theme/default/style.css',
+          /**'docs/css/style.css'**/
+          'css/jassa-ui-angular-edit.css',
+          'demo/rex/demo1/app/bower_components/bootstrap/dist/css/bootstrap.css',
+          'demo/rex/demo1/app/bower_components/jassa-ui-angular/jassa-ui-angular.css',
+          'demo/rex/demo1/app/bower_components/angular-ui-select/dist/select.css',
+          'demo/rex/demo1/app/bower_components/selectize/dist/css/selectize.css',
+          'demo/rex/demo1/app/bower_components/codemirror/lib/codemirror.css'
         ],
-        navTemplate: 'docs/nav.html',
-        title: 'ui-bootstrap',
-        html5Mode: false
+        /*navTemplate: 'docs/nav.html',*/
+        title: 'Jassa-Angular-UI',
+        html5Mode: false,
+        deferLoad: false,
+        sourceLink: false
       },
       api: {
         src: ['src/**/*.js', 'src/**/*.ngdoc'],
         title: 'API Documentation'
+      },
+      tutorial: {
+        title: 'Tutorial',
+        src: ['tutorials/*.ngdoc']
+
       }
     }
   });
@@ -205,13 +249,22 @@ module.exports = function(grunt) {
   grunt.registerTask('watch', ['before-test', 'after-test', 'karma:watch', 'delta']);
 
   // Default task.
-  grunt.registerTask('default', ['before-test', 'test', 'after-test']);
+  grunt.registerTask('default', ['before-test', 'test', 'after-test', 'ngdocs']);
 
   grunt.registerTask('enforce', 'Install commit message enforce script if it doesn\'t exist', function() {
 //    if (!grunt.file.exists('.git/hooks/commit-msg')) {
 //      grunt.file.copy('misc/validate-commit-msg.js', '.git/hooks/commit-msg');
 //      require('fs').chmodSync('.git/hooks/commit-msg', '0755');
 //    }
+  });
+
+  grunt.registerTask('install', 'install the backend and frontend dependencies', function() {
+    var exec = require('child_process').exec;
+    var cb = this.async();
+    exec('bower install', {cwd: './frontend'}, function(err, stdout, stderr) {
+      console.log(stdout);
+      cb();
+    });
   });
 
   //Common ui.bootstrap module containing all modules for src and templates
@@ -275,6 +328,7 @@ module.exports = function(grunt) {
             deps.push(depName);
             //Get dependencies for this new dependency
             deps = deps.concat(dependenciesForModule(depName));
+            console.log('depname: ', depName);
           }
         }
       });

@@ -3,6 +3,24 @@ var rdfTermInputCounter = 0;
 
 angular.module('ui.jassa.rdf-term-input', [])
 
+/**
+ * @ngdoc directive
+ * @name ui.jassa.rdf-term-input.directive:rdfTermInput
+ * @element rdf-term-input
+ * @function
+ * @restrict EA
+ *
+ * @description
+ * This directives creates an input field for
+ * editing plain-, typed-, uri-literals. The user can switch
+ * instantly between them.
+ *
+ * @example
+ <doc:example module="ui.jassa.rdf-term-input" animations="true">
+ <doc:source>
+ </doc:source>
+ </doc:example>
+ */
 .directive('rdfTermInput', ['$parse', function($parse) {
 
     // Some vocab - later we could fetch labels on-demand based on the uris.

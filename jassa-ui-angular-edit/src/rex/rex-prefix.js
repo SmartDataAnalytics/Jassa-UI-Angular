@@ -1,10 +1,15 @@
 angular.module('ui.jassa.rex')
-
 /**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-prefix
+ * @element div
+ * @restrict A
+ * @function
+ *
+ * @description
  * Prefixes
  *
  * prefixes must be declared together with the context and cannot be nested
- *
  */
 .directive('rexPrefix', ['$parse', function($parse) {
     return {

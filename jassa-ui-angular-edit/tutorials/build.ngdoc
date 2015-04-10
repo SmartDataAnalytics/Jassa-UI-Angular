@@ -1,0 +1,32 @@
+@ngdoc overview
+@name Build
+@id 3
+@description
+
+## Build
+
+Make sure that a current version `npm` is available on your system.
+You can install `npm` using:
+
+```bash
+# Remove or purge old versions
+sudo apt-get remove nodejs npm
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get update
+sudo apt-get install nodejs
+# The nodejs package includes the npm command
+```
+
+Install development tools (-g indicates to install them globally on your system rather than the current working directory)
+
+```bash
+sudo npm install -g grunt-cli
+sudo npm install -g bower
+```
+
+Run the build script
+
+```bash
+cd jassa-ui-angular-core
+./build.sh
+```

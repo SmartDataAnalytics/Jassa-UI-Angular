@@ -1,8 +1,14 @@
 angular.module('ui.jassa.rex')
 
 /**
- * Directive to mark triples as deleted
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-deleted
+ * @element input
+ * @restrict A
+ * @function
  *
+ * @description
+ * Directive to mark triples as deleted
  */
 .directive('rexDeleted', ['$parse', function($parse) {
     return {

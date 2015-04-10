@@ -1,5 +1,106 @@
+
 angular.module('ui.jassa.geometry-input', [])
 
+
+  /**
+   * @ngdoc interface
+   * @name ui.jassa.geometry-input.provider:GeocodingLookup
+   *
+   * @description
+   * This provider is usually used to set geocoding apis like NOKIA HERE,
+   * which will be requested when typing a location into the
+   * geocoding-input directive search input field.
+   * Furthermore you can enable/disable pre-defined geocoding apis.
+   *
+   * @example
+   <pre>
+   // use the .config section to set up the GeocodingLookupProvider
+   angular.module('mymodule', []).config(GeocodingLookupProvider) {
+     GeocodingLookupProvider.setService(serviceConfig);
+   };
+
+
+   // Set GeocodingLookupProvider configurations
+   GeocodingLookupProvider.setConfiguration({
+     // use both pre-configured services
+     service: ['LinkedGeoData', 'Nominatim'],
+     // if own services are set, also the pre-configured services will be used
+     defaultService: true
+   });
+
+   // Set up a rest service
+   GeocodingLookupProvider.setService({
+     label: 'Nokia HERE',
+     serviceType: 'rest',
+     url: 'http://geocoder.cit.api.here.com/6.2/geocode.json',
+     data: {
+       app_id: 'DemoAppId01082013GAL',
+       app_code: 'AJKnXv84fjrb0KIHawS0Tg',
+       additionaldata: 'IncludeShapeLevel,default',
+       mode: 'retrieveAddresses',
+       searchtext: '%KEYWORD%'
+     },
+     fnSuccess: function(response) {
+       var data = response.data.Response.View.length > 0 ? response.data.Response.View[0].Result : [];
+       var resultSet = [];
+       for(var i in data) {
+         if(data[i].Location.hasOwnProperty('Shape')) {
+           resultSet.push({
+             'firstInGroup': false,
+             'wkt': data[i].Location.Shape.Value,
+             'label': data[i].Location.Address.Label,
+             'group': 'Nokia HERE'
+           });
+         }
+       }
+       return resultSet;
+     }
+   });
+
+   // Set up a sparql service
+   GeocodingLookupProvider.setService({
+     label: 'LinkedGeoData (User Config)',
+     serviceType: 'sparql',
+     endpoint: 'http://linkedgeodata.org/vsparql',
+     graph: 'http://linkedgeodata.org/ne/',
+     prefix: {
+       ogc: 'http://www.opengis.net/ont/geosparql#',
+       geom: 'http://geovocab.org/geometry#'
+     },
+     query: '{'
+       +' Graph <http://linkedgeodata.org/ne/> {'
+       +' ?s a <http://linkedgeodata.org/ne/ontology/Country> ;'
+       +' rdfs:label ?l ;'
+       +' geom:geometry ['
+       +'  ogc:asWKT ?g'
+       +' ] '
+       +' FILTER regex(?l, "%KEYWORD%", "i") '
+       +' } '
+       +'}',
+     sponateTemplate: [{
+       id: '?s',
+       label: '?l',
+       wkt: '?g'
+     }],
+     limit: 5,
+     fnSuccess: function(response) {
+       var data = response;
+       var resultSet = [];
+       if (data.length > 0) {
+         for(var i in data) {
+           resultSet.push({
+             'firstInGroup': false,
+             'wkt': data[i].val.wkt,
+             'label': data[i].val.label,
+             'group': 'LinkedGeoData (User Config)'
+           });
+         }
+       }
+       return resultSet;
+     }
+   });
+   </pre>
+   */
   .provider('GeocodingLookup', function() {
 
     this.config = {
@@ -237,16 +338,87 @@ angular.module('ui.jassa.geometry-input', [])
       };
     };
 
+
+    /**
+     * @ngdoc method
+     * @name ui.jassa.geometry-input.provider:GeocodingLookup#setService
+     * @methodOf ui.jassa.geometry-input.provider:GeocodingLookup
+     * @description Add a new geocoding service
+     * @param {Object} serviceConfig A new serviceConfig
+     */
     this.setService = function(serviceConfig) {
       this.userServices[serviceConfig.label] = serviceConfig;
     };
 
+
+
+    /**
+     * @ngdoc method
+     * @name ui.jassa.geometry-input.provider:GeocodingLookup#setConfiguration
+     * @methodOf ui.jassa.geometry-input.provider:GeocodingLookup
+     * @description
+     * Set configuration parameters. E.g. disable the
+     * pre-definied geocoding services.
+     *
+     * @param {Object} userConfig Configuration which will overwrite the default config
+     */
     this.setConfiguration = function(userConfig) {
       _(this.config).extend(userConfig);
     };
 
   })
 
+
+
+
+  /**
+   * @ngdoc directive
+   * @name ui.jassa.geometry-input.directive:geometryInput
+   * @element geometry-input
+   * @function
+   * @restrict EA
+   *
+   * @description
+   * This directives creates a map for setting/displaying a location on a map.
+   * Furthermore it is possible to draw/edit polygons, line, boxes and points.
+   *
+   * @example
+   <example module="geometryInputExample">
+   <file name="index.html">
+   <div ng-controller="AppCtrl">
+     <p>
+       <span>current model value: {{term.value}}</span>
+     </p>
+     <p>
+       <geometry-input ng-model="term.value"></geometry-input>
+     </p>
+   </div>
+   </file>
+   <file name="script.js">
+   jassa = new Jassa(Promise, $.ajax);
+   angular.module(
+   'geometryInputExample',
+   ['dddi', 'ngSanitize', 'ui.jassa', 'ui.bootstrap', 'ui.select', 'ui.jassa.edit', 'ui.jassa.rex', 'ui.codemirror', 'ngAnimate'])
+   .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http', '$q',
+   function($scope, $dddi, $location, $anchorScroll, $timeout, $http, $q) {
+
+      $scope.term = {
+        value: 'POLYGON((5.639629 55.426467,9.243144 47.164749,19.438457 51.559280,17.680644 57.887405,5.639629 55.426467))'
+      };
+
+      // Begin of REX Setup
+
+      $scope.defaultNgModelOptions = {
+          //updateOn: 'default blur',
+          debounce: {
+              'default': 300,
+              'blur': 0
+          }
+      };
+    }]);
+   </file>
+   </example>
+   */
   .directive('geometryInput', ['$http', '$q', 'GeocodingLookup', function($http, $q, GeocodingLookup) {
 
     var uniqueId = 1;
@@ -307,6 +479,7 @@ angular.module('ui.jassa.geometry-input', [])
               //scope.geometry-input-input = newValue;
               toggleControl();
             });
+
 
             function init() {
               // generate custom map id

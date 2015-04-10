@@ -1,10 +1,15 @@
 angular.module('ui.jassa.rex')
-
 /**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-subject
+ * @element form
+ * @restrict A
+ * @function
+ *
+ * @description
  * rexSubject only registers the referenced subject at the rexContext.
  *
  * This way, the context knows what data needs to be re-fetched in case of a full reset (e.g. after an edit).
- *
  */
 .directive('rexSubject', ['$parse', '$q', function($parse, $q) {
     return {

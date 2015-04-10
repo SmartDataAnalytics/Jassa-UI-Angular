@@ -1,6 +1,12 @@
 angular.module('ui.jassa.rex')
-
 /**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-typeof
+ * @element form
+ * @restrict A
+ * @function
+ *
+ * @description
  * Convenience directive
  *
  * implies rex-prediacte="rdf:type" rex-iri

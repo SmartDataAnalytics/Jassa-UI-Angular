@@ -1,5 +1,15 @@
 angular.module('ui.jassa.rex')
 
+/**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-lang
+ * @element rdf-term-type
+ * @restrict A
+ * @function
+ *
+ * @description
+ * Description of rex-directive.
+ */
 .directive('rexLang', ['$parse', function($parse) {
     return {
         priority: 7,

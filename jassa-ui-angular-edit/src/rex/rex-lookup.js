@@ -1,13 +1,19 @@
 angular.module('ui.jassa.rex')
 
 /**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-lookup
+ * @element div
+ * @restrict A
+ * @function
+ *
+ * @description
  * Directive to attach a rex lookup function to the scope
  *
  * Different lookup functions can be used at different HTML regions under a rex-context.
  *
  * If present, rex-subject will use the provided function to perform data lookups
  * on its IRIs and store the content in the scope
- *
  */
 .directive('rexLookup', ['$parse', function($parse) {
     return {

@@ -1,5 +1,15 @@
 angular.module('ui.jassa.rex')
 
+/**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-literal
+ * @element input
+ * @restrict A
+ * @function
+ *
+ * @description
+ * Description of rex-directive.
+ */
 .directive('rexLiteral', ['$parse', '$compile', function($parse, $compile) {
     return {
         priority: 900,

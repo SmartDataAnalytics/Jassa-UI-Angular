@@ -1,5 +1,15 @@
 angular.module('ui.jassa.rex')
 
+/**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-predicate
+ * @element input
+ * @restrict A
+ * @function
+ *
+ * @description
+ * Description of rex-directive.
+ */
 .directive('rexPredicate', ['$parse', function($parse) {
     return {
         priority: 17,

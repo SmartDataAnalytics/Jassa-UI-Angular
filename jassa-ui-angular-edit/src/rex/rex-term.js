@@ -1,20 +1,26 @@
 angular.module('ui.jassa.rex')
-
 /**
- * TODO: Actually we should just implement this as a convenience directive which replaces itself with
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-term
+ * @element rex-term
+ * @restrict A
+ * @function
+ *
+ * @description
+ * <strong>TODO: Actually we should just implement this as a convenience directive which replaces itself with</strong>
+ *
  * rex-termtype rex-value rex-lang and rex-datatype
+ *
  * This way we wouldn't have to make the book keeping more complex than it already is
  *
  * rexTerm synchronizes a model which is interpreted as an object in a talis RDF json and
  * thus provides the fields 'type', 'value', 'datatype' and 'lang'.
  *
- * <rdf-term-input ng-model="model" rex-term="model"></rdf-term-input>
+ * <pre><rdf-term-input ng-model="model" rex-term="model"></rdf-term-input></pre>
  *
- * If rex-term appears on a directive using a model attribute   , it can be shortened as shown below:
+ * If rex-term appears on a directive using a model attribute, it can be shortened as shown below:
  *
- * <rdf-term-input ng-model="model" rex-term></rdf-term-input>
- *
- *
+ * <pre><rdf-term-input ng-model="model" rex-term></rdf-term-input></pre>
  */
 .directive('rexTerm', ['$parse', '$compile', function($parse, $compile) {
     return {

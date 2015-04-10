@@ -1,9 +1,15 @@
 angular.module('ui.jassa.sync')
-
 /**
+ * @ngdoc directive
+ * @name ui.jassa.sync.directive:sync-template
+ * @element input
+ * @restrict A
+ * @function
+ *
+ * @description
  * Convenience directive
  *
- * sync-template="templateStr"
+ * <pre>sync-template="templateStr"</pre>
  *
  * implies sync-source="templateStr" sync-interpolate sync-to-target? sync-target?
  *

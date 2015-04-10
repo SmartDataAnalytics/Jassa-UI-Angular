@@ -1,19 +1,19 @@
 #!/bin/bash
 set -e
 
-npm install
+sudo npm install
 
 # Retrieve the package version via grunt (no idea how to make grunt output to stdout; that's why i just use a file)
-grunt getversion
+sudo grunt getversion
 version=`cat target/version.txt`
 tag="v$version"
 #echo "$version"
 
 sourceFolder='dist'
-targetFolder='target/release/repo'
+targetFolder='/home/cannelony/temp/target/release/repo'
 
 # !! WARNING: We delete the source folder as we assume its a dist folder anyway !!!
-rm -rf "$sourceFolder"
+sudo rm -rf "$sourceFolder"
 
 grunt
 

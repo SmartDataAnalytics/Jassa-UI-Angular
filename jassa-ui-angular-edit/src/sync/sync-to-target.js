@@ -1,6 +1,18 @@
 angular.module('ui.jassa.sync')
 
 // sync-to-target="toString"
+/**
+ * @ngdoc directive
+ * @name ui.jassa.sync.directive:sync-to-target
+ * @element input
+ * @restrict A
+ * @function
+ *
+ * @description
+ * <pre>sync-to-target="toString"</pre>
+ * @example
+ * <pre>sync-to-target="toString"</pre>
+ */
 .directive('syncToTarget', ['$parse', '$interpolate', function($parse, $interpolate) {
     return {
         priority: 390,

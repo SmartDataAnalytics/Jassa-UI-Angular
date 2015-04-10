@@ -1,5 +1,14 @@
 angular.module('ui.jassa.sync')
-
+/**
+ * @ngdoc directive
+ * @name ui.jassa.sync.directive:sync-to-source
+ * @element sync-to-source
+ * @restrict A
+ * @function
+ *
+ * @description
+ * Description of sync-directive.
+ */
 .directive('syncToSource', ['$parse', '$interpolate', function($parse, $interpolate) {
     return {
         priority: 390,

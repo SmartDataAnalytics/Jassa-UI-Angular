@@ -1,9 +1,16 @@
 angular.module('ui.jassa.rex')
 
 /**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-iri
+ * @element input
+ * @restrict A
+ * @function
+ *
+ * @description
  * Convenience directive
  *
- * rexObjectIri="model"
+ * <pre>rexObjectIri="model"</pre>
  *
  * implies rex-object rex-termtype="iri" rex-value="model"
  */

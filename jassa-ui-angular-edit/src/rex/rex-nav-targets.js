@@ -1,20 +1,26 @@
 angular.module('ui.jassa.rex')
 
 /**
- * TODO rex-results may be conceptually a much cleaner approach - deprecated/remove this directive if it proofs true
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-nav-targets
+ * @element div
+ * @restrict A
+ * @function
  *
+ * @description
+ * <strong>TODO rex-results may be conceptually a much cleaner approach - deprecated/remove this directive if it proofs true</strong>
  *
  * Directive to refer to the set of URIs at a target
  *
- * rexNavTargets="arrayOfTargetIriStrings"
- *
- *
+ * <pre>rexNavTargets="arrayOfTargetIriStrings"</pre>
  *
  * Requires:
+ *
  * - rex-subject on any ancestor
  * - rex-nav-predicate present on the same element as rex-nav-targets
  *
  * Optional:
+ *
  * - rex-nav-inverse Whether to navigate the given predicate in inverse direction\
  *
  */

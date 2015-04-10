@@ -1,6 +1,15 @@
 angular.module('ui.jassa.rex')
 
-
+/**
+ * @ngdoc directive
+ * @name ui.jassa.rex.directive:rex-context
+ * @element div
+ * @restrict A
+ * @function
+ *
+ * @description
+ * Description of rex-directive.
+ */
 .directive('rexContext', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
     return {
         priority: 30,
