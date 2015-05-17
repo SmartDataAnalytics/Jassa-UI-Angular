@@ -310,7 +310,8 @@ $.widget('custom.ssbMap', {
             onUnselect: function(feature) {
                 var data = feature.attributes;
 
-                var event = null;
+                //var event = null;
+                var event = jQuery.Event('click');
                 self._trigger('featureUnselect', event, data);
             },
 
@@ -343,7 +344,10 @@ $.widget('custom.ssbMap', {
                     self.map.setCenter(clickLonLat, nextZoom);
                 }
                 else {
-                    var event = null;
+                    //var event = null;
+                    var event = jQuery.Event('click');
+                    event.pageX = xy.x;
+                    event.pageY = xy.y;
                     self._trigger('featureSelect', event, data);
                 }
             }

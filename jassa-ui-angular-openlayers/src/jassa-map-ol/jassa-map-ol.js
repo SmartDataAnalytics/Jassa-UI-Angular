@@ -304,12 +304,12 @@ angular.module('ui.jassa.openlayers.jassa-map-ol', ['dddi'])
             };
 
 
-            $el.on('ssbmapfeatureselect', function(ev, data) {
-                scope.onSelect({data: data});
+            $el.on('ssbmapfeatureselect', function(event, data) {
+                scope.onSelect({data: data, event: event});
             });
 
-            $el.on('ssbmapfeatureunselect', function(ev, data) {
-                scope.onUnselect({data: data});
+            $el.on('ssbmapfeatureunselect', function(event, data) {
+                scope.onUnselect({data: data, event: event});
             });
 
 
