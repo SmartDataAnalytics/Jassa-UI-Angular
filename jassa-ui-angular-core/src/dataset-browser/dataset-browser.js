@@ -75,7 +75,7 @@ angular.module('ui.jassa.dataset-browser', ['ui.jassa.replace'])
         });
 
         result.fetchItems().then(function(entries) {
-            console.log('Got: ', entries);
+            console.log('DatasetBrowser - found items: ', entries);
         });
 
         return result;

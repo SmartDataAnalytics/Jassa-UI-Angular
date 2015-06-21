@@ -15,7 +15,7 @@ angular.module("template/dataset-browser/dataset-list-item.html", []).run(["$tem
     "<!--     <li ng-show=\"!items.length\" class=\"alert alert-danger\" style=\"text-align: center\" role=\"alert\">No results</li> -->\n" +
     "\n" +
     "\n" +
-    "\n" +
+    "{{item}}\n" +
     "\n" +
     "<div class=\"media-left\">\n" +
     "    <a href=\"\" ng-click=\"context.onSelect({context: context, dataset: item})\">\n" +
