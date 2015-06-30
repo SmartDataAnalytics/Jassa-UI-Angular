@@ -30,7 +30,7 @@ cp css/jassa-ui-angular-edit.css "$targetFolder"
 for source in `cd "$sourceFolder" && ls -1`; do
     target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?\.|\.|g'`
  
-    cp -v "$sourceFolder/$source" "$targetFolder/$target"
+    cp -v "$sourceFolder/$source" "$targetFolder/$target" || true
 done
 
 cd "$targetFolder"
