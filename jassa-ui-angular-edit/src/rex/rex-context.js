@@ -40,12 +40,15 @@ angular.module('ui.jassa.rex')
             $scope.rexChangeSlots = {};
 
 
+            /**
+             * Allocate a 'slot' - an object that can be used as storage.
+             *
+             */
             this.allocSlot = function() {
                 var tmp = this.nextSlot++;
                 var id = 'slot_' + tmp;
 
                 //var self = this;
-
                 //console.log('[SLOT]: Allocated ' + id);
 
                 var result = $scope.rexChangeSlots[id] = {
@@ -139,6 +142,20 @@ angular.module('ui.jassa.rex')
 
                         rexContext.srcGraph = rexContext.srcGraph || new jassa.rdf.GraphImpl();
 
+                        /**
+                         * Sets the override as the new source data
+                         */
+                        rexContext.checkpoint = function() {
+
+
+                        };
+
+                        /**
+                         * Reloads all referenced data
+                         */
+                        resetData = function() {
+
+                        };
 
                         /**
                          * Resets the form by iterating over all referenced coordinates
@@ -155,8 +172,8 @@ angular.module('ui.jassa.rex')
 
                                 coordinates.forEach(function(coordinate) {
                                     var currentValue = getEffectiveValue(rexContext, coordinate);
-                                    var originalValue = getValueAt(rexContext.json, coordinate);
-                                    setValueAt(rexContext.override, coordinate, originalValue);
+                                    var originalValue = jassa.rdf.TalisRdfJsonUtils.getValueAt(rexContext.json, coordinate);
+                                    jassa.rdf.TalisRdfJsonUtils.setValueAt(rexContext.override, coordinate, originalValue);
                                     //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
                                 });
 
@@ -189,6 +206,80 @@ angular.module('ui.jassa.rex')
                        //console.log('Subjects:' + JSON.stringify(r));
                        return r;
                    });
+
+
+                   var createExprFilterByNodes(v, nodes) {
+                       var result;
+
+                       if(nodes) {
+                           if(nodes.length === 1) {
+                               result = new E_Equals(v, nodes[0]);
+                           } else {
+                               result = new E_Equals(v, nodes);
+                           }
+                       } else {
+                           result = jassa.sparql.NodeValue.nvFalse;
+                       }
+
+                       return result;
+                   };
+
+                   var appendExpr = function(arr, expr) {
+                       var isSatisfiable = expr.equals(jassa.rdf.NodeValue.nvFalse);
+
+                       if(isSatisfiable)
+                           if(!se.equals(jassa.rdf.NodeValue.nvTrue)) {
+                               arr.push(expr);
+                           }
+                       }
+
+                       return isSatisfiable;
+                   }
+
+                   /**
+                    * Creates a query based on (arrays of; optional)
+                    *
+                    * subjects, predicates, languages
+                    */
+                   var createElementObjectsBySpl: function(sparqlService, subjectStrs, predicateStrs, isInverse, langStrs) {
+                       var subjects = subjectStrs.map(function(str) {
+                           return jassa.rdf.NodeFactory.createUri(str);
+                       });
+
+                       var predicates = predicateStrs.map(function(str) {
+                           return jassa.rdf.NodeFactory.createUri(str);
+                       });
+
+                       var vars = jassa.rdf.VarUtils;
+                       var triple = isInverse
+                           ? new jassa.rdf.Triple(vars.s, vars.p, vars.o)
+                           : new jassa.rdf.Triple(vars.o, vars.p, vars.s);
+
+                       var tripleEl = new jassa.rdf.ElementTriplesBlock([triple]);
+
+                       var isSatisfiable = true;
+
+                       var exprs = [];
+
+                       var se = createExprFilterByNodes(vars.s, subjects);
+                       isSatisfiable = isSatisfiable && appendExpr(se, exprs);
+
+                       var pe = createExprFilterByNodes(vars.p, predicates);
+                       isSatisfiable = isSatisfiable && appendExpr(pe, exprs);
+
+                       // TODO: lang matches
+
+                       var result = isSatisfiable
+                           ? (exprs.length > 0
+                               ? new jassa.sparql.ElementGroup([
+                                 tripleEl,
+                                 new jassa.sparql.ElementFilter(exprs)
+                               ])
+                               : tripleEl)
+                           : null;
+
+                       return result;
+                   };
 
                    var updateSubjectGraphs = function() {
                        var lookupEnabled = scope.rexLookup;
@@ -320,6 +411,9 @@ angular.module('ui.jassa.rex')
 
 
 
+                    /**
+                     * Removes any non-referenced data from the override
+                     */
                     var cleanupReferences = function(coordinateSet) {
                         //console.log('Referenced coordinates', JSON.stringify(coordinates));
 
@@ -411,120 +505,4 @@ angular.module('ui.jassa.rex')
 
 ;
 
-
-/*
-var hashCodeArr = function(arr) {
-    var result = 0;
-    var l = arr ? arr.length : 0;
-    for (var i = 0; i < l; i++) {
-        var item = arr[i];
-        var hashCode = item.hashCode ? item.hashCode : 127;
-        result = result * 31 + hashCode;
-        res = res & res;
-    }
-
-    return result;
-};
-*/
-
-
-/*
-var getComponentValueForNode = function(node, component) {
-    var json = jassa.rdf.NodeUtils.toTalisRdfJson(node);
-    var result = json[compononte];
-    return result;
-};
-
-// A hacky function that iterates the graph
-getValue: function(graph, coordinate) {
-
-}
-*/
-
-
-// TODO Watch any present sourceGraph attribute
-// And create the talis-json structure
-
-// The issue is, that the source graph might become quite large
-// (e.g. consider storing a whole DBpedia Data ID in it)
-// Would it be sufficient to only convert the subset of the graph
-// to RDF which is referenced by the form?
-
-//scope.$watch(function() {
-//    return scope.rexSourceGraph;
-//}, function(sourceGraph) {
-//    scope.rexJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(sourceGraph);
-//}, true);
-
-
-// Remove all entries from map that exist in base
-//var mapDifference = function(map, baseFn) {
-//    var mapEntries = map.entries();
-//    mapEntries.forEach(function(mapEntry) {
-//        var mapKey = mapEntry.key;
-//        var mapVal = mapEntry.val;
-//
-//        var baseVal = baseFn(mapKey);
-//
-//        if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
-//            map.remove(mapKey);
-//        }
-//    });
-//};
-
-
-/*
-rexContext.remove = rexContext.remove || function(coordinate) {
-    // Removes an object
-    var objs = getObjectsAt(rexContext.json, coordinate);
-    if(objs) {
-        objs.splice(coordinate.i, 1);
-    }
-
-    objs = getObjectsAt(rexContext.override, coordinate);
-    if(objs) {
-        objs.splice(coordinate.i, 1);
-    }
-};
-*/
-
-/*
-rexContext.setObject = function(s, p, i, sourceObj) {
-    var coordinate = new Coordinate(s, p, i);
-    var targetObj = getOrCreateObjectAt(rexContext.override, coordinate);
-    angular.copy(sourceObj, targetObj);
-    //setObjectAt(rexContext.override, coordinate, value) {
-};
-*/
-/* TODO I think it is not used anymore, but code left here for reference
-rexContext.addObject = function(_s, _p, sourceObj) {
-    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
-    //__defaultPrefixMapping;
-
-    var s = pm.expandPrefix(_s);
-    var p = pm.expandPrefix(_p);
-
-    var coordinate = new Coordinate(s, p);
-
-    var as = getObjectsAt(rexContext.json, coordinate);
-    var bs = getObjectsAt(rexContext.override, coordinate);
-
-    var a = as ? as.length : 0;
-    var b = bs ? bs.length : 0;
-
-    var i = Math.max(a, b);
-
-    var c = new Coordinate(s, p, i);
-
-    var targetObj = getOrCreateObjectAt(rexContext.override, c);
-    angular.copy(sourceObj, targetObj);
-    //setObjectAt(rexContext.override, coordinate, value) {
-};
-*/
-//var override = scope.rexContext.override;
-//console.log('Override', JSON.stringify(scope.rexContext.override.entries()));
-//var combined = new jassa.util.HashMap();
-//console.log('Coordinates: ', JSON.stringify(coordinates));
-//var map = new MapUnion([scope.rexContext.override, scope.rex]);
-//console.log('DATA', result.entries());
 

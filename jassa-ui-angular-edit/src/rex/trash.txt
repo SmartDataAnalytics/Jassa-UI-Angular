@@ -1,0 +1,333 @@
+
+//var _array = {
+//    create: function() {
+//        return [];
+//    },
+//    put: function(arr, index, value) {
+//        data[index] = value;
+//    },
+//    get: function(arr, index) {
+//        return data[index];
+//    },
+//    remove: function(arr, index) {
+//        arr.splice(index, 1);
+//    }
+//};
+//
+//var _obj = {
+//    create: function() {
+//        return {};
+//    },
+//    put: function(obj, key, value) {
+//        obj[key] = value;
+//    },
+//    get: function(obj, key) {
+//        return obj[key];
+//    },
+//    remove: function(arr, key) {
+//        delete obj[key];
+//    }
+//};
+//
+//var rdfSchema = [{
+//    id: 's',
+//    type: _obj
+//}, {
+//    id: 'p'
+//    type: _obj
+//}, {
+//    id: 'i',
+//    type: _array
+//}, {
+//    id: 'c',
+//    type: _obj
+//}
+//];
+//
+//var NestedMap = jassa.ext.Class.create({
+//    /**
+//     * schema: []
+//     */
+//    initialize: function(schema) {
+//        this.schema = schema;
+//    },
+//
+//    put: function(coordinate, value) {
+//
+//    },
+//
+//    get: function(coordinate, value) {
+//
+//    },
+//
+//    remove: function(coordinate) {
+//
+//    }
+//})
+
+
+
+/*
+var hashCodeArr = function(arr) {
+    var result = 0;
+    var l = arr ? arr.length : 0;
+    for (var i = 0; i < l; i++) {
+        var item = arr[i];
+        var hashCode = item.hashCode ? item.hashCode : 127;
+        result = result * 31 + hashCode;
+        res = res & res;
+    }
+
+    return result;
+};
+*/
+
+
+/*
+var getComponentValueForNode = function(node, component) {
+    var json = jassa.rdf.NodeUtils.toTalisRdfJson(node);
+    var result = json[compononte];
+    return result;
+};
+
+// A hacky function that iterates the graph
+getValue: function(graph, coordinate) {
+
+}
+*/
+
+
+// TODO Watch any present sourceGraph attribute
+// And create the talis-json structure
+
+// The issue is, that the source graph might become quite large
+// (e.g. consider storing a whole DBpedia Data ID in it)
+// Would it be sufficient to only convert the subset of the graph
+// to RDF which is referenced by the form?
+
+//scope.$watch(function() {
+//    return scope.rexSourceGraph;
+//}, function(sourceGraph) {
+//    scope.rexJson = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(sourceGraph);
+//}, true);
+
+
+// Remove all entries from map that exist in base
+//var mapDifference = function(map, baseFn) {
+//    var mapEntries = map.entries();
+//    mapEntries.forEach(function(mapEntry) {
+//        var mapKey = mapEntry.key;
+//        var mapVal = mapEntry.val;
+//
+//        var baseVal = baseFn(mapKey);
+//
+//        if(jassa.util.ObjectUtils.isEqual(mapVal, baseVal)) {
+//            map.remove(mapKey);
+//        }
+//    });
+//};
+
+
+/*
+rexContext.remove = rexContext.remove || function(coordinate) {
+    // Removes an object
+    var objs = getObjectsAt(rexContext.json, coordinate);
+    if(objs) {
+        objs.splice(coordinate.i, 1);
+    }
+
+    objs = getObjectsAt(rexContext.override, coordinate);
+    if(objs) {
+        objs.splice(coordinate.i, 1);
+    }
+};
+*/
+
+/*
+rexContext.setObject = function(s, p, i, sourceObj) {
+    var coordinate = new Coordinate(s, p, i);
+    var targetObj = getOrCreateObjectAt(rexContext.override, coordinate);
+    angular.copy(sourceObj, targetObj);
+    //setObjectAt(rexContext.override, coordinate, value) {
+};
+*/
+/* TODO I think it is not used anymore, but code left here for reference
+rexContext.addObject = function(_s, _p, sourceObj) {
+    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+    //__defaultPrefixMapping;
+
+    var s = pm.expandPrefix(_s);
+    var p = pm.expandPrefix(_p);
+
+    var coordinate = new Coordinate(s, p);
+
+    var as = getObjectsAt(rexContext.json, coordinate);
+    var bs = getObjectsAt(rexContext.override, coordinate);
+
+    var a = as ? as.length : 0;
+    var b = bs ? bs.length : 0;
+
+    var i = Math.max(a, b);
+
+    var c = new Coordinate(s, p, i);
+
+    var targetObj = getOrCreateObjectAt(rexContext.override, c);
+    angular.copy(sourceObj, targetObj);
+    //setObjectAt(rexContext.override, coordinate, value) {
+};
+*/
+//var override = scope.rexContext.override;
+//console.log('Override', JSON.stringify(scope.rexContext.override.entries()));
+//var combined = new jassa.util.HashMap();
+//console.log('Coordinates: ', JSON.stringify(coordinates));
+//var map = new MapUnion([scope.rexContext.override, scope.rex]);
+//console.log('DATA', result.entries());
+
+//var basePriority = 0;
+
+
+
+
+
+
+/**
+ * Falsy valued arguments will be replaced with empty strings or 0
+ */
+
+//BELOW Moved to Jassa/TalisRdfJson
+
+
+//var Coordinate = Jassa.ext.Class.create({
+//    initialize: function(s, p, i, c) {
+//        this.s = s || '';
+//        this.p = p || '';
+//        this.i = i || 0;
+//        this.c = c || '';
+//    },
+//
+//    equals: function(that) {
+//        var result = this.s === that.s && this.p === that.p && this.i === that.i && this.c === that.c;
+//        return result;
+//    },
+//
+//    hashCode: function() {
+//        if(this.hash == null) {
+//            this.hash =
+//                jassa.util.ObjectUtils.hashCodeStr(this.s) +
+//                3 * jassa.util.ObjectUtils.hashCodeStr(this.p) +
+//                7 * this.i +
+//                11 * jassa.util.ObjectUtils.hashCodeStr(this.c);
+//        }
+//
+//        return this.hash;
+//    },
+//
+//    toString: function() {
+//        var result = this.s + ' ' + this.p + ' ' + this.i + ' ' + this.c;
+//        return result;
+//    },
+//});
+
+//
+//
+////Returns the object array at a given predicate
+//var getObjectsAt = function(talisRdfJson, coordinate) {
+// var s = coordinate ? talisRdfJson[coordinate.s] : null;
+// var result = s ? s[coordinate.p] : null;
+// return result;
+//};
+//
+////Returns the object at a given index
+//var getObjectAt = function(talisRdfJson, coordinate) {
+// var p = getObjectsAt(talisRdfJson, coordinate);
+// var result = p ? p[coordinate.i] : null;
+//
+// return result;
+//};
+//
+//var getOrCreateObjectAt = function(talisRdfJson, coordinate, obj) {
+// var s = talisRdfJson[coordinate.s] = talisRdfJson[coordinate.s] || {};
+// var p = s[coordinate.p] = s[coordinate.p] || [];
+// var result = p[coordinate.i] = p[coordinate.i] || obj || {};
+// return result;
+//};
+//
+///* Dangerous: splicing breaks references by index
+//var removeObjectAt = function(talisRdfJson, coordinate) {
+// var s = talisRdfJson[coordinate.s];
+// var p = s ? s[coordinate.p] : null;
+// //var i = p ? p[coordinate.i] : null;
+//
+// if(p) {
+//     p.splice(coordinate.i, 1);
+//
+//     if(p.length === 0) {
+//         delete s[coordinate.p];
+//     }
+// }
+//};
+//*/
+//
+//var removeValueAt = function(talisRdfJson, coordinate) {
+//
+// var ps = talisRdfJson[coordinate.s];
+// var is = ps ? ps[coordinate.p] : null;
+// var cs = is ? is[coordinate.i] : null;
+//
+// if(cs) {
+//     delete cs[coordinate.c];
+//
+//     if(Object.keys(cs).length === 0) {
+//
+//         delete is[coordinate.i];
+//         compactTrailingNulls(is);
+//
+//         if(is.length === 0) {
+//             delete ps[coordinate.p];
+//
+//             if(Object.keys(ps).length === 0) {
+//                 delete talisRdfJson[coordinate.s];
+//             }
+//         }
+//     }
+// }
+//};
+//
+//var setValueAt = function(talisRdfJson, coordinate, value) {
+// //if(value != null) {
+// if(coordinate != null) {
+//     var o = getOrCreateObjectAt(talisRdfJson, coordinate);
+//     o[coordinate.c] = value;
+// //}
+// }
+//};
+//
+////TODO Rename to getComponentAt
+//var getValueAt = function(talisRdfJson, coordinate) {
+// var i = getObjectAt(talisRdfJson, coordinate);
+// var result = i ? i[coordinate.c] : null;
+//
+// return result;
+//};
+//
+
+// jassa.util.ObjectUtils.
+//function capitalize(s)
+//{
+//    return s && s[0].toUpperCase() + s.slice(1);
+//}
+
+//var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+
+
+//var createCoordinate = function(scope, component) {
+//    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+//
+//    return new Coordinate(
+//        pm.expandPrefix(scope.rexSubject),
+//        pm.expandPrefix(scope.rexPredicate),
+//        scope.rexObject,
+//        component
+//    );
+//};
+

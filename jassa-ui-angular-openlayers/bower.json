@@ -13,7 +13,7 @@
     "jquery-ui": "1.10.3",
     "openlayers": "release-2.13.1",
     "angular": "1.3.5-build.3630+sha.30694c8",
-    "dddi-angular": "1.0.0",
+    "dddi-angular": "1.0.1",
     "jassa": "0.9.0-SNAPSHOT",
     "underscore": "1.7.0",
     "bootstrap": "3.3.2"

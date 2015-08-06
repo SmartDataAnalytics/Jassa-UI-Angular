@@ -1,45 +1,305 @@
 
 
+var ArrayTool = jassa.ext.Class.create({
+    filter: function() {
+        throw new Error('not implemented');
+    },
+
+    project: function(obj, value) {
+        throw new Error('not implemented');
+    },
+
+    generate: function() {
+        throw new Error('not implemented');
+    },
+});
+
+var RdfObjectFilter = jassa.ext.Class.create({
+    initialize: function(types, langs, datatypes) {
+        this.types = termTypes || null;
+        this.langs = langs || null;
+        this.datatypes = datatypes || null;
+    }
+
+    // TODO Add validate function (here or in a util class)
+});
+
+
 /**
- * Falsy valued arguments will be replaced with empty strings or 0
+ * Tooling for creating a virtual array based on filters on RDF objects
+ * 
  */
-var Coordinate = Jassa.ext.Class.create({
-    initialize: function(s, p, i, c) {
-        this.s = s || '';
-        this.p = p || '';
-        this.i = i || 0;
-        this.c = c || '';
+var ArrayToolRdfObject = jassa.ext.Class.create({
+    initialize: function(rdfObjectFilter, defaultTalisRdfJson, projectAttr) {
+        this.rdfObjectFilter = rdfObjectFilter;        
+        this.defaultTalisRdfJson = defaultTalisRdfJson; // Talis rdf json object with default values
+        this.projectAttr = projectAttr || 'value';
     },
+    
+    deriveDefaults: function() {
+        var rof = this.rdfObjectFilter;
 
-    equals: function(that) {
-        var result = this.s === that.s && this.p === that.p && this.i === that.i && this.c === that.c;
+        var result = {
+            type: rof.types ? rof.types[0] : null,
+            lang: rof.langs ? rof.langs[0] : null,
+            datatype: rof.datatypes ? rof.datatypes[0] : null,
+            value: null
+        };
+        
         return result;
     },
 
-    hashCode: function() {
-        if(this.hash == null) {
-            this.hash =
-                jassa.util.ObjectUtils.hashCodeStr(this.s) +
-                3 * jassa.util.ObjectUtils.hashCodeStr(this.p) +
-                7 * this.i +
-                11 * jassa.util.ObjectUtils.hashCodeStr(this.c);
+    arrayContains: function(array, item) {
+        var result = array == null
+            ? true
+            : array.indexOf(item) > -1;
+      
+        return result;
+    },
+
+    filter: function(json) {
+        var rof = this.rdfObjectFilter;
+        //var json = NodeUtils.toTalisRdfJson(node);
+        //var json =
+        
+        var acceptType = arrayContains(rof.types, json.type);
+        var acceptLang = arrayContains(rof.langs, json.lang);
+        var acceptDatatype = arrayContains(rof.datatypes, json.datatype);
+
+        var result = acceptType && acceptLang && acceptDataype;
+        return result;
+    },
+    
+    // TODO Does project return the default if the projected value is null? I'd say yes.
+    project: function(obj, value) {
+        var result = null;
+
+        if(arguments.length === 1) {
+            result = obj[this.projectAttr];
+        } else {
+            obj[this.projectAttr] = value;
         }
-
-        return this.hash;
-    },
-
-    toString: function() {
-        var result = this.s + ' ' + this.p + ' ' + this.i + ' ' + this.c;
         return result;
     },
+    
+    generate: function() {
+        var result = {};
+        ObjectUtils.extend(result, this.defaultTalisRdfJson);
+        
+        return result;
+    }
+});
+
+
+var SimpleArray = jass.ext.Class.create({
+    
+});
+
+
+/**
+ * An array of all URIs that are reachable via a property in inverse direction
+ * 
+ */
+var SimpleArrayRdfInverse = jassa.ext.Class.create({
+    initialize: function(talisRdfJson, propertyStr, sourceRdfObject) {
+        this.talisRdfJson = talisRdfJson;
+        this.propertyStr = propertyStr;
+        this.sourceRdfObject = sourceRdfObject;
+    }
 });
 
 
 
-// Prefix str:
-var parsePrefixStr = function(str) {
-    regex = /\s*([^:]+)\s*:\s*([^\s]+)\s*/g;
+
+var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
+    initialize: function(baseArray) {
+        this.baseArray = baseArray;
+    },
+    
+    get: function(index) {
+        var result = this.baseArray[index];
+        return result;
+    },
+    
+    set: function(index, value) {
+       this.baseArray[index] = value;
+    },
+    
+    push: function(value) {
+        this.baseArray.push(value);
+    },
+
+    remove: function(index) {
+        this.baseArray.splice(index, 1);
+    },
+    
+    size: function() {
+        var result = this.baseArray.length;
+        return resul;t
+    }
+})
+
+/**
+ * Notes on deletion: TODO Which semantic to use - remove or mark as deleted?
+ *
+ * Note: This array object is not a proxy, but it can be delegated
+ * to by one.
+ * 
+ */
+var SimpleArrayVirt = jassa.ext.Class.create({
+    initialize: function(baseArrayFn, arrayTool) {
+        //this.talisRdfJson = talisRdfJson || {};
+        this.baseArrayFn = baseArrayFn; // getter/setter that returning a base array
+        this.arrayTool = arrayTool;
+                
+        var self = this;
+        this.itemPredicate = function(item) {
+            var r = self.arrayTool.filter(item);
+            return r;
+        };
+    },
+    
+    /**
+     * Removal
+     */
+    remove: function(virtIndex) {
+        var baseArray = this.baseArrayFn();
+        var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
+
+        var baseIndex = virtIndex < indexMap.length
+            ? indexMap[virtIndex]
+            : null;
+
+        if(baseIndex != null) {
+            //baseArray.splice(baseIndex, 1);
+            baseArray.remove(baseIndex, 1);
+            this.baseArrayFn(baseArray); // set the array with the removed element back
+        }
+    },
+
+    set: function(virtIndex, value) {
+        var baseArray = this.baseArrayFn();
+        var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
+        
+        var baseIndex = virtIndex < indexMap.length
+            ? indexMap[virtIndex]
+            : null;
+
+        // If there was no base index, we need to allocate additional array elements
+        if(baseIndex != null) {
+            var delta = virtIndex - offset;
+            for(var i = 0; i < delta; ++i) {
+                var newItem = this.arrayTool.generate();
+                baseArray.push(newItem);
+                indexMap.push(baseArray.length);                
+            }
+        }
+
+        var item = baseArray.get(baseIndex);
+        this.arrayTool.project(item, value);
+    },
+
+    push: function(value) {
+        var index = this.size();
+        this.set(index, value);
+    },
+    
+    get: function(virtIndex) {
+        var baseArray = this.baseArrayFn();
+        var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
+        
+        var baseIndex = virtIndex < indexMap.length
+            ? indexMap[virtIndex]
+            : null;
+        
+        var item = baseIndex
+            ? baseArray.get(baseIndex)
+            : null;
+            
+        var result = this.arrayTool.project(item);
+            
+        return result;
+    },
+
+    size: function() {
+        var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
+        var result = indexMap.length;
+        return result;
+    }
+
+
+});
+
+
+SimpleArrayVirt.createVirtArrayForRdf = function(talisRdfJson, subject, predicate, ) {
+    
 };
+
+
+var ArrayUtils = {
+    /**
+     * Create a mapping of indices between a baseArray
+     * and the virtual array when the array is filtered via some predicate.
+     * 
+     * result[virtualIndex] = baseIndex
+     * 
+     * @param predicate A function
+     */
+    createIndexMapVirtToBase: function(baseArray, itemPredicate) {
+        var result = [];
+        var baseArray = this.baseArrayFn();
+        
+        for(var i = 0; i < baseArray.size(); ++i) {
+            var baseItem = baseArray.get(i);
+            var isAccepted = itemPredicate(baseItem);
+            
+            if(isAccepted) {
+                result.push(i);
+            } // else: just skip the item
+        }
+        
+        return result;
+    },
+
+        
+    /**
+     * Copies data from destArr to srcArr via the indexArr.
+     * indexArr maps indexes of srcArr to those in destArr
+     *
+     *
+     * @param destArr Array containing the data
+     * @param indexArr (in/out) Array mapping indexes to t
+     * @param srcArray Array containing the source data
+     */
+    syncToSrc: function(srcArr, destArr, indexArr) {
+        destArr.forEach(function(item, destIndex) {
+            var srcIndex = indexArr[destIndex];
+            if(srcIndex == null) {
+                // if there is no srcIndex, append the item to srcArr
+                srcIndex = srcArr.length;
+                srcArray.push(item);
+                indexArr[destIndex] = srcIndex;
+            } else {
+                srcArray[srcIndex] = item;
+            }
+        });
+
+        // TODO Delete items that were removed from dest
+    },
+
+    syncToDest: function(srcArr, destArr, indexArr) {
+        indexArr.forEach(function(srcIndex, destIndex) {
+            var item = srcArr[srcIndex];
+            destArr[destIndex] = item;
+        });
+    }
+};
+
+
+// Prefix str:
+//var parsePrefixStr = function(str) {
+//    regex = /\s*([^:]+)\s*:\s*([^\s]+)\s*/g;
+//};
 
 
 var parsePrefixes = function(prefixMapping) {
@@ -70,11 +330,6 @@ var getModelAttribute = function(attrs) {
     return result;
 };
 
-
-function capitalize(s)
-{
-    return s && s[0].toUpperCase() + s.slice(1);
-}
 
 // TODO We need to expand prefixed values if the termtype is IRI
 
@@ -258,6 +513,137 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
     };
 };
 
+
+
+
+
+/**
+ * Create the function for projecting an attribute
+ */
+var createCompileArray = function() {
+    return {
+        pre: function(scope, ele, attrs, ctrls) {
+
+            var contextCtrl = ctrls[0];
+
+            var slot = contextCtrl.allocSlot();
+            slot.triples = [];
+            //slot.entry = {};
+
+            scope.$on('$destroy', function() {
+                slot.release();
+            });
+
+
+
+            syncAttr($parse, scope, attrs, 'rexNavPredicate');
+            syncAttr($parse, scope, attrs, 'rexNavInverse');
+
+
+            syncAttr($parse, scope, attrs, 'rexFilterTermtype');
+            syncAttr($parse, scope, attrs, 'rexFilterLang');
+            syncAttr($parse, scope, attrs, 'rexFilterDatatype');
+
+            syncAttr($parse, scope, attrs, 'rexDefaultTermtype');
+            syncAttr($parse, scope, attrs, 'rexDefaultLang');
+            syncAttr($parse, scope, attrs, 'rexDefaultDatatype');
+
+            //syncAttr($parse, scope, attrs, 'rex');
+
+            syncAttr($parse, scope, attrs, 'rexOffset');
+            syncAttr($parse, scope, attrs, 'rexLimit');
+
+
+
+            var targetModelStr = ele.attr('rex-nav-targets');
+            var dddi = $dddi(scope);
+
+            dddi.register(targetModelStr, ['rexSparqlService', 'rexSubject', 'rexNavPredicate', '?rexNavInverse',
+                function(sparqlService, subjectStr, predicateStr, isInverse) {
+
+                    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+
+                    subjectStr = pm.expandPrefix(subjectStr);
+                    predicateStr = pm.expandPrefix(predicateStr);
+
+                    //var path = new jassa.facete.Path([new jassa.facete.Step(propertyStr, isInverse)]);
+
+                    var s = jassa.sparql.VarUtils.s;
+                    var p = jassa.rdf.NodeFactory.createUri(predicateStr);
+                    //var o = jassa.sparql.VarUtils.o;
+                    var o = jassa.rdf.NodeFactory.createUri(subjectStr);
+
+                    var triple = isInverse
+                        ? new jassa.rdf.Triple(s, p, o)
+                        : new jassa.rdf.Triple(o, p, s)
+                        ;
+
+                    var concept = new jassa.sparql.Concept(
+                        new jassa.sparql.ElementGroup([
+                            new jassa.sparql.ElementTriplesBlock([triple]),
+                            new jassa.sparql.ElementFilter(new jassa.sparql.E_IsIri(new jassa.sparql.ExprVar(s)))
+                        ]), s);
+
+                    var query = jassa.sparql.ConceptUtils.createQueryList(concept);
+
+                    var listService = new jassa.service.ListServiceSparqlQuery(sparqlService, query, concept.getVar());
+
+                    var task = listService.fetchItems().then(function(entries) {
+                        var r = entries.map(function(item) {
+                            var s = item.key.getUri();
+                            return s;
+                        });
+
+                        return r;
+                    });
+
+                    return task;
+            }]);
+
+
+            var updateRelation = function(array) {
+                // Convert the array to triples
+
+                var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
+
+                var s = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(scope.rexSubject));
+                var p = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(scope.rexNavPredicate));
+
+                var triples = array.map(function(item) {
+                    var o = jassa.rdf.NodeFactory.createUri(pm.expandPrefix(item));
+                    var r = scope.rexNavInverse
+                        ? new jassa.rdf.Triple(o, p, s)
+                        : new jassa.rdf.Triple(s, p, o)
+                        ;
+
+                    return r;
+                });
+
+                // TODO: We must check whether that triple already exists, and if it does not, insert it
+                //jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(triples, scope.rexContext.override);
+
+                // Notify the context about the triples which we require to exist
+                slot.triples = triples;
+            };
+
+            // TODO Check for changes in the target array, and update
+            // relations as needed
+
+            // ISSUE: We need to ensure that each IRI in the array has the appropriate relation to
+            // the source resource of the navigation
+            scope.$watchCollection(targetModelStr, function(array) {
+                if(array) {
+                    updateRelation(array);
+                }
+            });
+
+        }
+    };    };
+}
+
+
+
+
 var assembleTalisRdfJson = function(map) {
     //console.log('Assembling talis rdf json');
     var result = {};
@@ -267,7 +653,7 @@ var assembleTalisRdfJson = function(map) {
     entries.forEach(function(entry) {
         var coordinate = entry.key;
 
-        var check = new Coordinate(
+        var check = new jassa.rdf.Coordinate(
             coordinate.s,
             coordinate.p,
             coordinate.i,
@@ -338,22 +724,8 @@ var processPrefixes = function(talisRdfJson, prefixMapping) {
 };
 
 
-//var __defaultPrefixMapping = new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
-
-
-//var createCoordinate = function(scope, component) {
-//    var pm = scope.rexPrefixMapping || new jassa.rdf.PrefixMappingImpl(jassa.vocab.InitialContext);
-//
-//    return new Coordinate(
-//        pm.expandPrefix(scope.rexSubject),
-//        pm.expandPrefix(scope.rexPredicate),
-//        scope.rexObject,
-//        component
-//    );
-//};
-
 var createCoordinate = function(scope, component) {
-    return new Coordinate(
+    return new jassa.rdf.Coordinate(
         scope.rexSubject,
         scope.rexPredicate,
         scope.rexObject,
@@ -362,73 +734,10 @@ var createCoordinate = function(scope, component) {
 };
 
 
-//var _array = {
-//    create: function() {
-//        return [];
-//    },
-//    put: function(arr, index, value) {
-//        data[index] = value;
-//    },
-//    get: function(arr, index) {
-//        return data[index];
-//    },
-//    remove: function(arr, index) {
-//        arr.splice(index, 1);
-//    }
-//};
-//
-//var _obj = {
-//    create: function() {
-//        return {};
-//    },
-//    put: function(obj, key, value) {
-//        obj[key] = value;
-//    },
-//    get: function(obj, key) {
-//        return obj[key];
-//    },
-//    remove: function(arr, key) {
-//        delete obj[key];
-//    }
-//};
-//
-//var rdfSchema = [{
-//    id: 's',
-//    type: _obj
-//}, {
-//    id: 'p'
-//    type: _obj
-//}, {
-//    id: 'i',
-//    type: _array
-//}, {
-//    id: 'c',
-//    type: _obj
-//}
-//];
-//
-//var NestedMap = jassa.ext.Class.create({
-//    /**
-//     * schema: []
-//     */
-//    initialize: function(schema) {
-//        this.schema = schema;
-//    },
-//
-//    put: function(coordinate, value) {
-//
-//    },
-//
-//    get: function(coordinate, value) {
-//
-//    },
-//
-//    remove: function(coordinate) {
-//
-//    }
-//})
-
-
+/**
+ * Transform a talis RDF json structure to Map<Coordinate, String>
+ *
+ */
 var talisRdfJsonToEntries = function(talisRdfJson) {
     var result = [];
 
@@ -449,7 +758,7 @@ var talisRdfJsonToEntries = function(talisRdfJson) {
                cs.forEach(function(c) {
                    var val = cMap[c];
 
-                   var coordinate = new Coordinate(s, p, i, c);
+                   var coordinate = new jassa.rdf.Coordinate(s, p, i, c);
 
                    result.push({
                        key: coordinate,
@@ -462,94 +771,6 @@ var talisRdfJsonToEntries = function(talisRdfJson) {
         });
 
     });
-
-    return result;
-};
-
-
-
-// Returns the object array at a given predicate
-var getObjectsAt = function(talisRdfJson, coordinate) {
-    var s = coordinate ? talisRdfJson[coordinate.s] : null;
-    var result = s ? s[coordinate.p] : null;
-    return result;
-};
-
-// Returns the object at a given index
-var getObjectAt = function(talisRdfJson, coordinate) {
-    var p = getObjectsAt(talisRdfJson, coordinate);
-    var result = p ? p[coordinate.i] : null;
-
-    return result;
-};
-
-var getOrCreateObjectAt = function(talisRdfJson, coordinate, obj) {
-    var s = talisRdfJson[coordinate.s] = talisRdfJson[coordinate.s] || {};
-    var p = s[coordinate.p] = s[coordinate.p] || [];
-    var result = p[coordinate.i] = p[coordinate.i] || obj || {};
-    return result;
-};
-
-/* Dangerous: splicing breaks references by index
-var removeObjectAt = function(talisRdfJson, coordinate) {
-    var s = talisRdfJson[coordinate.s];
-    var p = s ? s[coordinate.p] : null;
-    //var i = p ? p[coordinate.i] : null;
-
-    if(p) {
-        p.splice(coordinate.i, 1);
-
-        if(p.length === 0) {
-            delete s[coordinate.p];
-        }
-    }
-};
-*/
-
-var compactTrailingNulls = function(arr) {
-    while(arr.length && arr[arr.length-1] == null){
-        arr.pop();
-    }
-};
-
-var removeValueAt = function(talisRdfJson, coordinate) {
-
-    var ps = talisRdfJson[coordinate.s];
-    var is = ps ? ps[coordinate.p] : null;
-    var cs = is ? is[coordinate.i] : null;
-
-    if(cs) {
-        delete cs[coordinate.c];
-
-        if(Object.keys(cs).length === 0) {
-
-            delete is[coordinate.i];
-            compactTrailingNulls(is);
-
-            if(is.length === 0) {
-                delete ps[coordinate.p];
-
-                if(Object.keys(ps).length === 0) {
-                    delete talisRdfJson[coordinate.s];
-                }
-            }
-        }
-    }
-};
-
-var setValueAt = function(talisRdfJson, coordinate, value) {
-    //if(value != null) {
-    if(coordinate != null) {
-        var o = getOrCreateObjectAt(talisRdfJson, coordinate);
-        o[coordinate.c] = value;
-    //}
-    }
-};
-
-// TODO Rename to getComponentAt
-var getValueAt = function(talisRdfJson, coordinate) {
-    var i = getObjectAt(talisRdfJson, coordinate);
-    var result = i ? i[coordinate.c] : null;
 
     return result;
 };
@@ -581,14 +802,15 @@ var setDiff = function(before, after) {
 
 var getEffectiveValue = function(rexContext, coordinate) {
     //var result = rexContext.override ? rexContext.override.get(coordinate) : null;
-    var result = rexContext.override ? getValueAt(rexContext.override, coordinate) : null;
+    var result = rexContext.override ? jassa.rdf.TalisRdfJsonUtils.getValueAt(rexContext.override, coordinate) : null;
 
     if(result == null) {
-        result = rexContext.json ? getValueAt(rexContext.json, coordinate) : null;
+        result = rexContext.json ? jassa.rdf.TalisRdfJsonUtils.getValueAt(rexContext.json, coordinate) : null;
     }
 
     return result;
 };
+
 
 
 /**
@@ -597,22 +819,29 @@ var getEffectiveValue = function(rexContext, coordinate) {
  *
  */
 var syncAttr = function($parse, $scope, attrs, attrName, deep, transformFn) {
-    var attr = attrs[attrName];
-    var getterFn = $parse(attr);
+    var result;
 
-    var getEffectiveValue = function() {
-        var v = getterFn($scope);
-        var r = transformFn ? transformFn(v) : v;
-        return r;
-    };
+    if(attrName in attrs) {
+        var attr = attrs[attrName];
 
-    $scope.$watch(getEffectiveValue, function(v) {
-        $scope[attrName] = v;
-    }, deep);
+        var getterFn = $parse(attr);
 
-    var result = getEffectiveValue();
-    // Also init the value immediately
-    $scope[attrName] = result;
+        var getEffectiveValue = function() {
+            var v = getterFn($scope);
+            var r = transformFn ? transformFn(v) : v;
+            return r;
+        };
+
+        $scope.$watch(getEffectiveValue, function(v) {
+            $scope[attrName] = v;
+        }, deep);
+
+        result = getEffectiveValue();
+        // Also init the value immediately
+        $scope[attrName] = result;
+    } else {
+        result = undefined;
+    }
 
     return result;
 };
@@ -640,4 +869,3 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 // NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
 angular.module('ui.jassa.rex', ['dddi', 'ui.select']);
 
-//var basePriority = 0;

@@ -32,13 +32,14 @@
 
     <form role="form" name="ex05.editForm" rex-subject="ex05.subject">
 
+<!--
         <rdf-term-input ng-init="term={}" name="test" ng-model="foo" ng-model-options="defaultNgModelOptions"></rdf-term-input>
 
         Is field pristine? <span ng-bind="editForm.test.$pristine"></span>
         Is form pristine? <span ng-bind="editForm.$pristine"></span>
         <button class="btn btn-primary" ng-click="editForm.test.$setPristine()">field</button>
         <button class="btn btn-primary" ng-click="editForm.$setPristine()">form</button>
-
+-->
 
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in allProps = rexContext.json[rexSubject].concat(addedProperties) track by property" rex-predicate="property"> -->
         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
@@ -80,8 +81,10 @@
         </div>
 <!-- </div> -->
 
-
-        <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button>
+        <hr />
+        <div class="form-group">         
+          <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button>
+        </div>
     </form>
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that

@@ -19,7 +19,7 @@
     "jquery-ui": "1.10.3",
     "angular-ui-sortable": "0.12.11",
     "angular-ui-utils": "0.1.1",
-    "dddi-angular": "1.0.0"
+    "dddi-angular": "1.0.1"
   },
   "keywords": [
     "rdf",

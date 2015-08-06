@@ -1,21 +1,5 @@
 angular.module('ui.jassa.rex')
 
-
-/*
-var RemappedArray = jassa.ext.Class.create({
-    initialize: function(srcArr, indexArr) {
-        this.srcArr = srcArr;
-        this.indexArr = indexArr;
-    },
-
-    get: function(index) {
-
-    }
-});
-*/
-
-
-
 /**
  * @ngdoc directive
  * @name ui.jassa.rex.directive:rex-nav-targets
@@ -40,7 +24,7 @@ var RemappedArray = jassa.ext.Class.create({
  * - rex-nav-inverse Whether to navigate the given predicate in inverse direction\
  *
  */
-.directive('rexNavTargets', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
+.directive('rexValues', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
     return {
         priority: 10,
         restrict: 'A',

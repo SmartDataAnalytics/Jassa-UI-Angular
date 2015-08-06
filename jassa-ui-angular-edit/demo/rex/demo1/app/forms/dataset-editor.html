@@ -6,7 +6,7 @@
     rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
     rex-lookup="true">
 
-
+<!--
 <div ng-init="a=[1,2,3]; b=[4,5,6]">
     <ul>
         <li ng-repeat="x in foo = a.concat(b)">{{x}}</li>
@@ -27,6 +27,7 @@
         sync-template="{{JSON.stringify(rexContext.dirty, null, 4)}}"
     ></div>
 </div>
+-->
 <!--     Dirty state: {{rexContext.dirty}} -->
 
     <div class="col-md-6">
@@ -43,13 +44,13 @@
                 ng-init="addedDists=[]"
             >
 
-            <button class="btn btn-primary" ng-click="data.group='org.dbpedia'; data.artifact='dbpedia-essential'; data.version='2014'; datasetForm.group.$setDirty(); datasetForm.artifact.$setDirty(); datasetForm.version.$setDirty()">Test</button>
+<!--            <button class="btn btn-primary" ng-click="data.group='org.dbpedia'; data.artifact='dbpedia-essential'; data.version='2014'; datasetForm.group.$setDirty(); datasetForm.artifact.$setDirty(); datasetForm.version.$setDirty()">Test</button> -->
 
 <!--                 <input type="hidden" rex-predicate="theme:primary" rex-iri="theme:primary"> -->
 
 <button class="btn btn-primary" ng-click="rexContext.reset()">Reset state</button>
 <button class="btn btn-primary" ng-click="datasetForm.$setPristine()">Set pristine</button>
-
+<hr />
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon">URI: </span>
@@ -81,7 +82,7 @@
                     <div class="input-group">
                         <span class="input-group-addon">Artefact: </span>
                         <input type="text" name="artifact" class="form-control" ng-model="data.artifact" ng-model-options="defaultNgModelOptions" rex-predicate="'o:artifact'" rex-deleted="!data.artifact" rex-literal>
-                        <span class="input-group-addon">Deleted: {{!data.artifact}}</span>
+<!--                       <span class="input-group-addon">Deleted: {{!data.artifact}}</span> -->
                     </div>
                 </div>
 
@@ -96,7 +97,7 @@
                     <div class="input-group">
                         <span class="input-group-addon">Comment: </span>
                         <input type="text" name="comment" class="form-control" ng-model="data.comment" ng-model-options="defaultNgModelOptions"rex-predicate="'rdfs:comment'" rex-literal>
-                        <span class="input-group-addon">Pristine: {{datasetForm.comment.$pristine}}</span>
+<!--                       <span class="input-group-addon">Pristine: {{datasetForm.comment.$pristine}}</span> -->
                     </div>
                 </div>
 
@@ -111,13 +112,13 @@
                                 </div>
                             </div>
 
-                            <button class="btn" ng-class="dist.deleted ? 'btn-warning' : 'btn-primary'" ng-click="dist.deleted=!dist.deleted">Toggle Delete Distribution</button>
+<!--                            <button class="btn" ng-class="dist.deleted ? 'btn-warning' : 'btn-primary'" ng-click="dist.deleted=!dist.deleted">Toggle Delete Distribution</button> -->
 
                         </li>
                     </ul>
 <!--                     <button class="btn btn-primary" ng-click="data.dists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button> -->
 
-                    <button class="btn btn-primary" ng-click="addedDists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">+</button>
+                    <button class="btn btn-primary" ng-click="addedDists.push('dist:' + data.group + '_' + data.artifact + '_' + data.version + '_' +  data.dists.length)">Add Distribution</button>
 
 <!--                     <ul> -->
 <!--                         <li ng-repeat="distNode in rexContext.navigate(rexSubject, '<o:isDistributionOf') | filter:distNode.isUri()" rex-subject="distNode.getUri()" ng-init="dist={}"> -->
@@ -173,7 +174,7 @@
 
             <hr />
             Added:
-            {{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}
+<!--           {{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}} -->
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="addedStr"
