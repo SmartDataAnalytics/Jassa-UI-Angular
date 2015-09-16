@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-sudo npm install
+npm install
 
 # Retrieve the package version via grunt (no idea how to make grunt output to stdout; that's why i just use a file)
 grunt getversion
