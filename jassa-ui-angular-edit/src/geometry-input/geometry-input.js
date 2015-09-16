@@ -433,7 +433,7 @@ angular.module('ui.jassa.geometry-input', [])
 
     return {
       restrict: 'EA',
-      priority: 4,
+      //priority: 4,
       require: '?ngModel',
       templateUrl: 'template/geometry-input/geometry-input.html',
       replace: true,

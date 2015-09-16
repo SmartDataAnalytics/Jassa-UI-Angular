@@ -188,12 +188,19 @@
       });
     })
 
-    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http', '$q',
-        function($scope, $dddi, $location, $anchorScroll, $timeout, $http, $q) {
+    .controller('AppCtrl', ['$scope', '$dddi', '$location', '$anchorScroll', '$timeout', '$http', '$q', '$templateCache', '$templateRequest', '$sce',
+        function($scope, $dddi, $location, $anchorScroll, $timeout, $http, $q, $templateCache, $templateRequest, $sce) {
 
         var dddi = $dddi($scope);
 
         $scope.JSON = JSON;
+        $scope.$templateCache = $templateCache;
+
+        var templateUrl = $sce.getTrustedResourceUrl('forms/map-demo-core.html');
+
+        $templateRequest(templateUrl).then(function(template) {
+        	$scope.demoHtml = template;
+        });
 
         // Begin of REX Setup
 
@@ -238,7 +245,7 @@
         $scope.performUpdate = function(rexContext, prefixMapping, form) {
             //var updateService = $scope.active.service.updateService;
 
-            var x = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, prefixMapping)
+            var x = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, null, prefixMapping)
             .then(function() {
                 form.$setPristine();
                 var r = rexContext.reset();
@@ -413,14 +420,15 @@
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <div ng-include="'forms/dataset-editor.html'"></div>
+            <div ng-include="'forms/map-demo.html'"></div>
+<!--             <div ng-include="'forms/dataset-editor.html'"></div> -->
 
-            <div ng-include="'forms/dynamic.html'"></div>
+<!--             <div ng-include="'forms/dynamic.html'"></div> -->
 
-            <div ng-include="'forms/geo.html'"></div>
+<!--             <div ng-include="'forms/geo.html'"></div> -->
 
-            <div ng-include="'forms/person-form.html'"></div>
-            <div ng-include="'forms/simple-editor.html'"></div>
+<!--             <div ng-include="'forms/person-form.html'"></div> -->
+<!--             <div ng-include="'forms/simple-editor.html'"></div> -->
 
         </div>
     </div>

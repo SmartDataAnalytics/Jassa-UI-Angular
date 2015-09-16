@@ -97,7 +97,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}}"
     ></div>
 
     <hr />
@@ -105,7 +105,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, null, rexPrefixMapping)}}"
     ></div>
 
 

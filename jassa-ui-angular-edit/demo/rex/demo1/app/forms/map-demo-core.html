@@ -1,0 +1,23 @@
+<div
+  ng-init="t={}"
+  rex-context
+  rex-sparql-service="sparqlService"
+  rex-lookup="true"
+  rex-prefix="'geo: http://.../wgs84_pos#'">
+
+  <form
+    rex-subject="'dbr:Vienna'"
+    rex-predicate="'geo:geometry'" rex-object="0"
+    rex-termtype="t.type" rex-value="t.value"
+    rex-lang="t.lang" rex-datatype="t.datatype">
+
+    <rdf-term-input ng-model="t">
+    <geometry-input ng-model="t.value">
+
+    <ui-codemirror ng-model="output"
+        sync-template="{{graphToTurtle(
+          rexContext.graph,
+          rexPrefixMapping)}}">
+    </ui-codemirror>
+  </form>
+</div>

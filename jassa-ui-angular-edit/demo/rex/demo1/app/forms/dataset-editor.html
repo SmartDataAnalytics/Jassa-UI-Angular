@@ -173,11 +173,11 @@
 
             <hr />
             Added:
-            {{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}
+            {{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}}
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="addedStr"
-                sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}}"
             ></div>
 
             <hr />
@@ -185,7 +185,7 @@
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="removedStr"
-                sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, null, rexPrefixMapping)}}"
             ></div>
 
 

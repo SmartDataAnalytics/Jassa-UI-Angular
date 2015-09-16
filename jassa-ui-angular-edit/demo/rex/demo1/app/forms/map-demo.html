@@ -1,0 +1,56 @@
+<div
+    class="row"
+    ng-init="ex09={}; ex09.context={}; ex09.term={}; ex09.baseGraph=newGraph()"
+    rex-context="ex09.context"
+    rex-base-graph="ex09.baseGraph"
+    rex-sparql-service="sparqlService"
+    rex-lookup="true"
+    rex-prefix="'geo: http://www.w3.org/2003/01/geo/wgs84_pos# dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
+    >
+
+    <div class="col-md-6">
+        <div class="alert alert-success" role="alert">
+			<div
+		    	ui-codemirror="editorOptions.html"
+		    	ng-model="demoHtml"></div>
+		</div>
+
+        <div class="alert alert-success" role="alert">
+            <div
+                ui-codemirror="editorOptions.ttl"
+                ng-model="turtle"
+                sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+        <div class="alert alert-info" role="alert">
+
+            <form role="form" rex-subject="'dbr:Vienna'" rex-predicate="'geo:geometry'" rex-object="0" rex-termtype="ex09.term.type" rex-value="ex09.term.value" rex-lang="ex09.term.lang" rex-datatype="ex09.term.datatype">
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Term </span>
+<!--                         <input type="text" name="geometry" class="form-control" ng-model="ex09.term.value" ng-model-options="defaultNgModelOptions"> -->
+
+                        <rdf-term-input replace name="geometry" class="form-control" ng-model="ex09.term" ng-model-options="defaultNgModelOptions">
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">Geom </span>
+                        <geometry-input style="width: 100%" name="uri" type="text" class="form-control" ng-model="ex09.term.value" ng-model-options="defaultNgModelOptions">
+                    </div>
+                </div>
+
+<!-- STATUS: {{ex09.term.value | json}} -->
+            </form>
+
+        </div>
+    </div>
+
+</div>
