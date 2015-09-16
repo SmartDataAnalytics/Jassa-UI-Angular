@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-sudo npm install
+npm install
 source ./build.conf
 
 # !! WARNING: We delete the source folder as we assume its a dist folder anyway !!!
