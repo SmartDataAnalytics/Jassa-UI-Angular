@@ -6,7 +6,7 @@ It is comprised of three components:
 * Widgets for geometry and input
 * Annotations for syncing values between models
 
-At present, this * [GeoKnow Deliverable](/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf) explains the concepts best. We will move the documentation to Github pages soon.
+At present, this [GeoKnow Deliverable](/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf) explains the concepts best. We will move the documentation to Github pages soon.
 
 
 ## Build the demo
