@@ -1,5 +1,7 @@
 # Jassa-Ui-Angular-Edit
 
+[Click here to visit the ONLINE DEMO](http://js.geoknow.eu/demos/rex)
+
 This project features a toolkit for Web-based editing of RDF data using HTML forms.
 It is comprised of three components:
 * The RDF edit extensions (REX) annotation system
