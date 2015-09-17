@@ -6,11 +6,11 @@ It is comprised of three components:
 * Widgets for geometry and input
 * Annotations for syncing values between models
 
-At present, this * (/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf)[GeoKnow Deliverable] explains the concepts best. We will move the documentation to Github pages soon.
+At present, this * [/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf](GeoKnow Deliverable) explains the concepts best. We will move the documentation to Github pages soon.
 
 
 ## Build the demo
-Check out this repository and go to the folder (demo/rex/demo1)[demo/rex/demo1]
+Check out this repository and go to the folder [demo/rex/demo1](demo/rex/demo1)
 
 Run
 ```bash
@@ -30,8 +30,8 @@ sudo apt-get install nodejs
 
 
 ## Publications and Reports
-* (/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf)[Spatial authoring widget set / GeoKnow Deliverable]
-* (/jassa-ui-angular-dissemination/documents/2015-semantics-poster-demo.pdf)[Poster and Demo Submission at Semantics 2015]
+* [/jassa-ui-angular-dissemination/documents/2015-geoknow-spatial-authoring-widget-set-D4.2.1.pdf](Spatial authoring widget set / GeoKnow Deliverable)
+* [/jassa-ui-angular-dissemination/documents/2015-semantics-poster-demo.pdf](Poster and Demo Submission at Semantics 2015)
 
 ## Acknowledgement
 This
