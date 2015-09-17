@@ -55,7 +55,7 @@ $scope.selectFacet = function(path) {
 #### Facet Tree
 A SPARQL-based data-driven widget for showing a (possibly) nested facet tree for a selected set of resources. Nodes in the tree feature support for regex search and pagination.
 
-![facet-tree](jassa-ui-angular-dissemination/images/facet-tree.png)
+![facet-tree](/jassa-ui-angular-dissemination/images/facet-tree.png)
 
 ```html
 <facet-tree
