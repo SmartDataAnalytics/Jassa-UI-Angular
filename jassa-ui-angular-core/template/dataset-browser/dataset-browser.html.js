@@ -10,6 +10,7 @@ angular.module("template/dataset-browser/dataset-browser.html", []).run(["$templ
     "        do-filter=\"doFilter\"\n" +
     "        total-items=\"totalItems\"\n" +
     "        items=\"items\"\n" +
+    "        max-size=\"maxSize\"\n" +
     "        langs=\"langs\"\n" +
     "        availableLangs=\"availableLangs\"\n" +
     "        search-modes=\"searchModes\"\n" +

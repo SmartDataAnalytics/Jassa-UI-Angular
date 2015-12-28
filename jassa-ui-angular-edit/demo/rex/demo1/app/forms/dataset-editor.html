@@ -6,12 +6,13 @@
     rex-prefix="'data: http://example.org/dataset/ dist: http://example.org/distribution/ distgraphs: http://example.org/distribution-graphs o: http://example.org/ontology/ r: http://example.org/resource/ theme: http://example.org/resource/theme/'"
     rex-lookup="true">
 
-<!--
-<div ng-init="a=[1,2,3]; b=[4,5,6]">
+
+<div ng-init="a=['a1','a2','a3']; b=['b1','b2','b3']">
     <ul>
         <li ng-repeat="x in foo = a.concat(b)">{{x}}</li>
     </ul>
-    <button ng-click="b.push(foo.length + 1)">Add</button>
+    <button ng-click="a.push('a' + (a.length + 1))">Add A</button>
+    <button ng-click="b.push('b' + (b.length + 1))">Add B</button>
 </div>
 
 <div ng-if="false">
@@ -174,11 +175,11 @@
 
             <hr />
             Added:
-<!--           {{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}} -->
+<!--             {{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}} -->
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="addedStr"
-                sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}}"
             ></div>
 
             <hr />
@@ -186,7 +187,7 @@
             <div
                 ui-codemirror="editorOptions.ttl"
                 ng-model="removedStr"
-                sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+                sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, null, rexPrefixMapping)}}"
             ></div>
 
 

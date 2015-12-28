@@ -1,19 +1,19 @@
 #!/bin/bash
 set -e
 
-sudo npm install
+npm install
 
 # Retrieve the package version via grunt (no idea how to make grunt output to stdout; that's why i just use a file)
-sudo grunt getversion
+grunt getversion
 version=`cat target/version.txt`
 tag="v$version"
 #echo "$version"
 
 sourceFolder='dist'
-targetFolder='/home/cannelony/temp/target/release/repo'
+targetFolder='target/release/repo'
 
 # !! WARNING: We delete the source folder as we assume its a dist folder anyway !!!
-sudo rm -rf "$sourceFolder"
+rm -rf "$sourceFolder"
 
 grunt
 
@@ -30,7 +30,7 @@ cp css/jassa-ui-angular-edit.css "$targetFolder"
 for source in `cd "$sourceFolder" && ls -1`; do
     target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?\.|\.|g'`
  
-    cp -v "$sourceFolder/$source" "$targetFolder/$target"
+    cp -v "$sourceFolder/$source" "$targetFolder/$target" || true
 done
 
 cd "$targetFolder"

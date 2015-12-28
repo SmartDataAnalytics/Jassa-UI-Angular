@@ -10,3 +10,5 @@ ngdocs
 npm-debug.log
 delete-when-refactored
 .idea
+.buildpath
+.project

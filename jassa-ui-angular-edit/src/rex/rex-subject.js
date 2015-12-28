@@ -21,6 +21,9 @@ angular.module('ui.jassa.rex')
         compile: function(ele, attrs) {
             return {
                 pre: function(scope, ele, attrs, contextCtrl) {
+                    //var dddi = $dddi(scope);
+                    //dddi.register('rexSubject', []
+
                     syncAttr($parse, scope, attrs, 'rexSubject', false, function(subject) {
                         var pm = scope.rexPrefixMapping;
                         var r = pm ? pm.expandPrefix(subject) : subject;

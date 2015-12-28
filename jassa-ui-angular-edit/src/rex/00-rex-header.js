@@ -27,15 +27,15 @@ var RdfObjectFilter = jassa.ext.Class.create({
 
 /**
  * Tooling for creating a virtual array based on filters on RDF objects
- * 
+ *
  */
 var ArrayToolRdfObject = jassa.ext.Class.create({
     initialize: function(rdfObjectFilter, defaultTalisRdfJson, projectAttr) {
-        this.rdfObjectFilter = rdfObjectFilter;        
+        this.rdfObjectFilter = rdfObjectFilter;
         this.defaultTalisRdfJson = defaultTalisRdfJson; // Talis rdf json object with default values
         this.projectAttr = projectAttr || 'value';
     },
-    
+
     deriveDefaults: function() {
         var rof = this.rdfObjectFilter;
 
@@ -45,7 +45,7 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
             datatype: rof.datatypes ? rof.datatypes[0] : null,
             value: null
         };
-        
+
         return result;
     },
 
@@ -53,7 +53,7 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
         var result = array == null
             ? true
             : array.indexOf(item) > -1;
-      
+
         return result;
     },
 
@@ -61,7 +61,7 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
         var rof = this.rdfObjectFilter;
         //var json = NodeUtils.toTalisRdfJson(node);
         //var json =
-        
+
         var acceptType = arrayContains(rof.types, json.type);
         var acceptLang = arrayContains(rof.langs, json.lang);
         var acceptDatatype = arrayContains(rof.datatypes, json.datatype);
@@ -69,7 +69,7 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
         var result = acceptType && acceptLang && acceptDataype;
         return result;
     },
-    
+
     // TODO Does project return the default if the projected value is null? I'd say yes.
     project: function(obj, value) {
         var result = null;
@@ -81,24 +81,24 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
         }
         return result;
     },
-    
+
     generate: function() {
         var result = {};
         ObjectUtils.extend(result, this.defaultTalisRdfJson);
-        
+
         return result;
     }
 });
 
 
 var SimpleArray = jass.ext.Class.create({
-    
+
 });
 
 
 /**
  * An array of all URIs that are reachable via a property in inverse direction
- * 
+ *
  */
 var SimpleArrayRdfInverse = jassa.ext.Class.create({
     initialize: function(talisRdfJson, propertyStr, sourceRdfObject) {
@@ -115,16 +115,16 @@ var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
     initialize: function(baseArray) {
         this.baseArray = baseArray;
     },
-    
+
     get: function(index) {
         var result = this.baseArray[index];
         return result;
     },
-    
+
     set: function(index, value) {
        this.baseArray[index] = value;
     },
-    
+
     push: function(value) {
         this.baseArray.push(value);
     },
@@ -132,7 +132,7 @@ var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
     remove: function(index) {
         this.baseArray.splice(index, 1);
     },
-    
+
     size: function() {
         var result = this.baseArray.length;
         return resul;t
@@ -144,21 +144,21 @@ var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
  *
  * Note: This array object is not a proxy, but it can be delegated
  * to by one.
- * 
+ *
  */
 var SimpleArrayVirt = jassa.ext.Class.create({
     initialize: function(baseArrayFn, arrayTool) {
         //this.talisRdfJson = talisRdfJson || {};
         this.baseArrayFn = baseArrayFn; // getter/setter that returning a base array
         this.arrayTool = arrayTool;
-                
+
         var self = this;
         this.itemPredicate = function(item) {
             var r = self.arrayTool.filter(item);
             return r;
         };
     },
-    
+
     /**
      * Removal
      */
@@ -180,7 +180,7 @@ var SimpleArrayVirt = jassa.ext.Class.create({
     set: function(virtIndex, value) {
         var baseArray = this.baseArrayFn();
         var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
-        
+
         var baseIndex = virtIndex < indexMap.length
             ? indexMap[virtIndex]
             : null;
@@ -191,7 +191,7 @@ var SimpleArrayVirt = jassa.ext.Class.create({
             for(var i = 0; i < delta; ++i) {
                 var newItem = this.arrayTool.generate();
                 baseArray.push(newItem);
-                indexMap.push(baseArray.length);                
+                indexMap.push(baseArray.length);
             }
         }
 
@@ -203,21 +203,21 @@ var SimpleArrayVirt = jassa.ext.Class.create({
         var index = this.size();
         this.set(index, value);
     },
-    
+
     get: function(virtIndex) {
         var baseArray = this.baseArrayFn();
         var indexMap = ArrayUtils.createIndexMapVirtToBase(baseArray, this.itemPredicate);
-        
+
         var baseIndex = virtIndex < indexMap.length
             ? indexMap[virtIndex]
             : null;
-        
+
         var item = baseIndex
             ? baseArray.get(baseIndex)
             : null;
-            
+
         var result = this.arrayTool.project(item);
-            
+
         return result;
     },
 
@@ -232,7 +232,7 @@ var SimpleArrayVirt = jassa.ext.Class.create({
 
 
 SimpleArrayVirt.createVirtArrayForRdf = function(talisRdfJson, subject, predicate, ) {
-    
+
 };
 
 
@@ -240,28 +240,28 @@ var ArrayUtils = {
     /**
      * Create a mapping of indices between a baseArray
      * and the virtual array when the array is filtered via some predicate.
-     * 
+     *
      * result[virtualIndex] = baseIndex
-     * 
+     *
      * @param predicate A function
      */
     createIndexMapVirtToBase: function(baseArray, itemPredicate) {
         var result = [];
         var baseArray = this.baseArrayFn();
-        
+
         for(var i = 0; i < baseArray.size(); ++i) {
             var baseItem = baseArray.get(i);
             var isAccepted = itemPredicate(baseItem);
-            
+
             if(isAccepted) {
                 result.push(i);
             } // else: just skip the item
         }
-        
+
         return result;
     },
 
-        
+
     /**
      * Copies data from destArr to srcArr via the indexArr.
      * indexArr maps indexes of srcArr to those in destArr
@@ -867,5 +867,25 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 // TODO Create a util for id allocation
 
 // NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
-angular.module('ui.jassa.rex', ['dddi', 'ui.select']);
+angular.module('ui.jassa.rex', ['dddi', 'ui.select'])
 
+.filter('toArray', function() {
+    var result = function(obj) {
+        var r = obj;
+        if (obj instanceof Object) {
+            r = _.map(obj, function(val, key) {
+                return {
+                    key: key,
+                    val: val
+                };
+
+                //return Object.defineProperty(val, '$key', {__proto__: null, value: key});
+            });
+        }
+        return r;
+    };
+    return result;
+})
+
+;
+//var basePriority = 0;

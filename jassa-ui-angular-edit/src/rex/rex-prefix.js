@@ -13,7 +13,7 @@ angular.module('ui.jassa.rex')
  */
 .directive('rexPrefix', ['$parse', function($parse) {
     return {
-        priority: 19,
+        priority: 25,
         restrict: 'A',
         scope: true,
         //require: '^rexContext',

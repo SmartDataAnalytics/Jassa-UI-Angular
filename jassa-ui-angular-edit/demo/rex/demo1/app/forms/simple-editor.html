@@ -41,8 +41,8 @@
         <button class="btn btn-primary" ng-click="editForm.$setPristine()">form</button>
 -->
 
-<!--         <div class="repeat-item" ng-repeat="(property, propertyData) in allProps = rexContext.json[rexSubject].concat(addedProperties) track by property" rex-predicate="property"> -->
-        <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
+        <div class="repeat-item" ng-repeat="(property, propertyData) in allProps = angular.extend(rexContext.json[rexSubject] || {}, addedProperties) track by property" rex-predicate="property">
+<!--        <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property"> -->
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
@@ -82,9 +82,11 @@
 <!-- </div> -->
 
         <hr />
-        <div class="form-group">         
-          <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button>
-        </div>
+<!--         <div class="form-group">          -->
+<!--           <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button> -->
+<!--         </div> -->
+
+        <button class="btn btn-primary" ng-click="addedProperties['http://newproperty.org'] = {}">Add property</button>
     </form>
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
@@ -100,7 +102,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, null, rexPrefixMapping)}}"
     ></div>
 
     <hr />
@@ -108,7 +110,7 @@
     <div
         ui-codemirror="editorOptions.ttl"
         ng-model="turtle"
-        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, null, rexPrefixMapping)}}"
     ></div>
 
 

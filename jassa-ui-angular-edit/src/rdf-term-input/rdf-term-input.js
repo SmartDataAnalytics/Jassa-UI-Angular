@@ -210,6 +210,14 @@ angular.module('ui.jassa.rdf-term-input', [])
                         var state = scope.state;
                         // {"type":{"id":"http://typedLiteral","displayLabel":"typed"},"value":"297.6","datatype":"http://dbpedia.org/datatype/squareKilometre"}
                         var type = state.type;
+
+                        // If there is a value for a non-type field, set the type to plain literal
+                        // Otherwise, we would 'forget' these values, as nodes without a type cannot exist and are therefore not created
+                        if(type == null && !(state.value == null && state.datatype == null && state.lang == null)) {
+                            type = vocab.plainLiteral;
+                        }
+
+
                         switch(type) {
                         case vocab.iri:
                             result = {
@@ -233,10 +241,11 @@ angular.module('ui.jassa.rdf-term-input', [])
                             };
                             break;
                         default:
-                            result = {
-                                type: 'uri',
-                                value: state.value
-                            };
+                            result = {};
+//                            result = {
+//                                type: 'uri',
+//                                value: state.value
+//                            };
                             break;
                         }
 
@@ -254,9 +263,9 @@ angular.module('ui.jassa.rdf-term-input', [])
                         //var clone = createTalisJsonObjectWithDefaults(talisJson);
                         var clone = talisJson;
 
-                        if(clone.type != null && clone.value == null) {
-                            clone.value = '';
-                        }
+//                        if(clone.type != null && clone.value == null) {
+//                            clone.value = '';
+//                        }
 
                         var node;
                         try {
