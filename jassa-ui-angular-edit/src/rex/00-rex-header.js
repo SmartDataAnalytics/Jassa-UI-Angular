@@ -640,4 +640,21 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 // NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
 angular.module('ui.jassa.rex', ['dddi', 'ui.select']);
 
+.filter('toArray', function() {
+    var result = function(obj) {
+        var r = obj;
+        if (obj instanceof Object) {
+            r = _.map(obj, function(val, key) {
+                return {
+                    key: key,
+                    val: val
+                };
+
+                //return Object.defineProperty(val, '$key', {__proto__: null, value: key});
+            });
+        }
+        return r;
+    };
+    return result;
+});
 //var basePriority = 0;
