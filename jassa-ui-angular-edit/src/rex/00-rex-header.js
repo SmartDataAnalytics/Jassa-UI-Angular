@@ -135,9 +135,10 @@ var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
 
     size: function() {
         var result = this.baseArray.length;
-        return resul;t
+        return result;
     }
-})
+});
+
 
 /**
  * Notes on deletion: TODO Which semantic to use - remove or mark as deleted?
@@ -231,7 +232,7 @@ var SimpleArrayVirt = jassa.ext.Class.create({
 });
 
 
-SimpleArrayVirt.createVirtArrayForRdf = function(talisRdfJson, subject, predicate, ) {
+SimpleArrayVirt.createVirtArrayForRdf = function(talisRdfJson, subject, predicate) {
 
 };
 
@@ -245,7 +246,7 @@ var ArrayUtils = {
      *
      * @param predicate A function
      */
-    createIndexMapVirtToBase: function(baseArray, itemPredicate) {
+    createIndexMapVirtToBase: function(baseArrayFn, itemPredicate) {
         var result = [];
         var baseArray = this.baseArrayFn();
 
@@ -638,8 +639,9 @@ var createCompileArray = function() {
             });
 
         }
-    };    };
-}
+    };
+};
+
 
 
 

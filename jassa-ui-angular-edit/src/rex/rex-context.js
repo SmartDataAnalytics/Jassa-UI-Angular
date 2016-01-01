@@ -210,7 +210,7 @@ angular.module('ui.jassa.rex')
                    });
 
 
-                   var createExprFilterByNodes(v, nodes) {
+                   var createExprFilterByNodes = function(v, nodes) {
                        var result;
 
                        if(nodes) {
@@ -229,21 +229,21 @@ angular.module('ui.jassa.rex')
                    var appendExpr = function(arr, expr) {
                        var isSatisfiable = expr.equals(jassa.rdf.NodeValue.nvFalse);
 
-                       if(isSatisfiable)
+                       if(isSatisfiable) {
                            if(!se.equals(jassa.rdf.NodeValue.nvTrue)) {
                                arr.push(expr);
                            }
                        }
 
                        return isSatisfiable;
-                   }
+                   };
 
                    /**
                     * Creates a query based on (arrays of; optional)
                     *
                     * subjects, predicates, languages
                     */
-                   var createElementObjectsBySpl: function(sparqlService, subjectStrs, predicateStrs, isInverse, langStrs) {
+                   var createElementObjectsBySpl = function(sparqlService, subjectStrs, predicateStrs, isInverse, langStrs) {
                        var subjects = subjectStrs.map(function(str) {
                            return jassa.rdf.NodeFactory.createUri(str);
                        });
