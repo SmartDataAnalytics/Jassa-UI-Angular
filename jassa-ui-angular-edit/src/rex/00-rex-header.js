@@ -1,6 +1,6 @@
 
 
-var ArrayTool = jassa.ext.Class.create({
+var ArrayTool = Jassa.ext.Class.create({
     filter: function() {
         throw new Error('not implemented');
     },
@@ -11,10 +11,10 @@ var ArrayTool = jassa.ext.Class.create({
 
     generate: function() {
         throw new Error('not implemented');
-    },
+    }
 });
 
-var RdfObjectFilter = jassa.ext.Class.create({
+var RdfObjectFilter = Jassa.ext.Class.create({
     initialize: function(types, langs, datatypes) {
         this.types = termTypes || null;
         this.langs = langs || null;
@@ -29,7 +29,7 @@ var RdfObjectFilter = jassa.ext.Class.create({
  * Tooling for creating a virtual array based on filters on RDF objects
  *
  */
-var ArrayToolRdfObject = jassa.ext.Class.create({
+var ArrayToolRdfObject = Jassa.ext.Class.create({
     initialize: function(rdfObjectFilter, defaultTalisRdfJson, projectAttr) {
         this.rdfObjectFilter = rdfObjectFilter;
         this.defaultTalisRdfJson = defaultTalisRdfJson; // Talis rdf json object with default values
@@ -91,7 +91,7 @@ var ArrayToolRdfObject = jassa.ext.Class.create({
 });
 
 
-var SimpleArray = jass.ext.Class.create({
+var SimpleArray = Jassa.ext.Class.create({
 
 });
 
@@ -100,7 +100,7 @@ var SimpleArray = jass.ext.Class.create({
  * An array of all URIs that are reachable via a property in inverse direction
  *
  */
-var SimpleArrayRdfInverse = jassa.ext.Class.create({
+var SimpleArrayRdfInverse = Jassa.ext.Class.create({
     initialize: function(talisRdfJson, propertyStr, sourceRdfObject) {
         this.talisRdfJson = talisRdfJson;
         this.propertyStr = propertyStr;
@@ -111,7 +111,7 @@ var SimpleArrayRdfInverse = jassa.ext.Class.create({
 
 
 
-var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
+var ArrayWrapper = Jassa.ext.Class.create(SimpleArray, {
     initialize: function(baseArray) {
         this.baseArray = baseArray;
     },
@@ -147,7 +147,7 @@ var ArrayWrapper = jassa.ext.Class.create(SimpleArray, {
  * to by one.
  *
  */
-var SimpleArrayVirt = jassa.ext.Class.create({
+var SimpleArrayVirt = Jassa.ext.Class.create({
     initialize: function(baseArrayFn, arrayTool) {
         //this.talisRdfJson = talisRdfJson || {};
         this.baseArrayFn = baseArrayFn; // getter/setter that returning a base array
