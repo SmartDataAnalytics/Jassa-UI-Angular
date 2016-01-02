@@ -400,7 +400,7 @@ angular.module('ui.jassa.rex')
                         var srcJson = scope.rexContext.json;
 
                         coordinates.forEach(function(coordinate) {
-                            var obj = getObjectAt(srcJson, coordinate);
+                            var obj = jassa.rdf.TalisRdfJsonUtils.getObjectAt(srcJson, coordinate);
                             if(obj != null) {
                                 var o = jassa.rdf.NodeFactory.createFromTalisRdfJson(obj);
 
