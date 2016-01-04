@@ -430,7 +430,7 @@ angular.module('ui.jassa.rex')
                             var coordinate = entry.key;
                             var isContained = coordinateSet.contains(coordinate);
                             if(!isContained) {
-                                removeValueAt(override, coordinate);
+                                jassa.rdf.TalisRdfJsonUtils.removeValueAt(override, coordinate);
                             }
                         });
                     };

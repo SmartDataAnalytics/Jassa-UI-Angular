@@ -5,10 +5,21 @@ var ArrayTool = Jassa.ext.Class.create({
         throw new Error('not implemented');
     },
 
-    project: function(obj, value) {
+    project: function(obj) {
         throw new Error('not implemented');
     },
 
+    /**
+     * Inverse of the projection function.
+     */
+    inject: function(obj, value) {
+        throw new Error('not implemented');
+    },
+
+    /**
+     * Generate a new default base value (i.e. an object on which project
+     * can be applied)
+     */
     generate: function() {
         throw new Error('not implemented');
     }
@@ -72,15 +83,21 @@ var ArrayToolRdfObject = Jassa.ext.Class.create({
 
     // TODO Does project return the default if the projected value is null? I'd say yes.
     project: function(obj, value) {
-        var result = null;
-
-        if(arguments.length === 1) {
-            result = obj[this.projectAttr];
-        } else {
-            obj[this.projectAttr] = value;
-        }
+        var result = obj[this.projectAttr];
         return result;
+//
+//        if(arguments.length === 1) {
+//            result = obj[this.projectAttr];
+//        } else {
+//            obj[this.projectAttr] = value;
+//        }
+//        return result;
     },
+
+    inject: function(obj, value) {
+        obj[this.projectAttr] = value;
+    },
+
 
     generate: function() {
         var result = {};
@@ -129,9 +146,14 @@ var ArrayWrapper = Jassa.ext.Class.create(SimpleArray, {
         this.baseArray.push(value);
     },
 
-    remove: function(index) {
-        this.baseArray.splice(index, 1);
+    pop: function() {
+        var result = this.baseArray.pop();
+        return result;
     },
+
+//    remove: function(index) {
+//        this.baseArray.splice(index, 1);
+//    },
 
     size: function() {
         var result = this.baseArray.length;
@@ -197,7 +219,8 @@ var SimpleArrayVirt = Jassa.ext.Class.create({
         }
 
         var item = baseArray.get(baseIndex);
-        this.arrayTool.project(item, value);
+        //this.arrayTool.project(item, value);
+        this.arrayTool.inject(item, value);
     },
 
     push: function(value) {
@@ -376,7 +399,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                 slot.entry.key = createCoordinate(scope, $component$);
                 var value = modelGetter(scope);
                 if(value) {
-                    setValueAt(contextCtrl.getOverride(), slot.entry.key, value);
+                    jassa.rdf.TalisRdfJsonUtils.setValueAt(contextCtrl.getOverride(), slot.entry.key, value);
                 }
             }
 
@@ -470,7 +493,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                         ;
 
                     //console.log('## Watch 1: Transferring value [' + value + '] from coordinate [' + oldCoordinate + '] to [' + newCoordinate + ']');
-                    setValueAt(contextCtrl.getOverride(), newCoordinate, value);
+                    jassa.rdf.TalisRdfJsonUtils.setValueAt(contextCtrl.getOverride(), newCoordinate, value);
 
                     //console.log('>> UNDIRTY : ' + oldCoordinate);
                     unsetDirty(oldCoordinate);
@@ -505,7 +528,7 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                 var coordinate = slot.entry.key;
 
                 //console.log('## Watch 3: Setting shadow value [' + value + '] at coordinate [' + coordinate + ']');
-                setValueAt(contextCtrl.getOverride(), coordinate, value);
+                jassa.rdf.TalisRdfJsonUtils.setValueAt(contextCtrl.getOverride(), coordinate, value);
 
             }, true);
 
