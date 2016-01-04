@@ -401,7 +401,8 @@ angular.module('ui.jassa.rex')
                         var result = new jassa.rdf.GraphImpl();
                         var coordinates = ctrl.getReferencedCoordinates();
 
-                        var srcJson = scope.rexContext.json;
+                        //var srcJson = scope.rexContext.json;
+                        var srcJson = scope.rexContext.base;
 
                         coordinates.forEach(function(coordinate) {
                             var obj = jassa.rdf.TalisRdfJsonUtils.getObjectAt(srcJson, coordinate);
