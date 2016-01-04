@@ -320,7 +320,10 @@ angular.module('ui.jassa.rex')
 
                        r = r.then(function() {
                            var rexContext = scope.rexContext;
-                           rexContext.json = rexContext.baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(rexContext.baseGraph) : {};
+                           rexContext.base = rexContext.baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(rexContext.baseGraph) : {};
+
+                           //rexContext.base = rexContext.baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(rexContext.baseGraph) : {};
+                           rexContext.json = angular.copy(rexContext.base);
                        });
 
                        return r;
@@ -382,6 +385,7 @@ angular.module('ui.jassa.rex')
 
                         return result;
                     };
+
 
                     var dataMapToGraph = function(dataMap, prefixMapping) {
                         var talis = assembleTalisRdfJson(dataMap);
@@ -481,7 +485,7 @@ angular.module('ui.jassa.rex')
                     }]);
 
                     dddi.register('rexContext.targetJson', ['rexContext.graph.hashCode()',
-                        function() {
+                        function(hashCode) {
                             var r = jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(scope.rexContext.graph);
                             return r;
                         }]);

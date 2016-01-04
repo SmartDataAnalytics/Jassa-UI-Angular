@@ -800,6 +800,18 @@ var talisRdfJsonToEntries = function(talisRdfJson) {
     return result;
 };
 
+/**
+ * Return an array of coordinate objects
+ */
+var talisRdfJsonToCoordinates = function(talisRdfJson) {
+    var entries = talisRdfJsonToEntries(talisRdfJson);
+    var result = [];
+    entries.forEach(function(entry) {
+        result.push(entry.key);
+    });
+    return result;
+};
+
 
 var diff = function(before, after) {
     var result = new jassa.util.HashSet();
@@ -885,6 +897,17 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 };
 
 
+var rexIsPredicateNew = function(rexContext, s, p) {
+    var basePToOs = rexContext.base[s];
+    var jsonPToOs = rexContext.json[s];
+
+    var existedBefore = basePToOs ? p in basePToOs : false;
+    var existsNow = jsonPToOs ? p in jsonPToOs : false;
+
+    var result = existsNow && !existedBefore;
+    return result;
+};
+
 
 
 
@@ -894,9 +917,9 @@ var setEleAttrDefaultValue = function(ele, attrs, attrName, defaultValue) {
 // NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
 angular.module('ui.jassa.rex', ['dddi', 'ui.select'])
 
-.filter('toArray', function() {
-    var result = function(obj) {
-        var r = obj;
+.filter('toArray', ['$dddi', function($dddi) {
+    return $dddi.utils.wrapArrayFn(function(obj) {
+        var r;
         if (obj instanceof Object) {
             r = _.map(obj, function(val, key) {
                 return {
@@ -906,10 +929,47 @@ angular.module('ui.jassa.rex', ['dddi', 'ui.select'])
 
                 //return Object.defineProperty(val, '$key', {__proto__: null, value: key});
             });
+        } else {
+            r = obj;
         }
+
         return r;
+    });
+}])
+
+/**
+ * ng-repeat = "rexContext.json[rexSubject] | rexSortPredicatesByNovelty"
+ */
+.filter('rexPredicateNew', function() {
+    return function(predicateObjectArray, scope, targetKey) {
+        if(!predicateObjectArray) {
+            return predicateObjectArray;
+        }
+
+
+        var rexContext = scope.rexContext;
+
+        var rexSubject = scope.rexSubject;
+        //var json = scope.json;
+
+        targetKey = targetKey || 'isNew';
+
+        predicateObjectArray.forEach(function(item) {
+            var p = item.key;
+            var r = rexIsPredicateNew(rexContext, rexSubject, p);
+            item[targetKey] = r;
+        });
+
+        /*
+        var result = _.sortBy(predicateObjectArray, function(entry) {
+            var p = entry.key;
+            var r = rexIsPredicateNew(rexContext, rexSubject, p);
+            return r;
+        });
+        */
+
+        return predicateObjectArray;
     };
-    return result;
 })
 
 ;

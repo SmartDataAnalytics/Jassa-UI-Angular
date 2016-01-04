@@ -42,7 +42,10 @@
 -->
 
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in allProps = angular.extend(rexContext.json[rexSubject] || {}, addedProperties) track by property" rex-predicate="property"> -->
-        <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
+<!--         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property"> -->
+        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
+
+<!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
@@ -86,7 +89,10 @@
 <!--           <button class="btn btn-primary" ng-click="addedProperties.push({'http://newproperty.org': []})">Add property</button> -->
 <!--         </div> -->
 
-        <button class="btn btn-primary" ng-click="rexContext.override['http://newproperty.org'] = {}">Add property</button>
+<!-- subject: {{rexSubject}} -->
+<!-- override: {{rexContext.override}} -->
+<!-- predicates: {{rexContext.override[rexSubject]}} -->
+        <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button>
     </form>
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
