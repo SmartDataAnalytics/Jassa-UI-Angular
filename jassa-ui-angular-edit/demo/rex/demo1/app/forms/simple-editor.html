@@ -43,9 +43,9 @@
 
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in allProps = angular.extend(rexContext.json[rexSubject] || {}, addedProperties) track by property" rex-predicate="property"> -->
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property"> -->
-        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
+<!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
 
-<!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
+        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->

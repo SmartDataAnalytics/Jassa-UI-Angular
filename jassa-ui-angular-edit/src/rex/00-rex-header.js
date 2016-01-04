@@ -917,6 +917,13 @@ var rexIsPredicateNew = function(rexContext, s, p) {
 // NOTE: We should make a rex module only for the annotations without the widgets, so that the annotations would not depend on ui.select
 angular.module('ui.jassa.rex', ['dddi', 'ui.select'])
 
+
+/**
+ * Convert an object into an array of objects
+ * with the keys 'key' and 'val'.
+ *
+ * Implicitly creates stable arrays using angular.equals
+ */
 .filter('toArray', ['$dddi', function($dddi) {
     return $dddi.utils.wrapArrayFn(function(obj) {
         var r;
@@ -926,14 +933,22 @@ angular.module('ui.jassa.rex', ['dddi', 'ui.select'])
                     key: key,
                     val: val
                 };
-
-                //return Object.defineProperty(val, '$key', {__proto__: null, value: key});
             });
         } else {
             r = obj;
         }
 
         return r;
+    });
+}])
+
+/**
+ * A filter that creates stable arrays from input arrays.
+ *
+ */
+.filter('stableArray', ['$dddi', function($dddi) {
+    return $dddi.utils.wrapArrayFn(function(arr) {
+        return arr;
     });
 }])
 
