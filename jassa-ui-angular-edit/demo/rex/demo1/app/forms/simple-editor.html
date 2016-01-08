@@ -45,10 +45,11 @@
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property"> -->
 <!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
 
-        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
+        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
+            <input type="text" ng-model="property">
             {{rexPrefixMapping.shortForm(property)}}:
 
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
@@ -90,7 +91,7 @@
 <!--         </div> -->
 
 <!-- subject: {{rexSubject}} -->
-<!-- override: {{rexContext.override}} -->
+<!-- override: {{rexContext.json}} -->
 <!-- predicates: {{rexContext.override[rexSubject]}} -->
         <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button>
     </form>

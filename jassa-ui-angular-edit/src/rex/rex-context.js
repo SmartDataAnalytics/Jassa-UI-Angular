@@ -370,7 +370,8 @@ angular.module('ui.jassa.rex')
                         return r;
                     }, function() {
                         var baseGraph = getBaseGraph();
-                        scope.rexContext.json = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
+                        scope.rexContext.base = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
+                        //scope.rexContext.json = baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(baseGraph) : {};
                     });
 
                     var createDataMap = function(coordinates) {
@@ -400,6 +401,13 @@ angular.module('ui.jassa.rex')
                     var createRefGraph = function() {
                         var result = new jassa.rdf.GraphImpl();
                         var coordinates = ctrl.getReferencedCoordinates();
+
+                        if(scope.rexContext.json) {
+                            var c2 = talisRdfJsonToCoordinates(scope.rexContext.json);
+                            coordinates.addAll(c2);
+                            //coordinates.push.apply(coordinates, c2);
+                        }
+
 
                         //var srcJson = scope.rexContext.json;
                         var srcJson = scope.rexContext.base;
@@ -502,9 +510,10 @@ angular.module('ui.jassa.rex')
                             return r;
                         });
 
-                    dddi.register('rexContext.diff', ['rexContext.srcGraph.hashCode()', 'rexContext.graph.hashCode()',
+                    dddi.register('rexContext.diff', ['rexContext.baseGraph.hashCode()', 'rexContext.graph.hashCode()',
                         function() {
-                            var r = setDiff(scope.rexContext.srcGraph, scope.rexContext.graph);
+                            var r = setDiff(scope.rexContext.baseGraph, scope.rexContext.graph);
+                            //var r = setDiff(scope.rexContext.srcGraph, scope.rexContext.graph);
                             return r;
                         }]);
 
