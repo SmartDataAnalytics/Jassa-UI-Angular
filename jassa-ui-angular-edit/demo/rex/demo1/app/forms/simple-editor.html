@@ -5,7 +5,8 @@
     rex-context
     rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
     rex-sparql-service="sparqlService"
-    rex-lookup="true">
+    rex-lookup="true"
+    rex-subject="ex05.subject">
 
     <h3>Generic Resource Editor</h3>
 
@@ -30,7 +31,7 @@
 
 
 
-    <form role="form" name="ex05.editForm" rex-subject="ex05.subject">
+    <form role="form" name="ex05.editForm">
 
 <!--
         <rdf-term-input ng-init="term={}" name="test" ng-model="foo" ng-model-options="defaultNgModelOptions"></rdf-term-input>
@@ -50,7 +51,6 @@
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
-            <input type="text" ng-model="property">
             {{rexPrefixMapping.shortForm(property)}}:
 
             <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
@@ -95,8 +95,20 @@
 working copy: {{rexContext.json}}
 test: {{test}}
 <!-- predicates: {{rexContext.override[rexSubject]}} -->
-        <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button>
+
+
+<!--         <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button> -->
     </form>
+
+        <div ng-init="showPredicateInput=false">
+        show: {{showPredicateInput}}
+            <button ng:show="!showPredicateInput" class="btn btn-primary" ng:click="showPredicateInput=true">Add property</button>
+            <form ng:show="showPredicateInput" ng-init="initPredicate='http://'; newPredicate=initPredicate" ng:submit="rexContext.json[rexSubject][newPredicate] = []; showPredicateInput=false" ui:keydown="{esc: 'showPredicateInput=false'}">
+                <input auto-focus="focusLangInput" size="4" ng:model="newPredicate" type="text" class="lang-borderless">
+                <button type="submit" style="cursor: pointer;" class="btn label label-info""><span class="glyphicon glyphicon-ok"></span></button>
+                <button type="reset" style="cursor: pointer;" class="btn label label-warning" ng:click="showPredicateInput=false"><span class="glyphicon glyphicon-remove"></span></button>
+            </form>
+        </div>
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
     a full round trip of the data is demonstrated.</i>

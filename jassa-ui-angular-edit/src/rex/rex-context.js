@@ -187,6 +187,14 @@ angular.module('ui.jassa.rex')
                             return r;
                         };
 
+                        rexContext.renamePredicate = function(s, oldName, newName) {
+                            var override = ctrl.getOverride();
+                            var json = rexContext.json;
+
+                            jassa.io.TalisRdfJsonUtils.renamePredicate(s, override, oldName, newName);
+                            jassa.io.TalisRdfJsonUtils.renamePredicate(s, json, oldName, newName);
+                        };
+
                     };
 
                     var updateArray = function(arrFn) {
