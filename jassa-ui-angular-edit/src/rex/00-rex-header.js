@@ -496,10 +496,10 @@ var createCompileComponent = function($rexComponent$, $component$, $parse, oneWa
                     jassa.rdf.TalisRdfJsonUtils.setValueAt(contextCtrl.getOverride(), newCoordinate, value);
 
                     // experimental:
-                    /*
-                        jassa.rdf.TalisRdfJsonUtils.removeValueAt(scope.rexContext.json, oldCoordinate);
-                        jassa.rdf.TalisRdfJsonUtils.setValueAt(scope.rexContext.json, newCoordinate, value);
-                    */
+                    //*
+//                        jassa.rdf.TalisRdfJsonUtils.removeValueAt(scope.rexContext.json, oldCoordinate);
+//                        jassa.rdf.TalisRdfJsonUtils.setValueAt(scope.rexContext.json, newCoordinate, value);
+                    //*/
 
 
                     //console.log('>> UNDIRTY : ' + oldCoordinate);

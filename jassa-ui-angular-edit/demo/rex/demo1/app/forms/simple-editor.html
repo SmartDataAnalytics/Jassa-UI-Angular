@@ -1,7 +1,7 @@
 <div
     class="alert alert-info"
     role="alert"
-    ng-init="ex05={}; ex05.subject='http://dbpedia.org/resource/Leipzig'; addedProperties={};"
+    ng-init="ex05={}; ex05.subject='http://dbpedia.org/resource/LeipzigX'; addedProperties={};"
     rex-context
     rex-prefix="'dbr: http://dbpedia.org/resource/ dbo: http://dbpedia.org/ontology/'"
     rex-sparql-service="sparqlService"
@@ -45,7 +45,8 @@
 <!--         <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property"> -->
 <!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
 
-        <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
+<!--         <div class="repeat-item" ng-repeat="propertyItem in test = rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
+        <div class="repeat-item" ng-repeat="propertyItem in test = rexContext.json[rexSubject] | toArray | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
 
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
@@ -81,7 +82,7 @@
 
                 </div>
             </div>
-            <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
+            <button class="btn btn-primary" ng-click="propertyData.push({})">Add Object</button>
         </div>
 <!-- </div> -->
 
@@ -91,7 +92,8 @@
 <!--         </div> -->
 
 <!-- subject: {{rexSubject}} -->
-<!-- override: {{rexContext.json}} -->
+working copy: {{rexContext.json}}
+test: {{test}}
 <!-- predicates: {{rexContext.override[rexSubject]}} -->
         <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button>
     </form>

@@ -402,7 +402,7 @@ angular.module('ui.jassa.rex')
                         var result = new jassa.rdf.GraphImpl();
                         var coordinates = ctrl.getReferencedCoordinates();
 
-                        if(scope.rexContext.json) {
+                        if(scope.rexContext.json != null) {
                             var c2 = talisRdfJsonToCoordinates(scope.rexContext.json);
                             coordinates.addAll(c2);
                             //coordinates.push.apply(coordinates, c2);
