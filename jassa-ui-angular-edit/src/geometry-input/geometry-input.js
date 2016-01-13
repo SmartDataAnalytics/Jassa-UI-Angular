@@ -237,6 +237,8 @@ angular.module('ui.jassa.geometry-input', [])
       };
 
       var createSparqlService = function(url, graphUris) {
+        graphUris = graphUris = null ? [] : (angular.isArray(graphUris) ? graphUris : [graphUris]);
+
         var result = jassa.service.SparqlServiceBuilder.http(url, graphUris, {type: 'POST'})
           .cache().virtFix().paginate(1000).pageExpand(100).create();
         return result;
@@ -332,7 +334,8 @@ angular.module('ui.jassa.geometry-input', [])
 
             return firstInGroupTrue(results);
           }, function(response) {
-            console.err('Error during request', response);
+              console.log('Error during request', response);
+              throw new Error('Error during request:' + JSON.stringify(response));
           });
 
           return resultPromise;

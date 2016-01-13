@@ -203,8 +203,17 @@ a {
 .show-on-hover-child {
     display: none;
 }
+
 .show-on-hover-parent-inline:hover .show-on-hover-child {
     display: inline;
+}
+
+.show-on-hover-parent-block:hover .show-on-hover-child {
+    display: block;
+}
+
+.show-on-hover-parent-table:hover .show-on-hover-child {
+    display: table;
 }
 
 

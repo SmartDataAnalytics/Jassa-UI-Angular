@@ -10,7 +10,7 @@ angular.module('ui.jassa.rex')
  * @description
  * Description of rex-directive.
  */
-.directive('rexContext', ['$parse', '$q', '$dddi', function($parse, $q, $dddi) {
+.directive('rexContext', ['$parse', '$q', '$dddi', '$log', function($parse, $q, $dddi, $log) {
     return {
         priority: 30,
         restrict: 'A',
@@ -181,7 +181,7 @@ angular.module('ui.jassa.rex')
                             });
 
                             r = $q.when(r).then(angular.noop).then(angular.noop, function() {
-                                console.error('error while rexContext.reset');
+                                $log.error('error while rexContext.reset');
                             });
 
                             return r;
@@ -191,8 +191,8 @@ angular.module('ui.jassa.rex')
                             var override = ctrl.getOverride();
                             var json = rexContext.json;
 
-                            jassa.io.TalisRdfJsonUtils.renamePredicate(s, override, oldName, newName);
-                            jassa.io.TalisRdfJsonUtils.renamePredicate(s, json, oldName, newName);
+                            jassa.rdf.TalisRdfJsonUtils.renamePredicate(override, s, oldName, newName);
+                            jassa.rdf.TalisRdfJsonUtils.renamePredicate(json, s, oldName, newName);
                         };
 
                     };
@@ -340,7 +340,7 @@ angular.module('ui.jassa.rex')
 
                     scope.$watchCollection('[rexSparqlService, rexLookup, rexPrefixMapping]', function() {
                         $q.when(updateSubjectGraphs()).then(angular.noop).then(angular.noop, function() {
-                            console.error('error while watching rexSparqlService, rexLookup, rexPrefixMapping');
+                            $log.error('error while watching rexSparqlService, rexLookup, rexPrefixMapping');
                         });
                     });
 
@@ -349,7 +349,7 @@ angular.module('ui.jassa.rex')
 
                         console.log('Subjects: ' + JSON.stringify(subjects));
                         $q.when(updateSubjectGraphs()).then(angular.noop).then(angular.noop, function() {
-                            console.error('error while watching getSubjects');
+                            $log.error('error while watching getSubjects');
                         });
                     });
 
