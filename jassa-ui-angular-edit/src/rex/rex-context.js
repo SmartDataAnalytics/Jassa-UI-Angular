@@ -195,6 +195,14 @@ angular.module('ui.jassa.rex')
                             return r;
                         };
 
+                        rexContext.renameSubject = function(s, oldName, newName) {
+                            var override = ctrl.getOverride();
+                            var json = rexContext.json;
+
+                            jassa.rdf.TalisRdfJsonUtils.renameSubject(override, s, oldName, newName);
+                            jassa.rdf.TalisRdfJsonUtils.renameSubject(json, s, oldName, newName);
+                        };
+
                         rexContext.renamePredicate = function(s, oldName, newName) {
                             var override = ctrl.getOverride();
                             var json = rexContext.json;
@@ -202,6 +210,23 @@ angular.module('ui.jassa.rex')
                             jassa.rdf.TalisRdfJsonUtils.renamePredicate(override, s, oldName, newName);
                             jassa.rdf.TalisRdfJsonUtils.renamePredicate(json, s, oldName, newName);
                         };
+
+                        rexContext.deleteSubject = function(s) {
+                            var override = ctrl.getOverride();
+                            var json = rexContext.json;
+
+                            jassa.rdf.TalisRdfJsonUtils.deleteSubject(override, s);
+                            jassa.rdf.TalisRdfJsonUtils.deleteSubject(json, s);
+                        };
+
+                        rexContext.deletePredicate = function(s, p) {
+                            var override = ctrl.getOverride();
+                            var json = rexContext.json;
+
+                            jassa.rdf.TalisRdfJsonUtils.deletePredicate(override, s, p);
+                            jassa.rdf.TalisRdfJsonUtils.deletePredicate(json, s, p);
+                        };
+
 
                     };
 

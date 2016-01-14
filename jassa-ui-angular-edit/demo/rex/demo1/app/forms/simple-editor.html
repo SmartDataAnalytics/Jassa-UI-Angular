@@ -41,9 +41,29 @@
         </div>
     </form>
 
+    <div ng-init="showRenameSubjectInput=false" class="form-group form-inline">
+        <span ng:show="!showRenameSubjectInput">
+<!--             <button class="btn-sm btn-default" type="button" ng-click="propertyData.push({})"><span class="glyphicon glyphicon-plus-sign"></span></button> -->
+            <button class="btn-sm btn-default" ng:click="rexContext.deleteSubject(rexSubject)"><span class="glyphicon glyphicon-trash"></span></button>
+            <button class="btn-sm btn-default" ng:click="showRenameSubjectInput=true"><span class="glyphicon glyphicon-edit"></span></button>
+        </span>
+
+        <form
+          ng:show="showRenameSubjectInput"
+          ng:init="newSubject=rexSubject"
+          ui:keydown="{esc: 'showRenameSubjectInput=false'}"
+          ng:submit="rexContext.renameSubject(rexSubject, newSubject); ex05.subject=newSubject; showRenameSubjectInput=false">
+
+            <!--  auto-focus="showRenameSubjectInput" / Auto focus causes some strange side effects on blur -->
+            <input class="lang-borderless form-control" style="min-width:500px" ng:model="newSubject" type="text">
+
+            <button class="btn-sm btn-default" type="submit"><span class="glyphicon glyphicon-ok"></span></button>
+            <button class="btn-sm btn-default" type="reset" ng:click="showRenameSubjectInput=false"><span class="glyphicon glyphicon-remove"></span></button>
+        </form>
+    </div>
 
 
-    <form role="form" name="ex05.editForm">
+    <div role="form" name="ex05.editForm">
 
 <!--
         <rdf-term-input ng-init="term={}" name="test" ng-model="foo" ng-model-options="defaultNgModelOptions"></rdf-term-input>
@@ -59,8 +79,7 @@
 <!--         <div class="repeat-item" ng-repeat="propertyItem in rexContext.json[rexSubject] | toArray track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
 
 <!--         <div class="repeat-item" ng-repeat="propertyItem in test = rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:isNew | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property"> -->
-        <div class="repeat-item" ng-repeat="propertyItem in test = rexContext.json[rexSubject] | toArray | stableArray track by $index"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
-
+        <div class="repeat-item" ng-repeat="propertyItem in test = (rexContext.json[rexSubject] | toArray | rexPredicateNew:this | orderBy:['isNew', 'key'] | stableArray) track by propertyItem.key"  ng-init="property=propertyItem.key; propertyData = propertyItem.val" rex-predicate="property">
 
 <!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
 
@@ -68,20 +87,30 @@
             <!-- The essence of this action is the execution of the statement -->
             <!-- rexContext.renamePredicate(rexSubject, rexPredicate, newPredicate); property=newPredicate -->
             <!-- The first part updates REX's internal state, the latter makes the form refer to the appropriate predicate -->
-            <div ng-init="showRenamePredicateInput=false" class="visible-on-hover-parent">
-                {{rexPrefixMapping.shortForm(property)}}:
+            <div ng-init="showRenamePredicateInput=false" class="form-group form-inline visible-on-hover-parent">
+                <span ng-show="!showRenamePredicateInput" title="{{property}}">{{rexPrefixMapping.shortForm(property)}}:</span>
 
-                <button class="visible-on-hover-child" ng:click="rexContext.deleteProperty(rexSubject, rexPredicate)"><span class="glyphicon glyphicon-trash"></span></button>
-                <button ng:show="!showRenamePredicateInput" class="visible-on-hover-child" ng:click="showRenamePredicateInput=true"><span class="glyphicon glyphicon-edit"></span></button>
+                <span ng:show="!showRenamePredicateInput" class="visible-on-hover-child">
+                    <button class="btn-sm btn-default" type="button" ng-click="propertyData.push({})"><span class="glyphicon glyphicon-plus-sign"></span></button>
+                    <button class="btn-sm btn-default" ng:click="rexContext.deletePredicate(rexSubject, rexPredicate)"><span class="glyphicon glyphicon-trash"></span></button>
+                    <button class="btn-sm btn-default" ng:click="showRenamePredicateInput=true"><span class="glyphicon glyphicon-edit"></span></button>
+                </span>
 
-                <div ng:show="showRenamePredicateInput" ng:init="initPredicate=rexPredicate; newPredicate=initPredicate" ui:keydown="{esc: 'showRenamePredicateInput=false'}">
-                    <input auto-focus="focusLangInput" size="4" ng:model="newPredicate" type="text" class="lang-borderless">
-                    <button type="submit" style="cursor: pointer;" class="btn label label-info" ng:click="rexContext.renamePredicate(rexSubject, rexPredicate, newPredicate); property=newPredicate; showRenamePredicateInput=false"><span class="glyphicon glyphicon-ok"></span></button>
-                    <button type="reset" style="cursor: pointer;" class="btn label label-warning" ng:click="showRenamePredicateInput=false"><span class="glyphicon glyphicon-remove"></span></button>
-                </div>
+                <form
+                  ng:show="showRenamePredicateInput"
+                  ng:init="newPredicate=rexPredicate"
+                  ui:keydown="{esc: 'showRenamePredicateInput=false'}"
+                  ng:submit="rexContext.renamePredicate(rexSubject, rexPredicate, newPredicate); property=newPredicate; showRenamePredicateInput=false">
+
+                    <!--  auto-focus="showRenamePredicateInput" / Auto focus causes some strange side effects on blur -->
+                    <input class="lang-borderless form-control" style="min-width:500px" ng:model="newPredicate" type="text">
+
+                    <button class="btn-sm btn-default" type="submit"><span class="glyphicon glyphicon-ok"></span></button>
+                    <button class="btn-sm btn-default" type="reset" ng:click="showRenamePredicateInput=false"><span class="glyphicon glyphicon-remove"></span></button>
+                </form>
             </div>
 
-            <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
+            <div class="form-group repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
 
                 <div class="form-group">
                   <div class="input-group">
@@ -129,16 +158,17 @@
 
 
 <!--         <button class="btn btn-primary" ng-click="rexContext.json[rexSubject]['http://newproperty.org'] = []">Add property</button> -->
-    </form>
+    </div>
 
     <div ng-init="showPredicateInput=false">
-        <button ng:show="!showPredicateInput" class="btn btn-primary" ng:click="showPredicateInput=true"><span class="glyphicon glyphicon-plus-sign"></span></button>
-        <form ng:show="showPredicateInput" ng-init="initPredicate='http://'; newPredicate=initPredicate" ng:submit="rexContext.json[rexSubject][newPredicate] = []; showPredicateInput=false" ui:keydown="{esc: 'showPredicateInput=false'}">
-            <input auto-focus="focusLangInput" size="4" ng:model="newPredicate" type="text" class="lang-borderless">
-            <button type="submit" style="cursor: pointer;" class="btn label label-info"><span class="glyphicon glyphicon-ok"></span></button>
-            <button type="reset" style="cursor: pointer;" class="btn label label-warning" ng:click="showPredicateInput=false"><span class="glyphicon glyphicon-remove"></span></button>
+        <button ng:show="!showPredicateInput" class="btn-sm btn-default" ng:click="showPredicateInput=true"><span class="glyphicon glyphicon-plus-sign"></span></button>
+        <form class="form-inline" ng:show="showPredicateInput" ng:init="initPredicate='http://'; newPredicate=initPredicate" ng:submit="rexContext.json[rexSubject][newPredicate] = []; showPredicateInput=false" ui:keydown="{esc: 'showPredicateInput=false'}">
+            <input input class="lang-borderless form-control" style="min-width:500px" ng:model="newPredicate" type="text">
+            <button class="btn-sm btn-default" type="submit"><span class="glyphicon glyphicon-ok"></span></button>
+            <button class="btn-sm btn-default" type="reset" ng:click="showPredicateInput=false"><span class="glyphicon glyphicon-remove"></span></button>
         </form>
     </div>
+
 
     <i>It is important to note that although the form is generated from the selected resource's RDF data, the turtle representation below is generated from the form annotations. This means that
     a full round trip of the data is demonstrated.</i>
