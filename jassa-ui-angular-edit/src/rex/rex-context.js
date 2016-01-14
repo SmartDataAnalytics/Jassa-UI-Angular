@@ -153,9 +153,29 @@ angular.module('ui.jassa.rex')
                         /**
                          * Reloads all referenced data
                          */
-                        resetData = function() {
+                        rexContext.resetData = function() {
+                            // TODO Reload all data for referenced resources
+                            // This essentially means that rexSubject has to registered referenced resources here...
 
+                            var coordinates = ctrl.getReferencedCoordinates();
+
+                            coordinates.forEach(function(coordinate) {
+                                var currentValue = getEffectiveValue(rexContext, coordinate);
+                                var originalValue = jassa.rdf.TalisRdfJsonUtils.getValueAt(rexContext.base, coordinate);
+                                jassa.rdf.TalisRdfJsonUtils.setValueAt(rexContext.override, coordinate, originalValue);
+                                //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
+                            });
                         };
+
+                        /**
+                         * Schedule reset will cause a resetData action
+                         * to be performed the *next* time a change in rex's
+                         * scope occurrs - i.e. if the sparqlEndpoint, or the lookup changes
+                         */
+                        rexContext.scheduleReset = function() {
+                            rexContext.isResetScheduled = true;
+                        };
+
 
                         /**
                          * Resets the form by iterating over all referenced coordinates
@@ -164,19 +184,7 @@ angular.module('ui.jassa.rex')
                         rexContext.reset = function() {
 
                             var r = updateSubjectGraphs().then(function() {
-
-                                // TODO Reload all data for referenced resources
-                                // This essentially means that rexSubject has to registered referenced resources here...
-
-                                var coordinates = ctrl.getReferencedCoordinates();
-
-                                coordinates.forEach(function(coordinate) {
-                                    var currentValue = getEffectiveValue(rexContext, coordinate);
-                                    var originalValue = jassa.rdf.TalisRdfJsonUtils.getValueAt(rexContext.json, coordinate);
-                                    jassa.rdf.TalisRdfJsonUtils.setValueAt(rexContext.override, coordinate, originalValue);
-                                    //console.log('Resetting ' + coordinate + ' from [' + currentValue + '] to [' + originalValue + ']');
-                                });
-
+                                rexContext.resetData();
                                 return true;
                             });
 
@@ -246,6 +254,15 @@ angular.module('ui.jassa.rex')
                        return isSatisfiable;
                    };
 
+                   var isLookupSatisfied = function() {
+                       var lookupEnabled = scope.rexLookup;
+                       var sparqlService = scope.rexSparqlService;
+
+                       var r = sparqlService && lookupEnabled;
+                       return r;
+                   };
+
+
                    /**
                     * Creates a query based on (arrays of; optional)
                     *
@@ -291,7 +308,7 @@ angular.module('ui.jassa.rex')
                        return result;
                    };
 
-                   var updateSubjectGraphs = function() {
+                   var updateBaseGraphCore = function() {
                        var lookupEnabled = scope.rexLookup;
                        var sparqlService = scope.rexSparqlService;
                        var subjectStrs = scope.rexContext.subjects;
@@ -326,6 +343,15 @@ angular.module('ui.jassa.rex')
                            r = Promise.resolve();
                        }
 
+                       return r;
+                   };
+
+                   var updateBaseGraph = jassa.util.PromiseUtils.lastRequest(updateBaseGraphCore);
+
+
+                   var updateSubjectGraphs = function() {
+                       var r = updateBaseGraph();
+
                        r = r.then(function() {
                            var rexContext = scope.rexContext;
                            rexContext.base = rexContext.baseGraph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(rexContext.baseGraph) : {};
@@ -337,9 +363,27 @@ angular.module('ui.jassa.rex')
                        return r;
                    };
 
+                   var updateSubjectGraphs2 = function() {
+                       var r = updateSubjectGraphs();
+                       var sat = isLookupSatisfied();
+                       var rexContext = scope.rexContext;
+
+                       if(rexContext.isResetScheduled && sat) {
+                           rexContext.isResetScheduled = false;
+                           r = r.then(function() {
+                               if(isLookupSatisfied()) {
+                                   rexContext.resetData();
+                               }
+                           });
+                       }
+                       return r;
+                   };
+
+
+                   //var updateSubjectGraphs = jassa.util.PromiseUtils.firstRequest(updateSubjectGraphsCore);
 
                     scope.$watchCollection('[rexSparqlService, rexLookup, rexPrefixMapping]', function() {
-                        $q.when(updateSubjectGraphs()).then(angular.noop).then(angular.noop, function() {
+                        $q.when(updateSubjectGraphs2()).then(angular.noop).then(angular.noop, function() {
                             $log.error('error while watching rexSparqlService, rexLookup, rexPrefixMapping');
                         });
                     });
@@ -348,7 +392,7 @@ angular.module('ui.jassa.rex')
                         scope.rexContext.subjects = subjects;
 
                         console.log('Subjects: ' + JSON.stringify(subjects));
-                        $q.when(updateSubjectGraphs()).then(angular.noop).then(angular.noop, function() {
+                        $q.when(updateSubjectGraphs2()).then(angular.noop).then(angular.noop, function() {
                             $log.error('error while watching getSubjects');
                         });
                     });
