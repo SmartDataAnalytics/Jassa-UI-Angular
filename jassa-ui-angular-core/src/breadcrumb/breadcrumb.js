@@ -37,7 +37,7 @@ angular.module('ui.jassa.breadcrumb', [])
             ls = new jassa.service.LookupServiceTransform(ls, function(val) { return val.displayLabel; });
             //ls = new jassa.service.LookupServicePathLabels(ls);
 
-            var uris = jassa.facete.PathUtils.getUris(path);
+            var uris = jassa.facete.PathUtils.getNodes(path);
 
             if(property != null) {
                 uris.push(property);
