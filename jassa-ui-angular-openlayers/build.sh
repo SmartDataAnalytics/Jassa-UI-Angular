@@ -18,7 +18,7 @@ rm -rf "$sourceFolder"
 grunt
 
 
-git clone git@github.com:GeoKnow/Jassa-UI-Angular-Bower.git "$targetFolder" || true
+git clone git@github.com:GeoKnow/Jassa-UI-Angular-Openlayers-Bower.git "$targetFolder" || true
 ( cd "$targetFolder" && git pull )
 
 #rm -rf "$targetFolder"
