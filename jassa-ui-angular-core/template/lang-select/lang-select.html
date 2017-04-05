@@ -5,7 +5,7 @@
         </ul>
     </li>
     <li ng-show="showLangInput">
-        <form ng-submit="confirmAddLang(newLang)" ui-keydown="{esc: 'showLangInput=false'}">
+        <form ng-submit="confirmAddLang(newLang)" ng-keydown="{esc: 'showLangInput=false'}">
             <input auto-focus="focusLangInput" size="4" ng-model="newLang" type="text" class="lang-borderless" typeahead="lang for lang in getLangSuggestions() | filter:$viewValue | limitTo:8">
             <button type="submit" style="cursor: pointer;" class="btn label label-info""><span class="glyphicon glyphicon-ok"></span></button>
             <button type="reset" style="cursor: pointer;" class="btn label label-warning" ng-click="showLangInput=false"><span class="glyphicon glyphicon-remove"></span></button>

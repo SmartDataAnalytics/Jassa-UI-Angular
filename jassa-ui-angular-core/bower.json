@@ -12,10 +12,10 @@
   ],
   "dependencies": {
     "jassa": "0.9.0-SNAPSHOT",
-    "angular": "1.3.5",
+    "angular": "1.6.3",
     "bootstrap": "3.3.2",
     "angular-ui-bootstrap-bower": "0.12.0",
-    "angular-sanitize": "1.3.5",
+    "angular-sanitize": "1.6.3",
     "jquery-ui": "1.10.3",
     "angular-ui-sortable": "0.12.11",
     "angular-ui-utils": "0.1.1",
