@@ -20,7 +20,7 @@ git clone "$gitRepo" "$targetFolder" || true
 cp bower.json "$targetFolder"
 cp css/* "$targetFolder"
 
-for source in `cd "$sourceFolder" && ls -1`; do
+for source in `cd "$sourceFolder" && ls -1 | grep -v docs`; do
     target=`echo "$source" | sed -r 's|-[0-9.]+(-SNAPSHOT)?||g'`
  
     cp -v "$sourceFolder/$source" "$targetFolder/$target"
